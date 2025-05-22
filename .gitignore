@@ -1,0 +1,36 @@
+# Файлы конфигурации и чувствительные данные
+config.php
+/includes/config*.php
+/includes/config/db_config.php
+connection.php
+*.env
+tools/test-ftp-connection.php
+
+# Тестовые файлы и директории
+/testcode/
+/testcode
+
+# Временные файлы
+*.log
+*.tmp
+*.bak
+*.cache
+*.swp
+*~
+
+# Папки, которые не нужно хранить в репозитории
+/vendor/
+/node_modules/
+/temp/
+/tmp/
+/cache/
+
+# Файлы среды разработки
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Папки загрузок пользователей (если есть)
+/uploads/
+/media/user-uploads/ 

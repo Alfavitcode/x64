@@ -1,0 +1,87 @@
+name: FTP Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+
+jobs:
+  deploy:
+    name: 📂 Deploy to FTP
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 📚 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        
+    - name: 📦 Install Dependencies
+      run: |
+        if [ -f composer.json ]; then
+          composer install --no-dev --optimize-autoloader
+        fi
+        
+    - name: 🔎 List files
+      run: ls -la
+      
+    - name: ⚙️ Run Pre-Deployment Hook
+      run: |
+        export DEPLOY_ENV=${{ github.event.inputs.environment || 'production' }}
+        php .github/workflows/pre-deployment-hook.php
+        
+    - name: 📊 Generate Deployment Report
+      run: |
+        php .github/workflows/deployment-report.php > deployment-report.md
+        cat deployment-report.md
+        
+    - name: 📂 FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: ${{ secrets.FTP_SERVER_DIR }}
+        dangerous-clean-slate: false
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.github/**
+          **/vendor/**
+          composer.json
+          composer.lock
+          README.md
+          .gitignore
+          deployment-report.md
+          **/testcode/**
+          /testcode/
+          includes/config/db_config.php
+          
+    - name: 📝 Create Deployment Summary
+      run: |
+        echo "::group::Deployment Summary"
+        cat deployment-report.md
+        echo "::endgroup::"
+        
+    - name: 📋 Upload Deployment Report as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-report
+        path: deployment-report.md 

@@ -1,0 +1,170 @@
+2025-05-21 01:03:18 - Тестовый запрос
+2025-05-21 01:03:18 - Входящие данные: {"update_id":902332,"message":{"message_id":1306,"from":{"id":"123456789","is_bot":false,"first_name":"\u0422\u0435\u0441\u0442\u043e\u0432\u044b\u0439","last_name":"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c","username":"test_user","language_code":"ru"},"chat":{"id":"123456789","first_name":"\u0422\u0435\u0441\u0442\u043e\u0432\u044b\u0439","last_name":"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c","username":"test_user","type":"private"},"date":1747778598,"text":"\/start"}}
+2025-05-21 01:03:18 - Декодированные данные: Array
+(
+    [update_id] => 902332
+    [message] => Array
+        (
+            [message_id] => 1306
+            [from] => Array
+                (
+                    [id] => 123456789
+                    [is_bot] => 
+                    [first_name] => Тестовый
+                    [last_name] => Пользователь
+                    [username] => test_user
+                    [language_code] => ru
+                )
+
+            [chat] => Array
+                (
+                    [id] => 123456789
+                    [first_name] => Тестовый
+                    [last_name] => Пользователь
+                    [username] => test_user
+                    [type] => private
+                )
+
+            [date] => 1747778598
+            [text] => /start
+        )
+
+)
+
+
+2025-05-21 01:03:27 - Тестовый запрос
+2025-05-21 01:03:27 - Входящие данные: {"update_id":920515,"message":{"message_id":2985,"from":{"id":"123456789","is_bot":false,"first_name":"\u0422\u0435\u0441\u0442\u043e\u0432\u044b\u0439","last_name":"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c","username":"test_user","language_code":"ru"},"chat":{"id":"123456789","first_name":"\u0422\u0435\u0441\u0442\u043e\u0432\u044b\u0439","last_name":"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c","username":"test_user","type":"private"},"date":1747778607,"text":"\/start"}}
+2025-05-21 01:03:27 - Декодированные данные: Array
+(
+    [update_id] => 920515
+    [message] => Array
+        (
+            [message_id] => 2985
+            [from] => Array
+                (
+                    [id] => 123456789
+                    [is_bot] => 
+                    [first_name] => Тестовый
+                    [last_name] => Пользователь
+                    [username] => test_user
+                    [language_code] => ru
+                )
+
+            [chat] => Array
+                (
+                    [id] => 123456789
+                    [first_name] => Тестовый
+                    [last_name] => Пользователь
+                    [username] => test_user
+                    [type] => private
+                )
+
+            [date] => 1747778607
+            [text] => /start
+        )
+
+)
+
+
+2025-05-21 01:04:37 - Тестовый запрос
+2025-05-21 01:04:37 - Входящие данные: {"update_id":945526,"message":{"message_id":5304,"from":{"id":"1169792623","is_bot":false,"first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","language_code":"ru"},"chat":{"id":"1169792623","first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","type":"private"},"date":1747778677,"text":"\/start"}}
+2025-05-21 01:04:37 - Декодированные данные: Array
+(
+    [update_id] => 945526
+    [message] => Array
+        (
+            [message_id] => 5304
+            [from] => Array
+                (
+                    [id] => 1169792623
+                    [is_bot] => 
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [language_code] => ru
+                )
+
+            [chat] => Array
+                (
+                    [id] => 1169792623
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [type] => private
+                )
+
+            [date] => 1747778677
+            [text] => /start
+        )
+
+)
+
+
+2025-05-21 01:04:50 - Тестовый запрос
+2025-05-21 01:04:50 - Входящие данные: {"update_id":647586,"message":{"message_id":9663,"from":{"id":"1169792623","is_bot":false,"first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","language_code":"ru"},"chat":{"id":"1169792623","first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","type":"private"},"date":1747778690,"text":"\/code"}}
+2025-05-21 01:04:50 - Декодированные данные: Array
+(
+    [update_id] => 647586
+    [message] => Array
+        (
+            [message_id] => 9663
+            [from] => Array
+                (
+                    [id] => 1169792623
+                    [is_bot] => 
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [language_code] => ru
+                )
+
+            [chat] => Array
+                (
+                    [id] => 1169792623
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [type] => private
+                )
+
+            [date] => 1747778690
+            [text] => /code
+        )
+
+)
+
+
+2025-05-21 01:06:04 - Тестовый запрос
+2025-05-21 01:06:04 - Входящие данные: {"update_id":366296,"message":{"message_id":6085,"from":{"id":"1169792623","is_bot":false,"first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","language_code":"ru"},"chat":{"id":"1169792623","first_name":"\u0414\u0435\u043d\u0438\u0441","last_name":"\u0424\u0438\u043b\u0438\u043c\u043e\u043d\u043e\u0432","username":"whyuhatemeee","type":"private"},"date":1747778764,"text":"\/code"}}
+2025-05-21 01:06:04 - Декодированные данные: Array
+(
+    [update_id] => 366296
+    [message] => Array
+        (
+            [message_id] => 6085
+            [from] => Array
+                (
+                    [id] => 1169792623
+                    [is_bot] => 
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [language_code] => ru
+                )
+
+            [chat] => Array
+                (
+                    [id] => 1169792623
+                    [first_name] => Денис
+                    [last_name] => Филимонов
+                    [username] => whyuhatemeee
+                    [type] => private
+                )
+
+            [date] => 1747778764
+            [text] => /code
+        )
+
+)
+
+

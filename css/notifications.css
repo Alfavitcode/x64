@@ -1,0 +1,145 @@
+/* Стили для уведомлений */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+    pointer-events: none; /* Позволяет кликать через контейнер */
+}
+
+.notification {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.3s ease;
+    max-width: 100%;
+    pointer-events: auto; /* Восстанавливаем события для самого уведомления */
+    border-left-width: 6px;
+    border-left-style: solid;
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.notification-show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.notification-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-message {
+    font-size: 15px;
+    line-height: 1.4;
+    flex: 1;
+    font-weight: 500;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #999;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    height: 24px;
+    width: 24px;
+}
+
+.notification-close:hover {
+    color: #333;
+}
+
+.notification-success {
+    border-left-color: #4caf50;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.notification-success .notification-icon {
+    color: #4caf50;
+}
+
+.notification-error {
+    border-left-color: #f44336;
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.notification-error .notification-icon {
+    color: #f44336;
+}
+
+.notification-info {
+    border-left-color: #2196f3;
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.notification-info .notification-icon {
+    color: #2196f3;
+}
+
+.notification-warning {
+    border-left-color: #ff9800;
+    background-color: rgba(255, 152, 0, 0.1);
+}
+
+.notification-warning .notification-icon {
+    color: #ff9800;
+}
+
+.notification-hide {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 576px) {
+    .notification-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .notification {
+        padding: 12px;
+    }
+    
+    .notification-message {
+        font-size: 14px;
+    }
+} 
