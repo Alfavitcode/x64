@@ -1724,7 +1724,7 @@ function getCartItemById($cart_id, $session_id, $user_id = null) {
     
     $sql = "SELECT c.*, c.price * c.quantity as subtotal, p.name, p.image, p.quantity as available_quantity 
             FROM cart c 
-            JOIN products p ON c.product_id = p.id 
+            JOIN product p ON c.product_id = p.id 
             WHERE c.id = ? AND $where_condition";
     
     $stmt = $conn->prepare($sql);
