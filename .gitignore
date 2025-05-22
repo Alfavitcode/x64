@@ -4,6 +4,13 @@ config.php
 connection.php
 *.env
 
+# Тестовые файлы и директории
+/testcode/
+/testcode
+testcode/*.sql
+testcode/*.php
+testcode/**/*
+
 # Временные файлы
 *.log
 *.tmp
