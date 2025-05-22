@@ -2,7 +2,6 @@
 // Подключаем файлы конфигурации
 require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
-include_once '../includes/header/header.php';
 // Начинаем сессию только если она еще не активна
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -105,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Подключаем шапку сайта
+include_once '../includes/header/header.php';
 
 ?>
             <!-- Основное содержимое -->
