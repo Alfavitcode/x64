@@ -3,8 +3,10 @@
 require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
 include_once '../includes/header/header.php';
-// Начинаем сессию
-session_start();
+// Начинаем сессию только если она еще не активна
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Если пользователь не авторизован, перенаправляем на страницу входа
 if(!isset($_SESSION['user_id'])) {

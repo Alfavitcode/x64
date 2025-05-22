@@ -3,8 +3,12 @@
 require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
 
+// Начинаем сессию только если она еще не активна
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Проверяем авторизацию
-session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
