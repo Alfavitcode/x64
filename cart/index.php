@@ -119,14 +119,27 @@ foreach ($cart_items as $item) {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    transition: all 0.2s ease;
+}
+.quantity-btn.disabled, .btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Флаг для отслеживания выполнения запроса
+    let isRequestInProgress = false;
+    
     // Удаление товара из корзины
     document.querySelectorAll('.remove-from-cart').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // Предотвращаем действие по умолчанию
+            
+            if (isRequestInProgress) return; // Не выполняем запрос, если предыдущий еще не завершен
+            
             const cartId = this.getAttribute('data-cart-id');
             removeFromCart(cartId);
         });
@@ -134,7 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Изменение количества товара
     document.querySelectorAll('.quantity-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // Предотвращаем действие по умолчанию
+            
+            if (isRequestInProgress) return; // Не выполняем запрос, если предыдущий еще не завершен
+            
             const cartId = this.getAttribute('data-cart-id');
             const quantity = parseInt(this.getAttribute('data-quantity'));
             
@@ -150,6 +167,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция обновления количества товара
     function updateCartItemQuantity(cartId, quantity) {
+        // Устанавливаем флаг, что запрос выполняется
+        isRequestInProgress = true;
+        
+        // Блокируем кнопки для этого товара
+        disableButtons(cartId);
+        
         const formData = new FormData();
         formData.append('cart_id', cartId);
         formData.append('quantity', quantity);
@@ -183,11 +206,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.error('Ошибка:', error);
             Cart.showNotification('Произошла ошибка при обновлении количества товара', 'error');
+        })
+        .finally(() => {
+            // Сбрасываем флаг и разблокируем кнопки
+            isRequestInProgress = false;
+            enableButtons(cartId);
         });
     }
     
     // Функция удаления товара из корзины
     function removeFromCart(cartId) {
+        // Устанавливаем флаг, что запрос выполняется
+        isRequestInProgress = true;
+        
+        // Блокируем кнопки для этого товара
+        disableButtons(cartId);
+        
         const formData = new FormData();
         formData.append('cart_id', cartId);
         
@@ -225,7 +259,35 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.error('Ошибка:', error);
             Cart.showNotification('Произошла ошибка при удалении товара из корзины', 'error');
+        })
+        .finally(() => {
+            // Сбрасываем флаг запроса
+            isRequestInProgress = false;
         });
+    }
+    
+    // Функция блокировки кнопок товара
+    function disableButtons(cartId) {
+        const row = document.getElementById('cart-item-' + cartId);
+        if (row) {
+            const buttons = row.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.setAttribute('disabled', 'disabled');
+                button.classList.add('disabled');
+            });
+        }
+    }
+    
+    // Функция разблокировки кнопок товара
+    function enableButtons(cartId) {
+        const row = document.getElementById('cart-item-' + cartId);
+        if (row) {
+            const buttons = row.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.removeAttribute('disabled');
+                button.classList.remove('disabled');
+            });
+        }
     }
     
     // Функция обновления UI для товара в корзине
