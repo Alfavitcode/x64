@@ -261,7 +261,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error('Ошибка сети: ' + response.status);
             }
-            return response.json();
+            // Добавляем отладочный код для проверки ответа
+            return response.text().then(text => {
+                console.log('Ответ сервера:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Ошибка парсинга JSON:', e);
+                    throw new Error('Некорректный ответ сервера');
+                }
+            });
         })
         .then(data => {
             if (data.success) {
@@ -322,7 +331,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error('Ошибка сети: ' + response.status);
             }
-            return response.json();
+            // Добавляем отладочный код для проверки ответа
+            return response.text().then(text => {
+                console.log('Ответ сервера:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Ошибка парсинга JSON:', e);
+                    throw new Error('Некорректный ответ сервера');
+                }
+            });
         })
         .then(data => {
             if (data.success) {

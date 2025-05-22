@@ -1719,21 +1719,22 @@ function getCartItemById($cart_id, $session_id, $user_id = null) {
     global $conn;
     
     // Формируем условие для поиска по user_id или session_id
-    $where_condition = $user_id ? "user_id = ?" : "session_id = ?";
-    $param_value = $user_id ?: $session_id;
+    if ($user_id) {
+        $sql = "SELECT c.*, p.name, p.image, p.stock as available_quantity, c.quantity * p.price as subtotal
+                FROM cart c 
+                JOIN product p ON c.product_id = p.id 
+                WHERE c.id = " . (int)$cart_id . " AND c.user_id = " . (int)$user_id;
+    } else {
+        $sql = "SELECT c.*, p.name, p.image, p.stock as available_quantity, c.quantity * p.price as subtotal
+                FROM cart c 
+                JOIN product p ON c.product_id = p.id 
+                WHERE c.id = " . (int)$cart_id . " AND c.session_id = '" . mysqli_real_escape_string($conn, $session_id) . "'";
+    }
     
-    $sql = "SELECT c.*, c.price * c.quantity as subtotal, p.name, p.image, p.quantity as available_quantity 
-            FROM cart c 
-            JOIN product p ON c.product_id = p.id 
-            WHERE c.id = ? AND $where_condition";
+    $result = mysqli_query($conn, $sql);
     
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('is', $cart_id, $param_value);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        return $result->fetch_assoc();
+    if ($result && mysqli_num_rows($result) > 0) {
+        return mysqli_fetch_assoc($result);
     }
     
     return false;
