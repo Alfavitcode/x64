@@ -1,14 +1,8 @@
 # Файлы конфигурации и чувствительные данные
 config.php
 /includes/config*.php
-/includes/config/db_config.php
 connection.php
 *.env
-tools/test-ftp-connection.php
-
-# Тестовые файлы и директории
-/testcode/
-/testcode
 
 # Временные файлы
 *.log
