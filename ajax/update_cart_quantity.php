@@ -13,6 +13,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($cart_id > 0 && $quantity > 0) {
         $result = updateCartItemQuantity($cart_id, $quantity, $session_id, $user_id);
+        
+        if ($result['success']) {
+            // Получаем обновленные данные о товаре в корзине
+            $cart_items = getCartItems($user_id, $session_id);
+            $updated_item = null;
+            $total_sum = 0;
+            $total_count = 0;
+            
+            foreach ($cart_items as $item) {
+                if ($item['id'] == $cart_id) {
+                    $updated_item = $item;
+                }
+                $total_sum += $item['subtotal'];
+                $total_count++;
+            }
+            
+            // Добавляем информацию о товаре и общей сумме в ответ
+            $result['quantity'] = $updated_item ? $updated_item['quantity'] : $quantity;
+            $result['subtotal'] = $updated_item ? $updated_item['subtotal'] : 0;
+            $result['cart_total'] = $total_sum;
+            $result['cart_count'] = $total_count;
+        }
+        
         echo json_encode($result);
     } else {
         echo json_encode(['success' => false, 'message' => 'Некорректные данные']);

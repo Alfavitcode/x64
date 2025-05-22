@@ -12,6 +12,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($cart_id > 0) {
         $result = removeFromCart($cart_id, $session_id, $user_id);
+        
+        if ($result['success']) {
+            // Получаем обновленные данные корзины
+            $cart_items = getCartItems($user_id, $session_id);
+            $total_sum = 0;
+            $total_count = 0;
+            
+            foreach ($cart_items as $item) {
+                $total_sum += $item['subtotal'];
+                $total_count++;
+            }
+            
+            // Добавляем информацию об общей сумме и количестве в ответ
+            $result['cart_total'] = $total_sum;
+            $result['cart_count'] = $total_count;
+        }
+        
         echo json_encode($result);
     } else {
         echo json_encode(['success' => false, 'message' => 'Некорректные данные']);
