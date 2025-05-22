@@ -1,6 +1,7 @@
 # Файлы конфигурации и чувствительные данные
 config.php
 /includes/config*.php
+/includes/config/db_config.php
 connection.php
 *.env
 
