@@ -4,8 +4,8 @@ require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
 header('Content-Type: application/json');
 
-// Добавляем задержку для предотвращения слишком быстрых повторных запросов
-usleep(200000); // 200 мс
+// Добавляем небольшую задержку для предотвращения слишком быстрых повторных запросов
+usleep(100000); // 100 мс
 
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 $session_id = session_id();
@@ -30,11 +30,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     if (!$item_exists) {
-        echo json_encode(['success' => false, 'message' => 'Товар не найден в корзине']);
+        // Если товар уже удален, считаем операцию успешной
+        $total_sum = 0;
+        $total_count = 0;
+        foreach ($cart_items as $item) {
+            $total_sum += $item['subtotal'];
+            $total_count++;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'cart_total' => $total_sum,
+            'cart_count' => $total_count,
+            'message' => 'Товар уже был удален из корзины'
+        ]);
         exit;
     }
     
-    // Удаляем товар из корзины
     $result = removeFromCart($cart_id, $session_id, $user_id);
     
     if ($result['success']) {
@@ -48,13 +60,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $total_count++;
         }
         
-        // Добавляем информацию об общей сумме и количестве в ответ
-        $result['cart_total'] = $total_sum;
-        $result['cart_count'] = $total_count;
+        echo json_encode([
+            'success' => true,
+            'cart_total' => $total_sum,
+            'cart_count' => $total_count,
+            'message' => 'Товар успешно удален из корзины'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => $result['message'] ?? 'Ошибка при удалении товара из корзины'
+        ]);
     }
-    
-    echo json_encode($result);
-    exit;
-}
-
-echo json_encode(['success' => false, 'message' => 'Неверный метод запроса']); 
+} else {
+    echo json_encode(['success' => false, 'message' => 'Неверный метод запроса']);
+} 

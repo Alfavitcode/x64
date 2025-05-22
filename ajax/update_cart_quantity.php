@@ -4,8 +4,8 @@ require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
 header('Content-Type: application/json');
 
-// Добавляем задержку для предотвращения слишком быстрых повторных запросов
-usleep(200000); // 200 мс
+// Добавляем небольшую задержку для предотвращения слишком быстрых повторных запросов
+usleep(100000); // 100 мс
 
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 $session_id = session_id();
@@ -21,52 +21,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     if ($quantity <= 0) {
-        echo json_encode(['success' => false, 'message' => 'Количество товара должно быть больше нуля']);
+        echo json_encode(['success' => false, 'message' => 'Количество товара должно быть больше 0']);
         exit;
     }
     
-    // Проверка существования товара в корзине
-    $cart_items = getCartItems($user_id, $session_id);
-    $item_exists = false;
-    foreach ($cart_items as $item) {
-        if ($item['id'] == $cart_id) {
-            $item_exists = true;
-            break;
-        }
-    }
-    
-    if (!$item_exists) {
+    // Получаем текущий элемент корзины для проверки
+    $currentItem = getCartItemById($cart_id, $session_id, $user_id);
+    if (!$currentItem) {
         echo json_encode(['success' => false, 'message' => 'Товар не найден в корзине']);
         exit;
     }
     
-    // Обновляем количество товара
+    // Получаем информацию о товаре для проверки наличия на складе
+    $product = getProductById($currentItem['product_id']);
+    if (!$product) {
+        echo json_encode(['success' => false, 'message' => 'Товар не найден']);
+        exit;
+    }
+    
+    // Проверка максимального количества (не больше, чем есть на складе)
+    if ($quantity > $product['quantity']) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Недостаточно товара на складе. Доступно: ' . $product['quantity'],
+            'available_quantity' => $product['quantity']
+        ]);
+        exit;
+    }
+    
+    // Проверяем, не изменилось ли количество с момента отправки запроса
+    if ($currentItem['quantity'] == $quantity) {
+        // Если количество не изменилось, просто возвращаем текущие данные
+        $cart_items = getCartItems($user_id, $session_id);
+        $total_sum = 0;
+        $total_count = 0;
+        
+        foreach ($cart_items as $item) {
+            $total_sum += $item['subtotal'];
+            $total_count++;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'quantity' => $currentItem['quantity'],
+            'subtotal' => $currentItem['subtotal'],
+            'cart_total' => $total_sum,
+            'cart_count' => $total_count,
+            'message' => 'Количество товара не изменилось'
+        ]);
+        exit;
+    }
+    
     $result = updateCartItemQuantity($cart_id, $quantity, $session_id, $user_id);
     
     if ($result['success']) {
         // Получаем обновленные данные о товаре в корзине
         $cart_items = getCartItems($user_id, $session_id);
-        $updated_item = null;
         $total_sum = 0;
         $total_count = 0;
+        $updated_item = null;
         
         foreach ($cart_items as $item) {
+            $total_sum += $item['subtotal'];
+            $total_count++;
+            
             if ($item['id'] == $cart_id) {
                 $updated_item = $item;
             }
-            $total_sum += $item['subtotal'];
-            $total_count++;
         }
         
-        // Добавляем информацию о товаре и общей сумме в ответ
-        $result['quantity'] = $updated_item ? $updated_item['quantity'] : $quantity;
-        $result['subtotal'] = $updated_item ? $updated_item['subtotal'] : 0;
-        $result['cart_total'] = $total_sum;
-        $result['cart_count'] = $total_count;
+        echo json_encode([
+            'success' => true,
+            'quantity' => $updated_item ? $updated_item['quantity'] : $quantity,
+            'subtotal' => $updated_item ? $updated_item['subtotal'] : 0,
+            'cart_total' => $total_sum,
+            'cart_count' => $total_count,
+            'message' => 'Количество товара успешно обновлено'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => $result['message'] ?? 'Ошибка при обновлении количества товара'
+        ]);
     }
-    
-    echo json_encode($result);
-    exit;
-}
-
-echo json_encode(['success' => false, 'message' => 'Неверный метод запроса']); 
+} else {
+    echo json_encode(['success' => false, 'message' => 'Неверный метод запроса']);
+} 

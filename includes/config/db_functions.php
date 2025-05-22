@@ -1706,4 +1706,36 @@ function getFilteredReportData($dateFrom, $dateTo, $category) {
         'chart' => getMonthlySalesData(date('Y'))
     ];
 }
+
+/**
+ * Получить элемент корзины по его ID
+ * 
+ * @param int $cart_id ID элемента корзины
+ * @param string $session_id ID сессии
+ * @param int|null $user_id ID пользователя (если авторизован)
+ * @return array|false Данные элемента корзины или false, если не найден
+ */
+function getCartItemById($cart_id, $session_id, $user_id = null) {
+    global $conn;
+    
+    // Формируем условие для поиска по user_id или session_id
+    $where_condition = $user_id ? "user_id = ?" : "session_id = ?";
+    $param_value = $user_id ?: $session_id;
+    
+    $sql = "SELECT c.*, c.price * c.quantity as subtotal, p.name, p.image, p.quantity as available_quantity 
+            FROM cart c 
+            JOIN products p ON c.product_id = p.id 
+            WHERE c.id = ? AND $where_condition";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('is', $cart_id, $param_value);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        return $result->fetch_assoc();
+    }
+    
+    return false;
+}
  

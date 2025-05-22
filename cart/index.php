@@ -126,69 +126,144 @@ foreach ($cart_items as $item) {
     cursor: not-allowed;
     pointer-events: none;
 }
+.quantity-btn.btn-active {
+    background-color: #e9ecef;
+    transform: scale(0.95);
+}
+.row-loader {
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+/* Анимация для изменения цены */
+@keyframes priceUpdate {
+    0% { color: #0d6efd; transform: scale(1.1); }
+    100% { color: inherit; transform: scale(1); }
+}
+.price-update {
+    animation: priceUpdate 0.5s ease-out;
+}
+/* Стили для анимации удаления товара */
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-20px); }
+}
+.fade-out {
+    animation: fadeOut 0.3s forwards;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Флаг для отслеживания выполнения запроса
-    let isRequestInProgress = false;
+    // Флаг для отслеживания выполнения запросов
+    let pendingRequests = {};
+    
+    // Дебаунс функция для предотвращения множественных вызовов
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+    }
     
     // Удаление товара из корзины
     document.querySelectorAll('.remove-from-cart').forEach(button => {
         button.addEventListener('click', function(e) {
-            e.preventDefault(); // Предотвращаем действие по умолчанию
-            
-            if (isRequestInProgress) return; // Не выполняем запрос, если предыдущий еще не завершен
+            e.preventDefault();
+            e.stopPropagation();
             
             const cartId = this.getAttribute('data-cart-id');
-            removeFromCart(cartId);
+            
+            // Проверяем, не выполняется ли уже запрос для этого товара
+            if (pendingRequests[cartId]) return;
+            
+            // Блокируем кнопку
+            this.disabled = true;
+            this.classList.add('disabled');
+            
+            // Устанавливаем флаг запроса
+            pendingRequests[cartId] = true;
+            
+            // Удаляем товар
+            removeFromCart(cartId, this);
         });
     });
     
-    // Изменение количества товара
+    // Изменение количества товара (с дебаунсингом)
     document.querySelectorAll('.quantity-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Предотвращаем действие по умолчанию
+        // Создаем дебаунсированную версию обработчика для каждой кнопки
+        const debouncedHandler = debounce(function(btn) {
+            const cartId = btn.getAttribute('data-cart-id');
+            const quantity = parseInt(btn.getAttribute('data-quantity'));
             
-            if (isRequestInProgress) return; // Не выполняем запрос, если предыдущий еще не завершен
-            
-            const cartId = this.getAttribute('data-cart-id');
-            const quantity = parseInt(this.getAttribute('data-quantity'));
-            
+            // Если количество 0 или меньше, удаляем товар
             if (quantity <= 0) {
-                // Если количество 0 или меньше, удаляем товар
-                removeFromCart(cartId);
+                removeFromCart(cartId, btn);
             } else {
                 // Иначе обновляем количество
-                updateCartItemQuantity(cartId, quantity);
+                updateCartItemQuantity(cartId, quantity, btn);
             }
+        }, 300); // 300 мс дебаунс
+        
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const cartId = this.getAttribute('data-cart-id');
+            
+            // Проверяем, не выполняется ли уже запрос для этого товара
+            if (pendingRequests[cartId]) return;
+            
+            // Визуальная обратная связь
+            this.classList.add('btn-active');
+            
+            // Блокируем все кнопки для этого товара
+            const row = document.getElementById('cart-item-' + cartId);
+            if (row) {
+                const buttons = row.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('disabled');
+                });
+            }
+            
+            // Устанавливаем флаг запроса
+            pendingRequests[cartId] = true;
+            
+            // Вызываем дебаунсированный обработчик
+            debouncedHandler(this);
         });
     });
     
     // Функция обновления количества товара
-    function updateCartItemQuantity(cartId, quantity) {
-        // Устанавливаем флаг, что запрос выполняется
-        isRequestInProgress = true;
-        
-        // Блокируем кнопки для этого товара
-        disableButtons(cartId);
+    function updateCartItemQuantity(cartId, quantity, button) {
+        // Показываем локальный индикатор загрузки для строки товара
+        showRowLoading(cartId, true);
         
         const formData = new FormData();
         formData.append('cart_id', cartId);
         formData.append('quantity', quantity);
         
-        // Показываем индикатор загрузки
-        showLoading(true);
-        
         fetch('/ajax/update_cart_quantity.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            // Важно: отключаем кэширование запросов
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка сети: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            // Скрываем индикатор загрузки
-            showLoading(false);
-            
             if (data.success) {
                 // Обновляем данные на странице без перезагрузки
                 updateCartItemUI(cartId, data.quantity, data.subtotal);
@@ -201,44 +276,57 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            // Скрываем индикатор загрузки
-            showLoading(false);
-            
             console.error('Ошибка:', error);
             Cart.showNotification('Произошла ошибка при обновлении количества товара', 'error');
         })
         .finally(() => {
-            // Сбрасываем флаг и разблокируем кнопки
-            isRequestInProgress = false;
-            enableButtons(cartId);
+            // Скрываем индикатор загрузки
+            showRowLoading(cartId, false);
+            
+            // Разблокируем кнопки
+            const row = document.getElementById('cart-item-' + cartId);
+            if (row) {
+                const buttons = row.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('disabled');
+                    btn.classList.remove('btn-active');
+                });
+            }
+            
+            // Снимаем флаг запроса
+            delete pendingRequests[cartId];
         });
     }
     
     // Функция удаления товара из корзины
-    function removeFromCart(cartId) {
-        // Устанавливаем флаг, что запрос выполняется
-        isRequestInProgress = true;
-        
-        // Блокируем кнопки для этого товара
-        disableButtons(cartId);
+    function removeFromCart(cartId, button) {
+        // Показываем локальный индикатор загрузки для строки товара
+        showRowLoading(cartId, true);
         
         const formData = new FormData();
         formData.append('cart_id', cartId);
         
-        // Показываем индикатор загрузки
-        showLoading(true);
-        
         fetch('/ajax/remove_from_cart.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            // Отключаем кэширование запросов
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка сети: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            // Скрываем индикатор загрузки
-            showLoading(false);
-            
             if (data.success) {
-                // Удаляем элемент из DOM
+                // Удаляем элемент из DOM с анимацией
                 removeCartItemFromUI(cartId);
                 
                 // Обновляем общую сумму и количество
@@ -250,43 +338,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Показываем уведомление
                 Cart.showNotification('Товар удален из корзины', 'success');
             } else {
+                // Разблокируем кнопки в случае ошибки
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                }
+                
                 Cart.showNotification('Ошибка: ' + data.message, 'error');
             }
         })
         .catch(error => {
-            // Скрываем индикатор загрузки
-            showLoading(false);
-            
             console.error('Ошибка:', error);
             Cart.showNotification('Произошла ошибка при удалении товара из корзины', 'error');
+            
+            // Разблокируем кнопки в случае ошибки
+            if (button) {
+                button.disabled = false;
+                button.classList.remove('disabled');
+            }
         })
         .finally(() => {
-            // Сбрасываем флаг запроса
-            isRequestInProgress = false;
+            // Скрываем индикатор загрузки
+            showRowLoading(cartId, false);
+            
+            // Снимаем флаг запроса
+            delete pendingRequests[cartId];
         });
     }
     
-    // Функция блокировки кнопок товара
-    function disableButtons(cartId) {
+    // Функция показа/скрытия индикатора загрузки для строки товара
+    function showRowLoading(cartId, show) {
         const row = document.getElementById('cart-item-' + cartId);
-        if (row) {
-            const buttons = row.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.setAttribute('disabled', 'disabled');
-                button.classList.add('disabled');
-            });
-        }
-    }
-    
-    // Функция разблокировки кнопок товара
-    function enableButtons(cartId) {
-        const row = document.getElementById('cart-item-' + cartId);
-        if (row) {
-            const buttons = row.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.removeAttribute('disabled');
-                button.classList.remove('disabled');
-            });
+        if (!row) return;
+        
+        let loader = row.querySelector('.row-loader');
+        
+        if (show) {
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.className = 'row-loader';
+                loader.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div>';
+                
+                // Добавляем индикатор загрузки в последнюю ячейку строки
+                const lastCell = row.querySelector('td:last-child');
+                if (lastCell) {
+                    lastCell.appendChild(loader);
+                }
+            }
+            loader.style.display = 'inline-block';
+        } else if (loader) {
+            loader.style.display = 'none';
         }
     }
     
@@ -300,10 +401,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 quantityElement.textContent = quantity;
             }
             
-            // Обновляем сумму
+            // Обновляем сумму с анимацией
             const subtotalElement = row.querySelector('.item-subtotal');
             if (subtotalElement) {
+                // Добавляем класс для анимации
+                subtotalElement.classList.add('price-update');
                 subtotalElement.textContent = formatPrice(subtotal) + ' ₽';
+                
+                // Удаляем класс анимации через некоторое время
+                setTimeout(() => {
+                    subtotalElement.classList.remove('price-update');
+                }, 500);
             }
             
             // Обновляем кнопки увеличения/уменьшения количества
@@ -340,7 +448,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCartTotals(total, count) {
         const totalSumElement = document.getElementById('cart-total-sum');
         if (totalSumElement) {
+            // Добавляем класс для анимации
+            totalSumElement.classList.add('price-update');
             totalSumElement.textContent = formatPrice(total) + ' ₽';
+            
+            // Удаляем класс анимации через некоторое время
+            setTimeout(() => {
+                totalSumElement.classList.remove('price-update');
+            }, 500);
         }
         
         const totalCountElement = document.getElementById('cart-total-count');
@@ -363,51 +478,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatPrice(price) {
         return new Intl.NumberFormat('ru-RU').format(price);
     }
-    
-    // Функция отображения/скрытия индикатора загрузки
-    function showLoading(show) {
-        let loader = document.getElementById('cart-loader');
-        
-        if (show) {
-            if (!loader) {
-                loader = document.createElement('div');
-                loader.id = 'cart-loader';
-                loader.className = 'cart-loader';
-                loader.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div>';
-                document.body.appendChild(loader);
-            }
-            loader.style.display = 'flex';
-        } else if (loader) {
-            loader.style.display = 'none';
-        }
-    }
 });
 </script>
-
-<style>
-/* Стили для анимации удаления товара */
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
-
-.fade-out {
-    animation: fadeOut 0.3s forwards;
-}
-
-/* Стили для индикатора загрузки */
-.cart-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-</style>
 
 <?php include_once '../includes/footer/footer.php'; ?> 
