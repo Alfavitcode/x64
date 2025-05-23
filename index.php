@@ -25,13 +25,13 @@ include_once 'includes/header/header.php';
                 </div>
             </div>
             <div class="slide">
-            <div class="slide-bg" style="background-image: url('/img/slider/8 белый.PNG'); background-size: cover; background-position: center; background-color: #f5f5f5;"></div>
+            <div class="slide-bg" style="background-image: url('/img/slider/samsung.JPEG'); background-size: cover; background-position: center; background-color: #f5f5f5;"></div>
                 <div class="slide-content container">
                     <!-- Контент слайдера удален по запросу -->
                 </div>
             </div>
             <div class="slide">
-            <div class="slide-bg" style="background-image: url('/img/slider/8 розовое золото.PNG'); background-size: cover; background-position: center; background-color: #f5f5f5;"></div>
+            <div class="slide-bg" style="background-image: url('/img/slider/xiaomi.JPEG'); background-size: cover; background-position: center; background-color: #f5f5f5;"></div>
                 <div class="slide-content container">
                     <!-- Контент слайдера удален по запросу -->
                 </div>
