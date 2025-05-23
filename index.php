@@ -36,20 +36,51 @@ include_once 'includes/header/header.php';
                     <!-- Контент слайдера удален по запросу -->
                 </div>
             </div>
-        
-        <!-- Слайдер-контроль переработан для лучшей мобильной совместимости -->
-        <button class="slider-arrow prev" aria-label="Предыдущий слайд"><i class="fas fa-chevron-left"></i></button>
-        <button class="slider-arrow next" aria-label="Следующий слайд"><i class="fas fa-chevron-right"></i></button>
-            
-            <div class="slider-controls">
-                <div class="slider-dots">
-                    <span class="dot active" data-slide="0"></span>
-                    <span class="dot" data-slide="1"></span>
-                    <span class="dot" data-slide="2"></span>
-            </div>
         </div>
-    </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Автоматическое переключение слайдов
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+    
+    // Функция для изменения слайда
+    function changeSlide() {
+        // Скрываем все слайды
+        slides.forEach(slide => slide.classList.remove('active'));
+        
+        // Переходим к следующему слайду
+        currentSlide = (currentSlide + 1) % slides.length;
+        
+        // Показываем текущий слайд
+        slides[currentSlide].classList.add('active');
+    }
+    
+    // Запускаем автоматическое переключение каждые 5 секунд
+    setInterval(changeSlide, 5000);
+    
+    // Добавляем плавную анимацию перехода слайдов
+    const style = document.createElement('style');
+    style.textContent = `
+        .slide {
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
 
 <!-- Популярные товары -->
 <section class="featured-products section">
@@ -789,59 +820,6 @@ include_once 'includes/header/header.php';
     color: #212529;
 }
 
-.slider-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-.slider-arrow {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.6);
-    border: none;
-    color: #333;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 10px;
-    transition: all 0.3s ease;
-    z-index: 20;
-}
-
-.slider-arrow:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.slider-dots {
-    display: flex;
-    margin: 0 20px;
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.3);
-    margin: 0 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.dot.active {
-    background-color: rgba(0, 0, 0, 0.7);
-    transform: scale(1.2);
-}
-
 /* Убираем градиент, который может мешать видеть изображение полностью */
 .slide::after {
     display: none;
@@ -861,17 +839,6 @@ include_once 'includes/header/header.php';
 @media (max-width: 576px) {
     .slider-container {
         height: 300px;
-    }
-    
-    .slider-arrow {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .dot {
-        width: 8px;
-        height: 8px;
-        margin: 0 3px;
     }
 }
 </style>

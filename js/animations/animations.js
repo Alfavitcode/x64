@@ -269,26 +269,6 @@ $(document).ready(function() {
     `;
     document.head.appendChild(styleSheet);
     
-    // Дополнительная анимация для слайдера
-    $('.hero-slider').on('mouseenter', function() {
-        $('.slider-controls').css({
-            'opacity': '1',
-            'transform': 'translateY(0)'
-        });
-    }).on('mouseleave', function() {
-        $('.slider-controls').css({
-            'opacity': '0.7',
-            'transform': 'translateY(10px)'
-        });
-    });
-    
-    // Инициализация начальных анимаций
-    $('.slider-controls').css({
-        'opacity': '0.7',
-        'transform': 'translateY(10px)',
-        'transition': 'all 0.3s ease'
-    });
-    
     // Анимация для появления хедера при скролле вверх
     let lastScrollTop = 0;
     $(window).on('scroll', function() {
