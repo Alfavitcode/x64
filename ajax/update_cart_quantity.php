@@ -52,11 +52,11 @@ try {
         }
         
         // Проверка максимального количества (не больше, чем есть на складе)
-        if ($quantity > $product['quantity']) {
+        if ($quantity > $product['stock']) {
             echo json_encode([
                 'success' => false, 
-                'message' => 'Недостаточно товара на складе. Доступно: ' . $product['quantity'],
-                'available_quantity' => $product['quantity']
+                'message' => 'Недостаточно товара на складе. Доступно: ' . $product['stock'],
+                'available_quantity' => $product['stock']
             ]);
             exit;
         }

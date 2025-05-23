@@ -20,27 +20,24 @@ foreach ($cart_items as $item) {
         <h1 class="mb-4">Корзина</h1>
         <div class="row">
             <div class="col-lg-8">
-                <?php if (empty($cart_items)): ?>
-                    <!-- Красивое сообщение о пустой корзине с иконкой -->
-                    <div class="card empty-cart-card shadow-sm">
-                        <div class="card-body text-center py-5">
-                            <div class="empty-cart-icon mb-4">
-                                <i class="fas fa-shopping-cart"></i>
-                                <div class="empty-cart-animation"></div>
-                            </div>
-                            <h3 class="mb-3">Ваша корзина пуста</h3>
-                            <p class="text-muted mb-4">Похоже, вы еще не добавили товары в корзину</p>
-                            <a href="/catalog.php" class="btn btn-primary btn-lg rounded-pill px-5">
-                                <i class="fas fa-shopping-bag me-2"></i>Перейти к покупкам
-                            </a>
-                        </div>
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Товары в корзине</h5>
                     </div>
-                <?php else: ?>
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Товары в корзине</h5>
-                        </div>
-                        <div class="card-body p-0">
+                    <div class="card-body">
+                        <?php if (empty($cart_items)): ?>
+                            <div class="empty-cart-container">
+                                <div class="empty-cart-icon">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <i class="fas fa-times empty-cart-icon-times"></i>
+                                </div>
+                                <h4 class="mt-4">Ваша корзина пуста</h4>
+                                <p class="text-muted">Добавьте товары в корзину, чтобы продолжить покупки</p>
+                                <a href="/catalog.php" class="btn btn-primary mt-3 rounded-pill">
+                                    <i class="fas fa-shopping-bag me-2"></i>Перейти к покупкам
+                                </a>
+                            </div>
+                        <?php else: ?>
                             <div class="table-responsive" id="cart-items-container">
                                 <table class="table table-hover mb-0 align-middle" id="cart-items-table">
                                     <thead class="table-light">
@@ -86,9 +83,9 @@ foreach ($cart_items as $item) {
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
+                </div>
             </div>
             <div class="col-lg-4">
                 <div class="card shadow-sm">
@@ -104,8 +101,12 @@ foreach ($cart_items as $item) {
                             <span>Итоговая сумма:</span>
                             <span class="fw-bold fs-5" id="cart-total-sum"><?php echo number_format($total_sum, 0, '.', ' '); ?> ₽</span>
                         </div>
-                        <button id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>Оформить заказ</button>
-                        <a href="/catalog.php" class="btn btn-outline-primary w-100 rounded-pill">Продолжить покупки</a>
+                        <button id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>
+                            <i class="fas fa-check-circle me-2"></i>Оформить заказ
+                        </button>
+                        <a href="/catalog.php" class="btn btn-outline-primary w-100 rounded-pill">
+                            <i class="fas fa-arrow-left me-2"></i>Продолжить покупки
+                        </a>
                     </div>
                 </div>
             </div>
@@ -152,7 +153,7 @@ foreach ($cart_items as $item) {
 }
 /* Анимация для изменения цены */
 @keyframes priceUpdate {
-    0% { color: var(--primary-color); transform: scale(1.1); }
+    0% { color: #0d6efd; transform: scale(1.1); }
     100% { color: inherit; transform: scale(1); }
 }
 .price-update {
@@ -168,89 +169,33 @@ foreach ($cart_items as $item) {
 }
 
 /* Стили для пустой корзины */
-.empty-cart-card {
-    border: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
-    transition: all 0.3s ease;
+.empty-cart-container {
+    text-align: center;
+    padding: 50px 20px;
 }
-
-.empty-cart-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
-}
-
 .empty-cart-icon {
     position: relative;
-    width: 120px;
-    height: 120px;
-    margin: 0 auto;
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
+    font-size: 5rem;
+    color: #6c757d;
+    margin-bottom: 20px;
+    animation: cartBounce 2s infinite ease-in-out;
 }
-
-.empty-cart-icon i {
-    font-size: 48px;
-    color: var(--primary-color);
-}
-
-.empty-cart-animation {
+.empty-cart-icon-times {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    animation: pulse 2s infinite;
+    font-size: 2.5rem;
+    color: #dc3545;
+    top: 15px;
+    right: -10px;
+    animation: timesRotate 2s infinite ease-in-out;
 }
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.95);
-        opacity: 1;
-    }
-    70% {
-        transform: scale(1.1);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(0.95);
-        opacity: 0;
-    }
+@keyframes cartBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
-
-/* Обновленные стили кнопок */
-.btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-color-hover);
-    border-color: var(--primary-color-hover);
-}
-
-.btn-outline-primary {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.btn-outline-primary:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.btn-outline-danger {
-    color: var(--danger-color);
-    border-color: var(--danger-color);
-}
-
-.btn-outline-danger:hover {
-    background-color: var(--danger-color);
-    color: white;
+@keyframes timesRotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(15deg); }
 }
 </style>
 
@@ -457,11 +402,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Показываем уведомление
                 Cart.showNotification('Товар удален из корзины', 'success');
                 
-                // Если корзина пуста, перезагружаем страницу для отображения пустой корзины
+                // Если корзина пуста, показываем сообщение о пустой корзине
                 if (data.cart_count === 0) {
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
+                    showEmptyCartMessage();
                 }
             } else {
                 // Разблокируем кнопки в случае ошибки
@@ -564,9 +507,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Проверяем, остались ли товары в корзине
                 const cartBody = document.getElementById('cart-items-body');
                 if (cartBody && cartBody.children.length === 0) {
-                    cartBody.innerHTML = '<tr id="empty-cart-row"><td colspan="5" class="text-center text-muted">Ваша корзина пуста</td></tr>';
+                    showEmptyCartMessage();
                 }
             }, 300);
+        }
+    }
+    
+    // Функция показа сообщения о пустой корзине
+    function showEmptyCartMessage() {
+        const container = document.getElementById('cart-items-container');
+        if (container) {
+            // Создаем элемент с сообщением о пустой корзине
+            const emptyCartContainer = document.createElement('div');
+            emptyCartContainer.className = 'empty-cart-container';
+            emptyCartContainer.innerHTML = `
+                <div class="empty-cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <i class="fas fa-times empty-cart-icon-times"></i>
+                </div>
+                <h4 class="mt-4">Ваша корзина пуста</h4>
+                <p class="text-muted">Добавьте товары в корзину, чтобы продолжить покупки</p>
+                <a href="/catalog.php" class="btn btn-primary mt-3 rounded-pill">
+                    <i class="fas fa-shopping-bag me-2"></i>Перейти к покупкам
+                </a>
+            `;
+            
+            // Заменяем содержимое контейнера
+            container.innerHTML = '';
+            container.appendChild(emptyCartContainer);
         }
     }
     
