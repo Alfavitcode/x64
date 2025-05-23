@@ -38,75 +38,66 @@ $cart_is_empty = empty($cart_items);
         <?php else: ?>
         <div class="row">
             <div class="col-lg-8">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Товары в корзине</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive" id="cart-items-container">
-                            <table class="table table-hover mb-0 align-middle" id="cart-items-table">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Товар</th>
-                                        <th>Цена</th>
-                                        <th>Количество</th>
-                                        <th>Сумма</th>
-                                        <th>Действия</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cart-items-body">
-                                <?php foreach ($cart_items as $item): ?>
-                                    <tr id="cart-item-<?php echo (int)$item['id']; ?>">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="img-fluid rounded me-3" style="width: 60px; height: 60px; object-fit: contain;">
-                                                <div>
-                                                    <h6 class="mb-1"><?php echo htmlspecialchars($item['name']); ?></h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold"><?php echo number_format($item['price'], 0, '.', ' '); ?> ₽</span>
-                                        </td>
-                                        <td>
-                                            <div class="quantity-control d-flex align-items-center">
-                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-decrease" data-cart-id="<?php echo (int)$item['id']; ?>">-</button>
-                                                <span class="mx-2 fw-bold item-quantity"><?php echo (int)$item['quantity']; ?></span>
-                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-increase" data-cart-id="<?php echo (int)$item['id']; ?>">+</button>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold item-subtotal"><?php echo number_format($item['subtotal'], 0, '.', ' '); ?> ₽</span>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-danger remove-from-cart" data-cart-id="<?php echo (int)$item['id']; ?>">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                <div class="cart-items-container">
+                    <?php foreach ($cart_items as $item): ?>
+                    <div id="cart-item-<?php echo (int)$item['id']; ?>" class="cart-item">
+                        <div class="cart-item-image">
+                            <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="img-fluid">
+                        </div>
+                        <div class="cart-item-details">
+                            <h5 class="cart-item-title"><?php echo htmlspecialchars($item['name']); ?></h5>
+                            <div class="cart-item-price-mobile d-block d-md-none">
+                                <span class="price-label">Цена:</span>
+                                <span class="price-value"><?php echo number_format($item['price'], 0, '.', ' '); ?> ₽</span>
+                            </div>
+                        </div>
+                        <div class="cart-item-price d-none d-md-flex">
+                            <?php echo number_format($item['price'], 0, '.', ' '); ?> ₽
+                        </div>
+                        <div class="cart-item-quantity">
+                            <div class="quantity-control">
+                                <button class="btn quantity-btn quantity-decrease" data-cart-id="<?php echo (int)$item['id']; ?>">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="quantity-value item-quantity"><?php echo (int)$item['quantity']; ?></span>
+                                <button class="btn quantity-btn quantity-increase" data-cart-id="<?php echo (int)$item['id']; ?>">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="cart-item-subtotal">
+                            <div class="subtotal-label d-block d-md-none">Сумма:</div>
+                            <div class="subtotal-value item-subtotal"><?php echo number_format($item['subtotal'], 0, '.', ' '); ?> ₽</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="btn btn-remove remove-from-cart" data-cart-id="<?php echo (int)$item['id']; ?>" title="Удалить товар">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h5 class="mb-0">Итого</h5>
+                <div class="cart-summary">
+                    <div class="cart-summary-header">
+                        <h5>Итого</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
+                    <div class="cart-summary-body">
+                        <div class="cart-summary-row">
                             <span>Товаров:</span>
                             <span class="fw-bold" id="cart-total-count"><?php echo $total_count; ?></span>
                         </div>
-                        <div class="d-flex justify-content-between mb-3">
+                        <div class="cart-summary-row total-row">
                             <span>Итоговая сумма:</span>
                             <span class="fw-bold fs-5" id="cart-total-sum"><?php echo number_format($total_sum, 0, '.', ' '); ?> ₽</span>
                         </div>
-                        <button id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>Оформить заказ</button>
-                        <a href="/catalog.php" class="btn btn-outline-secondary w-100 rounded-pill">Продолжить покупки</a>
+                        <button id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>
+                            <i class="fas fa-check-circle me-2"></i>Оформить заказ
+                        </button>
+                        <a href="/catalog.php" class="btn btn-outline-secondary w-100 rounded-pill">
+                            <i class="fas fa-shopping-bag me-2"></i>Продолжить покупки
+                        </a>
                     </div>
                 </div>
             </div>
@@ -235,6 +226,379 @@ $cart_is_empty = empty($cart_items);
     color: #6c757d;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
+}
+
+/* Стили для списка товаров в корзине */
+.cart-items-container {
+    margin-bottom: 2rem;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto auto;
+    grid-gap: 1rem;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 18px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.cart-item:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-item-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.cart-item-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cart-item-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #212529;
+}
+
+.cart-item-price {
+    font-weight: 600;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-item-price-mobile {
+    margin-top: 0.25rem;
+}
+
+.cart-item-price-mobile .price-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.cart-item-price-mobile .price-value {
+    font-weight: 600;
+}
+
+.cart-item-quantity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 50px;
+    padding: 0.25rem;
+}
+
+.quantity-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease;
+}
+
+.quantity-btn:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+
+.quantity-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.quantity-btn.btn-active {
+    background-color: #0d6efd;
+    color: #fff;
+    transform: scale(0.95);
+}
+
+.quantity-value {
+    width: 32px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #212529;
+}
+
+.cart-item-subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.subtotal-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.subtotal-value {
+    font-weight: 600;
+    color: #212529;
+    font-size: 1.1rem;
+}
+
+.cart-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Стили для итогового блока */
+.cart-summary {
+    background-color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: sticky;
+    top: 1rem;
+}
+
+.cart-summary-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.cart-summary-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #212529;
+}
+
+.cart-summary-body {
+    padding: 1.25rem;
+}
+
+.cart-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.cart-summary-row.total-row {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f1f1;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 767.98px) {
+    .cart-item {
+        grid-template-columns: 70px 1fr;
+        grid-template-rows: auto auto auto;
+        grid-gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    .cart-item-image {
+        width: 70px;
+        height: 70px;
+        grid-row: span 2;
+    }
+    
+    .cart-item-details {
+        grid-column: 2;
+    }
+    
+    .cart-item-quantity {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+    
+    .cart-item-subtotal {
+        grid-column: 2;
+        align-items: flex-start;
+    }
+    
+    .cart-item-actions {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .btn-remove {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+    
+    .quantity-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .quantity-value {
+        width: 28px;
+    }
+}
+
+/* Анимации и интерактивные эффекты */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-20px); }
+}
+
+@keyframes priceUpdate {
+    0% { color: #0d6efd; transform: scale(1.1); }
+    100% { color: inherit; transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.quantity-btn:active {
+    transform: scale(0.9);
+}
+
+.cart-item-image:hover img {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.btn-remove:hover {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Эффект при наведении на кнопку оформления заказа */
+#checkout-button:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Плавный переход для всех элементов */
+* {
+    transition: all 0.2s ease;
+}
+
+/* Стили для состояния загрузки */
+.cart-item.loading {
+    position: relative;
+}
+
+.cart-item.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 18px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.row-loader {
+    position: relative;
+    z-index: 2;
+    margin-left: 10px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.cart-item.loading .cart-item-price,
+.cart-item.loading .cart-item-subtotal,
+.cart-item.loading .quantity-value {
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-item.loading .cart-item-price::before,
+.cart-item.loading .cart-item-subtotal::before,
+.cart-item.loading .quantity-value::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    z-index: 2;
 }
 </style>
 
@@ -528,15 +892,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 loader.className = 'row-loader';
                 loader.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div>';
                 
-                // Добавляем индикатор загрузки в последнюю ячейку строки
-                const lastCell = row.querySelector('td:last-child');
-                if (lastCell) {
-                    lastCell.appendChild(loader);
+                // Добавляем индикатор загрузки в блок с действиями
+                const actionsContainer = row.querySelector('.cart-item-actions');
+                if (actionsContainer) {
+                    actionsContainer.appendChild(loader);
                 }
             }
             loader.style.display = 'inline-block';
+            
+            // Добавляем класс "loading" к строке товара
+            row.classList.add('loading');
         } else if (loader) {
             loader.style.display = 'none';
+            
+            // Удаляем класс "loading" со строки товара
+            row.classList.remove('loading');
         }
     }
     
@@ -581,8 +951,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция проверки, стала ли корзина пустой
     function checkEmptyCart() {
-        const cartBody = document.getElementById('cart-items-body');
-        if (cartBody && cartBody.children.length === 0) {
+        const cartContainer = document.querySelector('.cart-items-container');
+        if (cartContainer && cartContainer.children.length === 0) {
             // Перезагружаем страницу, чтобы показать пустую корзину
             window.location.reload();
         }
