@@ -54,9 +54,9 @@ foreach ($cart_items as $item) {
                                         </td>
                                         <td>
                                             <div class="quantity-control d-flex align-items-center">
-                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-decrease" data-cart-id="<?php echo (int)$item['id']; ?>" data-quantity="<?php echo (int)$item['quantity'] - 1; ?>">-</button>
+                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-decrease" data-cart-id="<?php echo (int)$item['id']; ?>">-</button>
                                                 <span class="mx-2 fw-bold item-quantity"><?php echo (int)$item['quantity']; ?></span>
-                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-increase" data-cart-id="<?php echo (int)$item['id']; ?>" data-quantity="<?php echo (int)$item['quantity'] + 1; ?>">+</button>
+                                                <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-increase" data-cart-id="<?php echo (int)$item['id']; ?>">+</button>
                                             </div>
                                         </td>
                                         <td>
@@ -220,16 +220,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Изменение количества товара (с дебаунсингом)
+    // Изменение количества товара (с использованием абсолютных значений)
     document.querySelectorAll('.quantity-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const cartId = this.getAttribute('data-cart-id');
-            const quantity = parseInt(this.getAttribute('data-quantity'));
+            const action = this.classList.contains('quantity-increase') ? 'increase' : 'decrease';
             
-            console.log(`Клик по кнопке изменения количества. ID товара: ${cartId}, новое количество: ${quantity}`);
+            // Получаем текущее количество из элемента на странице
+            const row = document.getElementById('cart-item-' + cartId);
+            if (!row) return;
+            
+            const quantityElement = row.querySelector('.item-quantity');
+            if (!quantityElement) return;
+            
+            let currentQuantity = parseInt(quantityElement.textContent) || 1;
+            let newQuantity = action === 'increase' ? currentQuantity + 1 : currentQuantity - 1;
+            
+            console.log(`Клик по кнопке ${action}. ID товара: ${cartId}, текущее: ${currentQuantity}, новое: ${newQuantity}`);
             
             // Проверяем, не выполняется ли уже запрос для этого товара
             if (pendingRequests[cartId]) {
@@ -247,13 +257,13 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingRequests[cartId] = true;
             
             // Если количество 0 или меньше, удаляем товар
-            if (quantity <= 0) {
+            if (newQuantity <= 0) {
                 console.log(`Количество <= 0, удаляем товар ID: ${cartId}`);
                 removeFromCart(cartId, this);
             } else {
                 // Иначе обновляем количество
-                console.log(`Обновляем количество товара ID: ${cartId} до ${quantity}`);
-                updateCartItemQuantity(cartId, quantity, this);
+                console.log(`Обновляем количество товара ID: ${cartId} до ${newQuantity}`);
+                updateCartItemQuantity(cartId, newQuantity, this);
             }
         });
     });
@@ -326,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 delete pendingRequests[cartId];
                 console.log(`Флаг запроса снят для товара ID: ${cartId}`);
-            }, 500);
+            }, 1000); // Увеличиваем задержку до 1 секунды
         });
     }
     
