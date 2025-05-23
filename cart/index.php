@@ -175,9 +175,13 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             
             const cartId = this.getAttribute('data-cart-id');
+            console.log(`Попытка удаления товара ID: ${cartId}`);
             
             // Проверяем, не выполняется ли уже запрос для этого товара
-            if (pendingRequests[cartId]) return;
+            if (pendingRequests[cartId]) {
+                console.log(`Запрос для товара ID: ${cartId} уже выполняется, игнорируем`);
+                return;
+            }
             
             // Блокируем кнопку
             this.disabled = true;
@@ -191,49 +195,66 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Жесткая блокировка всех кнопок товара при любом запросе
+    function lockAllItemButtons(cartId) {
+        const row = document.getElementById('cart-item-' + cartId);
+        if (row) {
+            const buttons = row.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+            });
+        }
+    }
+    
+    // Разблокировка всех кнопок товара
+    function unlockAllItemButtons(cartId) {
+        const row = document.getElementById('cart-item-' + cartId);
+        if (row) {
+            const buttons = row.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+                btn.classList.remove('btn-active');
+            });
+        }
+    }
+    
     // Изменение количества товара (с дебаунсингом)
     document.querySelectorAll('.quantity-btn').forEach(button => {
-        // Создаем дебаунсированную версию обработчика для каждой кнопки
-        const debouncedHandler = debounce(function(btn) {
-            const cartId = btn.getAttribute('data-cart-id');
-            const quantity = parseInt(btn.getAttribute('data-quantity'));
-            
-            // Если количество 0 или меньше, удаляем товар
-            if (quantity <= 0) {
-                removeFromCart(cartId, btn);
-            } else {
-                // Иначе обновляем количество
-                updateCartItemQuantity(cartId, quantity, btn);
-            }
-        }, 300); // 300 мс дебаунс
-        
         button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const cartId = this.getAttribute('data-cart-id');
+            const quantity = parseInt(this.getAttribute('data-quantity'));
+            
+            console.log(`Клик по кнопке изменения количества. ID товара: ${cartId}, новое количество: ${quantity}`);
             
             // Проверяем, не выполняется ли уже запрос для этого товара
-            if (pendingRequests[cartId]) return;
+            if (pendingRequests[cartId]) {
+                console.log(`Запрос для товара ID: ${cartId} уже выполняется, игнорируем`);
+                return;
+            }
             
             // Визуальная обратная связь
             this.classList.add('btn-active');
             
             // Блокируем все кнопки для этого товара
-            const row = document.getElementById('cart-item-' + cartId);
-            if (row) {
-                const buttons = row.querySelectorAll('button');
-                buttons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.add('disabled');
-                });
-            }
+            lockAllItemButtons(cartId);
             
             // Устанавливаем флаг запроса
             pendingRequests[cartId] = true;
             
-            // Вызываем дебаунсированный обработчик
-            debouncedHandler(this);
+            // Если количество 0 или меньше, удаляем товар
+            if (quantity <= 0) {
+                console.log(`Количество <= 0, удаляем товар ID: ${cartId}`);
+                removeFromCart(cartId, this);
+            } else {
+                // Иначе обновляем количество
+                console.log(`Обновляем количество товара ID: ${cartId} до ${quantity}`);
+                updateCartItemQuantity(cartId, quantity, this);
+            }
         });
     });
     
@@ -245,6 +266,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('cart_id', cartId);
         formData.append('quantity', quantity);
+        
+        console.log(`Отправка запроса на обновление количества. ID товара: ${cartId}, количество: ${quantity}`);
         
         fetch('/ajax/update_cart_quantity.php', {
             method: 'POST',
@@ -275,12 +298,14 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 // Обновляем данные на странице без перезагрузки
+                console.log(`Успешное обновление. Новое количество: ${data.quantity}, новая сумма: ${data.subtotal}`);
                 updateCartItemUI(cartId, data.quantity, data.subtotal);
                 updateCartTotals(data.cart_total, data.cart_count);
                 
                 // Показываем уведомление
                 Cart.showNotification('Количество товара обновлено', 'success');
             } else {
+                console.error(`Ошибка обновления: ${data.message}`);
                 Cart.showNotification('Ошибка: ' + data.message, 'error');
             }
         })
@@ -289,22 +314,19 @@ document.addEventListener('DOMContentLoaded', function() {
             Cart.showNotification('Произошла ошибка при обновлении количества товара', 'error');
         })
         .finally(() => {
+            console.log(`Завершение запроса для товара ID: ${cartId}`);
+            
             // Скрываем индикатор загрузки
             showRowLoading(cartId, false);
             
             // Разблокируем кнопки
-            const row = document.getElementById('cart-item-' + cartId);
-            if (row) {
-                const buttons = row.querySelectorAll('button');
-                buttons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.classList.remove('disabled');
-                    btn.classList.remove('btn-active');
-                });
-            }
+            unlockAllItemButtons(cartId);
             
-            // Снимаем флаг запроса
-            delete pendingRequests[cartId];
+            // Снимаем флаг запроса с задержкой, чтобы избежать быстрых повторных кликов
+            setTimeout(() => {
+                delete pendingRequests[cartId];
+                console.log(`Флаг запроса снят для товара ID: ${cartId}`);
+            }, 500);
         });
     }
     
@@ -315,6 +337,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData();
         formData.append('cart_id', cartId);
+        
+        console.log(`Отправка запроса на удаление товара ID: ${cartId}`);
         
         fetch('/ajax/remove_from_cart.php', {
             method: 'POST',
@@ -344,6 +368,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
+                console.log(`Успешное удаление товара ID: ${cartId}`);
+                
                 // Удаляем элемент из DOM с анимацией
                 removeCartItemFromUI(cartId);
                 
@@ -356,6 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Показываем уведомление
                 Cart.showNotification('Товар удален из корзины', 'success');
             } else {
+                console.error(`Ошибка удаления: ${data.message}`);
+                
                 // Разблокируем кнопки в случае ошибки
                 if (button) {
                     button.disabled = false;
@@ -376,11 +404,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .finally(() => {
+            console.log(`Завершение запроса на удаление товара ID: ${cartId}`);
+            
             // Скрываем индикатор загрузки
             showRowLoading(cartId, false);
             
-            // Снимаем флаг запроса
-            delete pendingRequests[cartId];
+            // Снимаем флаг запроса с задержкой
+            setTimeout(() => {
+                delete pendingRequests[cartId];
+                console.log(`Флаг запроса снят для товара ID: ${cartId}`);
+            }, 500);
         });
     }
     
