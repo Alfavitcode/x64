@@ -1,39 +1,137 @@
 /* Стили для страницы оформления заказа */
+:root {
+    --checkout-primary-color: #0d6efd;
+    --checkout-primary-rgb: 13, 110, 253;
+    --checkout-success-color: #198754;
+    --checkout-success-rgb: 25, 135, 84;
+    --checkout-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+    --checkout-border-radius: 20px;
+    --checkout-input-radius: 15px;
+    --checkout-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card {
+    border: none;
+    border-radius: var(--checkout-border-radius);
+    box-shadow: var(--checkout-shadow);
+    overflow: hidden;
+    transition: var(--checkout-transition);
+}
+
+.card:hover {
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: rgba(var(--checkout-primary-rgb), 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--checkout-primary-color);
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #212529;
+    padding-left: 10px;
+    position: relative;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+}
+
+.card-header h5:before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(var(--checkout-primary-rgb), 0.15);
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 0 0 0 5px rgba(var(--checkout-primary-rgb), 0.05);
+}
+
+.order-summary .card-header {
+    background: rgba(var(--checkout-success-rgb), 0.1);
+}
+
+.order-summary .card-header:before {
+    background: var(--checkout-success-color);
+}
+
+.order-summary .card-header h5:before {
+    background-color: rgba(var(--checkout-success-rgb), 0.15);
+    box-shadow: 0 0 0 5px rgba(var(--checkout-success-rgb), 0.05);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
 .order-summary {
     position: sticky;
     top: 20px;
 }
 
 .order-summary-img {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    padding: 5px;
 }
 
 .order-summary-img img {
-    width: 100%;
-    height: 100%;
+    max-width: 90%;
+    max-height: 90%;
     object-fit: contain;
 }
 
-.form-check-label {
-    cursor: pointer;
-    display: block;
-    width: 100%;
-    padding: 10px;
-    border-radius: 4px;
+.form-control {
+    border-radius: var(--checkout-input-radius);
+    border: 2px solid #edf2f7;
+    padding: 0.75rem 1rem;
     transition: all 0.3s ease;
+    background-color: #f8fafc;
+    font-size: 1rem;
 }
 
-.form-check-input:checked + .form-check-label {
-    background-color: rgba(var(--primary-color-rgb), 0.05);
-    border-left: 3px solid var(--primary-color);
+.form-control:focus {
+    border-color: rgba(var(--checkout-primary-rgb), 0.4);
+    box-shadow: 0 0 0 0.25rem rgba(var(--checkout-primary-rgb), 0.1);
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+    opacity: 0.8;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #3d4852;
+    margin-bottom: 0.5rem;
 }
 
 .form-check {
     padding: 0;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .form-check-input {
@@ -42,20 +140,167 @@
     margin-top: 15px;
 }
 
+.form-check-label {
+    width: 100%;
+    padding: 12px;
+    border-radius: 15px;
+    border: 2px solid #edf2f7;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.form-check-input:checked + .form-check-label {
+    background-color: rgba(var(--checkout-primary-rgb), 0.08);
+    border-color: rgba(var(--checkout-primary-rgb), 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(var(--checkout-primary-rgb), 0.1);
+}
+
+.list-group-item {
+    padding: 1rem 1.25rem;
+    background-color: transparent;
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.list-group-item:hover {
+    background-color: rgba(var(--checkout-primary-rgb), 0.02);
+}
+
+.card-footer {
+    background-color: rgba(var(--checkout-primary-rgb), 0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+}
+
+.total-amount {
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
+}
+
+.total-price-wrapper {
+    background-color: rgba(var(--checkout-primary-rgb), 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    display: inline-block;
+    box-shadow: 0 2px 5px rgba(var(--checkout-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--checkout-primary-rgb), 0.1);
+    transition: all 0.3s ease;
+}
+
+.total-price-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--checkout-primary-rgb), 0.15);
+}
+
+.total-price {
+    color: var(--checkout-primary-color);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.item-price-badge {
+    display: inline-block;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 10px;
+    background-color: rgba(var(--checkout-primary-rgb), 0.08);
+    color: var(--checkout-primary-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.item-price-badge:hover {
+    transform: translateY(-2px);
+    background-color: rgba(var(--checkout-primary-rgb), 0.12);
+    box-shadow: 0 3px 6px rgba(var(--checkout-primary-rgb), 0.1);
+}
+
+.delivery-value {
+    font-weight: 500;
+    color: var(--checkout-primary-color);
+}
+
+.btn-primary {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(var(--checkout-primary-rgb), 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(var(--checkout-primary-rgb), 0.3);
+}
+
+.btn-outline-secondary {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+}
+
 .order-success-icon {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background-color: rgba(40, 167, 69, 0.1);
+    background-color: rgba(var(--checkout-success-rgb), 0.1);
+    transition: all 0.3s ease;
+}
+
+.order-success-icon:hover {
+    transform: scale(1.05);
+    background-color: rgba(var(--checkout-success-rgb), 0.15);
+}
+
+.order-success-card .card-header {
+    background: rgba(var(--checkout-success-rgb), 0.15);
+}
+
+.order-success-card .card-header:before {
+    background: var(--checkout-success-color);
+}
+
+.order-success-card .card-header h5:before {
+    background-color: rgba(var(--checkout-success-rgb), 0.2);
+    box-shadow: 0 0 0 5px rgba(var(--checkout-success-rgb), 0.08);
+}
+
+/* Анимация для входа элементов */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Стили для валидации */
+.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }
 
 /* Адаптивные стили */
 @media (max-width: 767px) {
-    .form-check-label .d-flex {
+    .form-check-label {
         flex-direction: column;
         align-items: flex-start !important;
     }
@@ -64,7 +309,394 @@
         margin-top: 5px;
     }
     
+    .card-header, .card-body, .card-footer {
+        padding: 1rem;
+    }
+    
+    .form-control {
+        font-size: 0.95rem;
+    }
+    
     .order-summary {
         position: static;
+        margin-bottom: 2rem;
     }
+    
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-control, .btn {
+        padding: 0.625rem 0.875rem;
+    }
+    
+    .order-summary-img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .list-group-item .d-flex {
+        flex-wrap: wrap;
+    }
+    
+    .list-group-item .text-end {
+        margin-top: 0.5rem;
+        width: 100%;
+        text-align: left !important;
+        margin-left: 70px !important;
+    }
+    
+    .item-price-badge {
+        margin-top: 0.25rem;
+        font-size: 0.95rem;
+    }
+    
+    .total-price {
+        font-size: 1.2rem;
+    }
+    
+    .card-footer {
+        padding: 1rem;
+    }
+    
+    .list-group-item .product-price {
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: flex-start;
+        margin-left: 70px !important;
+    }
+    
+    .product-details h6 {
+        font-size: 0.95rem;
+    }
+    
+    .product-details .badge {
+        font-size: 0.7rem;
+    }
+    
+    .total-price-wrapper {
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .order-summary-img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .list-group-item .text-end {
+        margin-left: 60px !important;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem;
+    }
+    
+    .card-header h5:before {
+        display: none;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .item-price-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .list-group-item .product-price {
+        margin-left: 60px !important;
+    }
+    
+    .product-details h6 {
+        font-size: 0.9rem;
+        max-width: 190px;
+    }
+    
+    .product-details .text-muted {
+        font-size: 0.75rem;
+    }
+    
+    .total-price-wrapper {
+        padding: 0.3rem 0.7rem;
+    }
+    
+    .total-price {
+        font-size: 1.1rem;
+    }
+    
+    .total-amount {
+        font-size: 1rem;
+    }
+}
+
+/* Анимация для смены цены */
+@keyframes priceUpdate {
+    0% { transform: scale(1.1); color: var(--checkout-primary-color); }
+    100% { transform: scale(1); }
+}
+
+.price-update {
+    animation: priceUpdate 0.5s ease-out;
+}
+
+/* Анимация для выбора способа оплаты/доставки */
+@keyframes pulseSelection {
+    0% { background-color: rgba(var(--checkout-primary-rgb), 0.05); }
+    50% { background-color: rgba(var(--checkout-primary-rgb), 0.15); }
+    100% { background-color: rgba(var(--checkout-primary-rgb), 0.07); }
+}
+
+.pulse-animation {
+    animation: pulseSelection 0.5s ease-out;
+}
+
+/* Улучшенная анимация для элементов в сводке заказа */
+.list-group-item {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    border: none;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+.list-group-item:hover {
+    transform: translateX(5px);
+    background-color: rgba(var(--checkout-primary-rgb), 0.05);
+}
+
+/* Стили для полей ввода */
+.form-floating label {
+    padding-left: 1rem;
+}
+
+.form-floating>.form-control {
+    padding: 1.25rem 1rem;
+}
+
+.delivery-cost, .total-amount {
+    padding: 0.5rem 0;
+}
+
+/* Эффект наведения для кнопок */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn:hover:after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* Стили для спиннера загрузки */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+    margin-right: 0.5rem;
+}
+
+/* Плавное появление элементов формы */
+.card {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.col-lg-8 .card:nth-child(1) { animation-delay: 0.1s; }
+.col-lg-8 .card:nth-child(2) { animation-delay: 0.2s; }
+.col-lg-8 .card:nth-child(3) { animation-delay: 0.3s; }
+.col-lg-8 .card:nth-child(4) { animation-delay: 0.4s; }
+.col-lg-4 .card { animation-delay: 0.2s; }
+
+/* Стили для бейджей цены доставки */
+.delivery-price-badge {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    background-color: rgba(var(--checkout-primary-rgb), 0.08);
+    color: var(--checkout-primary-color);
+    transition: all 0.3s ease;
+}
+
+.delivery-price-badge.free {
+    background-color: rgba(var(--checkout-success-rgb), 0.08);
+    color: var(--checkout-success-color);
+}
+
+.form-check-input:checked + .form-check-label .delivery-price-badge {
+    background-color: rgba(var(--checkout-primary-rgb), 0.2);
+    transform: scale(1.05);
+}
+
+.form-check-input:checked + .form-check-label .delivery-price-badge.free {
+    background-color: rgba(var(--checkout-success-rgb), 0.2);
+}
+
+/* Стили для значков платежных систем */
+.payment-icons {
+    margin-top: 0.25rem;
+}
+
+.payment-icons i {
+    font-size: 1.25rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked + .form-check-label .payment-icons i {
+    color: var(--checkout-primary-color);
+    transform: scale(1.1);
+}
+
+/* Улучшенная анимация выбора */
+.form-check-input:checked + .form-check-label i.fas, 
+.form-check-input:checked + .form-check-label i.fab {
+    color: var(--checkout-primary-color);
+    transform: scale(1.1);
+}
+
+/* Эффект наведения на элементы форм */
+.form-check-label:hover .delivery-price-badge {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(var(--checkout-primary-rgb), 0.1);
+}
+
+.form-check-label:hover .payment-icons i {
+    transform: translateY(-2px);
+}
+
+/* Улучшенные стили для успешного оформления заказа */
+.order-success-icon i {
+    font-size: 4rem;
+    color: var(--checkout-success-color);
+}
+
+/* Тонкая линия-разделитель */
+hr {
+    margin: 1rem 0;
+    opacity: 0.1;
+    border-color: var(--checkout-primary-color);
+}
+
+/* Стили для успешного оформления заказа */
+.order-success-card {
+    border-left: 5px solid var(--checkout-success-color);
+    animation: slideIn 0.5s ease-out;
+}
+
+.success-details {
+    background-color: rgba(var(--checkout-success-rgb), 0.05);
+    border-radius: 15px;
+}
+
+.success-detail-item {
+    animation: fadeInRight 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.success-detail-item:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.success-detail-item:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.success-detail-item i {
+    font-size: 1.5rem;
+}
+
+/* Анимации для элементов страницы */
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Применить анимацию появления для карточек */
+.card {
+    opacity: 0;
+    animation: slideIn 0.5s ease-out forwards;
+}
+
+.col-lg-8 .card:nth-child(1) { animation-delay: 0.1s; }
+.col-lg-8 .card:nth-child(2) { animation-delay: 0.2s; }
+.col-lg-8 .card:nth-child(3) { animation-delay: 0.3s; }
+.col-lg-8 .card:nth-child(4) { animation-delay: 0.4s; }
+.col-lg-4 .card { animation-delay: 0.2s; }
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-details {
+    min-width: 0;
+    flex: 1;
+}
+
+.product-details h6 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.product-price {
+    display: flex;
+    align-items: flex-start;
 } 

@@ -425,7 +425,7 @@ if (isset($_GET['order_id']) && !empty($_GET['order_id'])) {
 
 /* Специальные стили для деталей заказа */
 .order-meta, .orders-header {
-    background: linear-gradient(135deg, #051937, #004d7a);
+    background: var(--primary-color);
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 15px !important;
@@ -514,6 +514,25 @@ if (isset($_GET['order_id']) && !empty($_GET['order_id'])) {
     color: var(--primary-color);
 }
 
+/* Стиль для карточек заказов в списке */
+.order-item .order-header {
+    background: var(--primary-color);
+    border-radius: 10px 10px 0 0;
+    padding: 15px;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.order-item .order-header .order-number,
+.order-item .order-header .order-date {
+    color: #ffffff;
+}
+
+.order-item .order-body {
+    padding: 15px;
+}
+
+/* Медиа-запросы для мобильных устройств */
 @media (max-width: 767px) {
     .order-total {
         flex-direction: column;
@@ -528,24 +547,169 @@ if (isset($_GET['order_id']) && !empty($_GET['order_id'])) {
     .order-meta .row {
         margin-bottom: -15px;
     }
+    
+    /* Улучшение отображения заказов на мобильных устройствах */
+    .order-item .order-body {
+        padding: 15px 10px;
+    }
+    
+    .order-item .order-body .d-flex {
+        flex-direction: column;
+    }
+    
+    .order-item .order-body .d-flex > div {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .order-total.text-end {
+        text-align: left !important;
+    }
+    
+    .order-total-price {
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    /* Улучшение отображения информации о доставке и оплате */
+    .order-item .order-body p.mb-0 {
+        margin-bottom: 8px !important;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    
+    /* Улучшение отображения статуса заказа */
+    .order-item .order-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .order-item .order-header .order-status {
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    .badge.rounded-pill {
+        display: inline-block;
+        margin-top: 5px;
+        font-size: 12px;
+        padding: 6px 12px !important;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.4;
+    }
+    
+    /* Улучшение отображения номера заказа и даты */
+    .order-number {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    /* Улучшение отображения карточки заказа */
+    .profile-info-card {
+        margin-bottom: 15px;
+    }
+    
+    /* Увеличение размера шрифта для лучшей читаемости */
+    .order-item .order-body strong {
+        font-size: 15px;
+    }
+    
+    /* Добавляем кнопку "Подробнее" */
+    .btn.btn-sm.btn-outline-primary.rounded-pill {
+        display: inline-block;
+        margin-top: 5px;
+        padding: 8px 16px;
+        font-size: 14px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Улучшение отображения для деталей заказа */
+    .order-item {
+        padding: 0;
+    }
+    
+    /* Улучшение отображения информации о заказе */
+    .profile-header h2.profile-name {
+        font-size: 18px;
+    }
+    
+    /* Улучшение отображения для карточек с деталями заказа */
+    .order-details-card {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    /* Улучшение отображения деталей заказа на странице детального просмотра */
+    .order-meta .row .col-md-4 {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .order-items-list .order-item-card .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    .order-items-list .order-item-card .col-md-8,
+    .order-items-list .order-item-card .col-md-4 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    .order-item-card .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .order-item-card .order-item-image {
+        margin-bottom: 10px;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .order-total-summary {
+        padding: 10px;
+    }
+    
+    .order-total-summary .col-md-8.offset-md-4 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    /* Улучшение отображения кнопки "Назад к заказам" */
+    .profile-header .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-header .d-flex.justify-content-between .btn {
+        margin-top: 10px;
+    }
 }
 
-/* Стиль для карточек заказов в списке */
-.order-item .order-header {
-    background: linear-gradient(135deg, #051937, #004d7a);
-    border-radius: 10px 10px 0 0;
-    padding: 15px;
-    margin-bottom: 0;
-    border-bottom: none;
-}
-
-.order-item .order-header .order-number,
-.order-item .order-header .order-date {
-    color: #ffffff;
-}
-
-.order-item .order-body {
-    padding: 15px;
+/* Стили для очень маленьких экранов */
+@media (max-width: 375px) {
+    .order-item .order-header {
+        padding: 12px 10px;
+    }
+    
+    .order-number {
+        font-size: 14px;
+    }
+    
+    .order-date {
+        font-size: 13px;
+    }
+    
+    .order-item .order-body {
+        padding: 12px 10px;
+    }
+    
+    .order-total-price {
+        font-size: 16px;
+    }
 }
 </style>
 

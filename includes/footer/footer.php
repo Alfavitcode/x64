@@ -20,17 +20,6 @@
                 </div>
                 
                 <div class="col-lg-3 col-md-6">
-                    <h3 class="footer__title h5 mb-3 position-relative">Каталог</h3>
-                    <ul class="footer__menu list-unstyled">
-                        <li class="mb-2"><a href="/catalog/electronics" class="text-decoration-none text-secondary">Электроника</a></li>
-                        <li class="mb-2"><a href="/catalog/fashion" class="text-decoration-none text-secondary">Одежда</a></li>
-                        <li class="mb-2"><a href="/catalog/home" class="text-decoration-none text-secondary">Товары для дома</a></li>
-                        <li class="mb-2"><a href="/catalog/beauty" class="text-decoration-none text-secondary">Красота и здоровье</a></li>
-                        <li class="mb-2"><a href="/catalog/sports" class="text-decoration-none text-secondary">Спорт и отдых</a></li>
-                    </ul>
-                </div>
-                
-                <div class="col-lg-3 col-md-6">
                     <h3 class="footer__title h5 mb-3 position-relative">Покупателям</h3>
                     <ul class="footer__menu list-unstyled">
                         <li class="mb-2"><a href="/how-to-order" class="text-decoration-none text-secondary">Как сделать заказ</a></li>
@@ -77,8 +66,8 @@
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         <div class="footer__links">
-                            <a href="/privacy" class="text-decoration-none text-secondary me-3">Политика конфиденциальности</a>
-                            <a href="/terms" class="text-decoration-none text-secondary">Пользовательское соглашение</a>
+                            <a href="/legal/privacy.php" class="text-decoration-none text-secondary me-3">Политика конфиденциальности</a>
+                            <a href="/legal/terms.php" class="text-decoration-none text-secondary">Пользовательское соглашение</a>
                         </div>
                     </div>
                 </div>

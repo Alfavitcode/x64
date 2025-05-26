@@ -19,520 +19,677 @@ if (!$product) {
 
 // Подключение хедера
 include_once 'includes/header/header.php';
+
+// Подготовка данных для отображения
+$imageUrl = !empty($product['image']) ? $product['image'] : '/img/products/no-image.jpg';
+
+// Проверяем, существует ли файл изображения
+if (!empty($imageUrl) && $imageUrl != '/img/products/no-image.jpg') {
+    $imageFilePath = $_SERVER['DOCUMENT_ROOT'] . $imageUrl;
+    if (!file_exists($imageFilePath)) {
+        $imageUrl = '/img/products/no-image.jpg';
+    }
+}
+
+$shortDescription = mb_substr(strip_tags($product['description']), 0, 150) . (mb_strlen($product['description']) > 150 ? '...' : '');
+$fullDescription = $product['description'];
+$price = number_format($product['price'], 0, '.', ' ');
+$hasDiscount = isset($product['discount']) && $product['discount'] > 0;
+$oldPrice = $hasDiscount ? number_format($product['price'] * (100 / (100 - $product['discount'])), 0, '.', ' ') : null;
 ?>
 
-<!-- Заголовок страницы -->
-<section class="page-header py-4">
-    <div class="container">
-        <h1 class="page-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Главная</a></li>
-                <li class="breadcrumb-item"><a href="/catalog.php">Каталог</a></li>
-                <li class="breadcrumb-item"><a href="/catalog.php?category=<?php echo urlencode($product['category']); ?>"><?php echo htmlspecialchars($product['category']); ?></a></li>
-                <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($product['name']); ?></li>
-            </ol>
-        </nav>
-    </div>
-</section>
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Основной контейнер товара */
+    .product-container {
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Заголовок товара */
+    .product-header {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .product-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #212529;
+    }
+    
+    .product-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .product-sku {
+        white-space: nowrap;
+    }
+    
+    .product-availability {
+        color: #34c759;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .product-availability.out-of-stock {
+        color: #ff3b30;
+    }
+    
+    /* Основное содержимое */
+    .product-content {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        background-color: #fff;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Изображение товара */
+    .product-image-container {
+        flex: 0 0 50%;
+        min-width: 300px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff;
+        position: relative;
+        text-align: center;
+        min-height: 300px;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+    }
+    
+    .product-image {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    /* Добавляем медиа-запрос для мобильных устройств */
+    @media (max-width: 768px) {
+        .product-content {
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+        
+        .product-image-container {
+            flex: 1 0 100%;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+            min-height: auto;
+            background-color: #fff;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            max-height: none;
+            margin: 0 auto;
+            padding: 0;
+            object-fit: cover;
+        }
+        
+        .product-info-container {
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+            padding: 15px;
+        }
+        
+        .product-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .product-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .quantity-control {
+            width: 100%;
+        }
+        
+        .add-to-cart-btn {
+            width: 100%;
+        }
+        
+        .specs-item {
+            flex-direction: column;
+        }
+        
+        .specs-name, .specs-value {
+            flex: 0 0 100%;
+        }
+    }
+    
+    /* Правая колонка */
+    .product-info-container {
+        flex: 1;
+        min-width: 300px;
+        max-width: 50%;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    /* Блок с ценой и добавлением в корзину */
+    .product-purchase-block {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Отдельный стиль для контейнера кнопки, чтобы избежать проблем с видимостью */
+    .cart-button-container {
+        display: block;
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .product-price-block {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .product-price {
+        font-size: 28px;
+        font-weight: 700;
+        color: #212529;
+    }
+    
+    .product-old-price {
+        font-size: 16px;
+        color: #6c757d;
+        text-decoration: line-through;
+        margin-left: 10px;
+    }
+    
+    .product-discount {
+        background-color: #ff3b30;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+    
+    .product-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        width: 100%;
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        overflow: hidden;
+        max-width: 130px;
+    }
+    
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: #f8f9fa;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .quantity-btn:hover {
+        background-color: #e9ecef;
+    }
+    
+    .quantity-input {
+        width: 50px;
+        height: 40px;
+        border: none;
+        border-left: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        text-align: center;
+        font-size: 16px;
+    }
+    
+    .add-to-cart-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0 20px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 200px;
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+        opacity: 1;
+        visibility: visible;
+        width: 100%;
+    }
+    
+    .add-to-cart-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(13, 110, 253, 0.3);
+    }
+    
+    .add-to-cart-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    }
+    
+    .add-to-cart-btn.disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    
+    .cart-icon {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+    
+    /* Блок с описанием */
+    .product-description-block {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    
+    .product-description-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #212529;
+        position: relative;
+        padding-left: 15px;
+    }
+    
+    .product-description-title:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 18px;
+        background-color: #0d6efd;
+        border-radius: 3px;
+    }
+    
+    .product-description-content {
+        color: #495057;
+        line-height: 1.6;
+    }
+    
+    /* Вкладки */
+    .product-tabs {
+        margin-top: 20px;
+        padding: 0 20px 20px;
+    }
+    
+    .nav-tabs {
+        border: none;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: #495057;
+        padding: 10px 20px;
+        font-weight: 500;
+        border-radius: 30px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #fff;
+        background-color: #0d6efd;
+    }
+    
+    .nav-tabs .nav-link:hover:not(.active) {
+        background-color: #e9ecef;
+    }
+    
+    .tab-content {
+        padding: 0;
+    }
+    
+    /* Характеристики */
+    .specs-card {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .specs-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .specs-item {
+        display: flex;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .specs-item:last-child {
+        border-bottom: none;
+    }
+    
+    .specs-name {
+        flex: 0 0 30%;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .specs-value {
+        flex: 0 0 70%;
+        padding: 12px 15px;
+        color: #212529;
+    }
+    
+    /* Доставка */
+    .delivery-method {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .delivery-method:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .delivery-icon {
+        flex: 0 0 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9f5ff;
+        border-radius: 50%;
+        color: #0d6efd;
+        font-size: 20px;
+        margin-right: 15px;
+    }
+    
+    .delivery-content {
+        flex: 1;
+    }
+    
+    .delivery-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .delivery-description {
+        color: #6c757d;
+        font-size: 14px;
+    }
+</style>
 
-<!-- Страница товара -->
-<section class="product-page section py-5">
-    <div class="container">
-        <div class="row">
-            <!-- Галерея товара -->
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="product-gallery">
-                    <div class="product-main-image position-relative">
-                        <?php
-                        // Метки товара
-                        if ($product['is_new'] || $product['is_bestseller'] || $product['discount'] > 0) {
-                            echo '<div class="product-badges">';
-                            if ($product['is_new']) {
-                                echo '<span class="badge badge-new">Новинка</span>';
-                            }
-                            if ($product['is_bestseller']) {
-                                echo '<span class="badge badge-bestseller">Хит</span>';
-                            }
-                            if ($product['discount'] > 0) {
-                                echo '<span class="badge badge-sale">-' . $product['discount'] . '%</span>';
-                            }
-                            echo '</div>';
-                        }
-                        
-                        // Изображение товара
-                        $imageUrl = !empty($product['image']) ? $product['image'] : '/img/products/no-image.jpg';
-                        ?>
-                        <img src="<?php echo $imageUrl; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" id="main-product-image" class="img-fluid rounded">
-                    </div>
-                    
-                    <div class="product-thumbnails d-flex mt-3">
-                        <div class="thumbnail active me-2" data-image="<?php echo $imageUrl; ?>">
-                            <img src="<?php echo $imageUrl; ?>" alt="Превью 1" class="img-fluid rounded">
-                        </div>
-                        <?php
-                        // Здесь можно вывести дополнительные изображения товара, если они есть в базе
-                        // Пока что выводим заглушки
-                        for ($i = 1; $i <= 3; $i++) {
-                            echo '<div class="thumbnail me-2" data-image="/img/products/placeholder-' . $i . '.jpg">
-                                <img src="/img/products/placeholder-' . $i . '.jpg" alt="Превью ' . ($i + 1) . '" class="img-fluid rounded">
-                            </div>';
-                        }
-                        ?>
-                    </div>
-                </div>
+<div class="container">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Главная</a></li>
+            <li class="breadcrumb-item"><a href="/catalog.php" class="text-decoration-none">Каталог</a></li>
+            <li class="breadcrumb-item"><a href="/catalog.php?category=<?php echo urlencode($product['category']); ?>" class="text-decoration-none"><?php echo htmlspecialchars($product['category']); ?></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($product['name']); ?></li>
+        </ol>
+    </nav>
+
+    <!-- Основной контейнер товара -->
+    <div class="product-container">
+        <!-- Заголовок с названием товара, артикулом и наличием -->
+        <div class="product-header">
+            <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
+            <div class="product-meta">
+                <span class="product-sku">Артикул: <?php echo htmlspecialchars($product['sku'] ?? 'SKU-' . $product['id']); ?></span>
+                <?php if ($product['stock'] > 0): ?>
+                    <span class="product-availability">
+                        <i class="fas fa-check-circle"></i> В наличии
+                    </span>
+                <?php else: ?>
+                    <span class="product-availability out-of-stock">
+                        <i class="fas fa-times-circle"></i> Нет в наличии
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Основное содержимое: изображение и информация -->
+        <div class="product-content">
+            <!-- Изображение товара -->
+            <div style="width: 100%; height: 400px; display: flex; justify-content: center; align-items: center; background: white; padding: 20px;">
+                <!-- Основное изображение товара -->
+                <img 
+                    src="<?php echo $imageUrl; ?>" 
+                    alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                    style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;"
+                    onerror="this.onerror=null; this.src='/img/products/no-image.jpg';"
+                >
             </div>
             
-            <!-- Информация о товаре -->
-            <div class="col-lg-6">
-                <div class="product-info">
-                    <h1 class="product-title d-lg-none"><?php echo htmlspecialchars($product['name']); ?></h1>
-                    
-                    <div class="product-meta d-flex flex-wrap align-items-center mb-3">
-                        <div class="product-rating me-3">
-                            <?php
-                            // Формируем рейтинг со звездами
-                            $fullStars = floor($product['rating']);
-                            $halfStar = ($product['rating'] - $fullStars) >= 0.5;
-                            
-                            for ($i = 1; $i <= 5; $i++) {
-                                if ($i <= $fullStars) {
-                                    echo '<i class="fas fa-star"></i>';
-                                } elseif ($i == $fullStars + 1 && $halfStar) {
-                                    echo '<i class="fas fa-star-half-alt"></i>';
-                                } else {
-                                    echo '<i class="far fa-star"></i>';
-                                }
-                            }
-                            ?>
-                            <span class="rating-value"><?php echo number_format($product['rating'], 1); ?></span>
-                        </div>
-                        
-                        <a href="#reviews" class="reviews-link mb-2 mb-md-0"><?php echo $product['reviews_count']; ?> отзывов</a>
-                        
-                        <div class="product-sku ms-auto">
-                            Артикул: <span><?php echo htmlspecialchars($product['sku'] ?? 'SKU-' . $product['id']); ?></span>
-                        </div>
-                    </div>
-                    
-                    <div class="product-price-block card p-3 mb-4">
-                        <div class="product-price d-flex align-items-center">
-                            <span class="current-price fs-3 fw-bold me-2"><?php echo number_format($product['price'], 0, '.', ' '); ?> ₽</span>
-                            <?php
-                            // Выводим старую цену, если есть скидка
-                            if ($product['discount'] > 0) {
-                                $oldPrice = round($product['price'] * (100 / (100 - $product['discount'])));
-                                echo '<span class="old-price text-muted text-decoration-line-through me-2">' . number_format($oldPrice, 0, '.', ' ') . ' ₽</span>';
-                                echo '<span class="discount-badge bg-danger text-white px-2 py-1 rounded-pill">-' . $product['discount'] . '%</span>';
-                            }
-                            ?>
-                        </div>
-                        
-                        <div class="product-availability mt-2">
-                            <?php if ($product['stock'] > 0): ?>
-                                <span class="in-stock text-success"><i class="fas fa-check-circle"></i> В наличии</span>
-                            <?php else: ?>
-                                <span class="out-of-stock text-danger"><i class="fas fa-times-circle"></i> Нет в наличии</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    
-                    <div class="product-description mb-4">
-                        <h5 class="mb-2">Краткое описание</h5>
-                        <div class="card p-3">
-                            <?php echo nl2br(htmlspecialchars($product['description'])); ?>
-                        </div>
-                    </div>
-                    
-                    <div class="product-actions d-flex mb-4 flex-wrap">
-                        <?php if ($product['stock'] > 0): ?>
-                        <div class="quantity-selector input-group me-3 mb-2 mb-md-0" style="max-width: 140px;">
-                            <button class="btn btn-outline-secondary quantity-btn minus"><i class="fas fa-minus"></i></button>
-                            <input type="number" min="1" value="1" class="form-control text-center quantity-input" id="product-quantity">
-                            <button class="btn btn-outline-secondary quantity-btn plus"><i class="fas fa-plus"></i></button>
-                        </div>
-                        
-                        <button class="btn btn-primary product-add-to-cart" data-product-id="<?php echo $product['id']; ?>" id="add-to-cart-button">
-                            <i class="fas fa-shopping-cart me-2"></i> Добавить в корзину
-                        </button>
-                        <?php else: ?>
-                        <div class="alert alert-danger w-100">
-                            <i class="fas fa-exclamation-circle me-2"></i> Товар отсутствует в наличии
-                        </div>
-                        
-                        <button class="btn btn-secondary btn-add-to-cart disabled" disabled>
-                            <i class="fas fa-shopping-cart"></i> Нет в наличии
-                        </button>
+            <!-- Правая колонка с информацией -->
+            <div class="product-info-container">
+                <!-- Блок с ценой и добавлением в корзину -->
+                <div class="product-purchase-block">
+                    <div class="product-price-block">
+                        <span class="product-price"><?php echo $price; ?> ₽</span>
+                        <?php if ($hasDiscount): ?>
+                            <span class="product-old-price"><?php echo $oldPrice; ?> ₽</span>
+                            <span class="product-discount">-<?php echo $product['discount']; ?>%</span>
                         <?php endif; ?>
                     </div>
                     
-                    <div class="product-extra-actions d-flex flex-wrap mb-4">
-                        <button class="btn btn-outline-secondary btn-wishlist me-2 mb-2" data-product-id="<?php echo $product['id']; ?>">
-                            <i class="far fa-heart"></i> В избранное
-                        </button>
-                        <button class="btn btn-outline-secondary btn-compare mb-2" data-product-id="<?php echo $product['id']; ?>">
-                            <i class="fas fa-exchange-alt"></i> Сравнить
-                        </button>
-                    </div>
-                    
-                    <div class="product-share">
-                        <span class="share-label d-block mb-2">Поделиться:</span>
-                        <div class="share-buttons">
-                            <a href="#" class="share-btn btn btn-outline-primary btn-sm rounded-circle me-1"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="share-btn btn btn-outline-info btn-sm rounded-circle me-1"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="share-btn btn btn-outline-primary btn-sm rounded-circle me-1"><i class="fab fa-vk"></i></a>
-                            <a href="#" class="share-btn btn btn-outline-info btn-sm rounded-circle me-1"><i class="fab fa-telegram-plane"></i></a>
+                    <?php if ($product['stock'] > 0): ?>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn minus">−</button>
+                            <input type="number" min="1" value="1" class="quantity-input" id="product-quantity">
+                            <button type="button" class="quantity-btn plus">+</button>
                         </div>
+                        
+                        <div class="cart-button-container">
+                            <button type="button" class="add-to-cart-btn product-add-to-cart" data-product-id="<?php echo $product['id']; ?>">
+                                <span class="cart-icon"><i class="fas fa-shopping-cart"></i></span> Добавить в корзину
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <div class="cart-button-container">
+                            <button type="button" class="add-to-cart-btn disabled" disabled>
+                                <span class="cart-icon"><i class="fas fa-times-circle"></i></span> Нет в наличии
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Блок с описанием -->
+                <div class="product-description-block">
+                    <h2 class="product-description-title">Описание</h2>
+                    <div class="product-description-content">
+                        <?php echo nl2br(htmlspecialchars($fullDescription)); ?>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Вкладки с дополнительной информацией -->
-        <div class="product-tabs mt-5">
+        <div class="product-tabs">
             <ul class="nav nav-tabs" id="productTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Описание</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab" aria-controls="specifications" aria-selected="false">Характеристики</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Отзывы (<?php echo $product['reviews_count']; ?>)</button>
+                    <button class="nav-link active" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab" aria-controls="specifications" aria-selected="true">Характеристики</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery" type="button" role="tab" aria-controls="delivery" aria-selected="false">Доставка и оплата</button>
                 </li>
             </ul>
-            
-            <div class="tab-content p-4 border border-top-0 rounded-bottom" id="productTabsContent">
-                <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                    <div class="product-full-description">
-                        <h3>Подробное описание</h3>
-                        <p><?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
-                    </div>
-                </div>
-                
-                <div class="tab-pane fade" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
-                    <div class="product-specifications">
-                        <h3>Технические характеристики</h3>
-                        <table class="table table-striped">
-                            <tbody>
-                                <?php
-                                // Здесь в реальном проекте будут выводиться характеристики из БД
-                                // Пока что выводим заглушки
-                                $specs = [
-                                    'Бренд' => 'x64',
-                                    'Модель' => $product['name'],
-                                    'Гарантия' => '12 месяцев',
-                                    'Страна производства' => 'Россия',
-                                    'Год выпуска' => '2023'
-                                ];
-                                
-                                foreach ($specs as $name => $value) {
-                                    echo '<tr>
-                                        <td class="spec-name">' . htmlspecialchars($name) . '</td>
-                                        <td class="spec-value">' . htmlspecialchars($value) . '</td>
-                                    </tr>';
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                    <div class="product-reviews">
-                        <h3>Отзывы покупателей</h3>
-                        
-                        <?php if ($product['reviews_count'] > 0): ?>
-                            <div class="reviews-summary">
-                                <div class="reviews-average">
-                                    <div class="average-rating"><?php echo number_format($product['rating'], 1); ?></div>
-                                    <div class="average-stars">
-                                        <?php
-                                        // Выводим звезды рейтинга
-                                        $fullStars = floor($product['rating']);
-                                        $halfStar = ($product['rating'] - $fullStars) >= 0.5;
-                                        
-                                        for ($i = 1; $i <= 5; $i++) {
-                                            if ($i <= $fullStars) {
-                                                echo '<i class="fas fa-star"></i>';
-                                            } elseif ($i == $fullStars + 1 && $halfStar) {
-                                                echo '<i class="fas fa-star-half-alt"></i>';
-                                            } else {
-                                                echo '<i class="far fa-star"></i>';
-                                            }
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="reviews-count"><?php echo $product['reviews_count']; ?> отзывов</div>
-                                </div>
-                                
-                                <div class="review-bars">
-                                    <?php
-                                    // Здесь в реальном проекте будет статистика по звездам
-                                    // Пока что выводим заглушки
-                                    $reviewStats = [
-                                        5 => rand(50, 80),
-                                        4 => rand(10, 30),
-                                        3 => rand(5, 15),
-                                        2 => rand(0, 5),
-                                        1 => rand(0, 3)
-                                    ];
-                                    
-                                    for ($i = 5; $i >= 1; $i--) {
-                                        $percent = $reviewStats[$i];
-                                        echo '<div class="review-bar">
-                                            <div class="stars">' . $i . ' <i class="fas fa-star"></i></div>
-                                            <div class="bar">
-                                                <div class="bar-fill" style="width: ' . $percent . '%;"></div>
-                                            </div>
-                                            <div class="percent">' . $percent . '%</div>
-                                        </div>';
-                                    }
-                                    ?>
-                                </div>
-                            </div>
-                            
-                            <!-- Список отзывов -->
-                            <div class="reviews-list">
-                                <?php
-                                // Здесь в реальном проекте будут выводиться отзывы из БД
-                                // Пока что выводим заглушки
-                                $reviewsCount = min(3, $product['reviews_count']);
-                                for ($i = 0; $i < $reviewsCount; $i++):
-                                    $rating = rand(3, 5);
-                                ?>
-                                <div class="review-item">
-                                    <div class="review-header">
-                                        <div class="reviewer-info">
-                                            <div class="reviewer-avatar">
-                                                <img src="/img/avatar-placeholder.jpg" alt="Аватар">
-                                            </div>
-                                            <div class="reviewer-name">Пользователь <?php echo $i + 1; ?></div>
-                                        </div>
-                                        <div class="review-date">
-                                            <?php echo date('d.m.Y', strtotime('-' . rand(1, 30) . ' days')); ?>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="review-rating">
-                                        <?php
-                                        for ($j = 1; $j <= 5; $j++) {
-                                            if ($j <= $rating) {
-                                                echo '<i class="fas fa-star"></i>';
-                                            } else {
-                                                echo '<i class="far fa-star"></i>';
-                                            }
-                                        }
-                                        ?>
-                                    </div>
-                                    
-                                    <div class="review-content">
-                                        <p>Отличный товар! Полностью соответствует описанию. Быстрая доставка и хорошее качество. Рекомендую к покупке.</p>
-                                    </div>
-                                </div>
-                                <?php endfor; ?>
-                            </div>
-                            
-                            <?php if ($product['reviews_count'] > 3): ?>
-                                <div class="reviews-more">
-                                    <button class="btn btn-outline load-more-reviews">Показать еще отзывы</button>
-                                </div>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <div class="no-reviews">
-                                <p>У данного товара пока нет отзывов.</p>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- Форма добавления отзыва -->
-                        <div class="add-review">
-                            <h4>Оставить отзыв</h4>
-                            <form class="review-form">
-                                <div class="form-group">
-                                    <label>Ваша оценка:</label>
-                                    <div class="rating-select">
-                                        <?php for ($i = 5; $i >= 1; $i--): ?>
-                                            <input type="radio" name="rating" id="rating-<?php echo $i; ?>" value="<?php echo $i; ?>" <?php echo $i == 5 ? 'checked' : ''; ?>>
-                                            <label for="rating-<?php echo $i; ?>"><i class="fas fa-star"></i></label>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="review-name">Ваше имя:</label>
-                                    <input type="text" id="review-name" name="name" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="review-email">E-mail:</label>
-                                    <input type="email" id="review-email" name="email" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="review-text">Отзыв:</label>
-                                    <textarea id="review-text" name="text" rows="5" required></textarea>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary">Отправить отзыв</button>
-                            </form>
+            <div class="tab-content" id="productTabsContent">
+                <div class="tab-pane fade show active" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
+                    <div class="specs-card">
+                        <div class="specs-item">
+                            <div class="specs-name">Бренд</div>
+                            <div class="specs-value">x64</div>
+                        </div>
+                        <div class="specs-item">
+                            <div class="specs-name">Модель</div>
+                            <div class="specs-value"><?php echo htmlspecialchars($product['name']); ?></div>
+                        </div>
+                        <div class="specs-item">
+                            <div class="specs-name">Артикул</div>
+                            <div class="specs-value"><?php echo htmlspecialchars($product['sku'] ?? 'SKU-' . $product['id']); ?></div>
+                        </div>
+                        <div class="specs-item">
+                            <div class="specs-name">Категория</div>
+                            <div class="specs-value"><?php echo htmlspecialchars($product['category']); ?></div>
+                        </div>
+                        <div class="specs-item">
+                            <div class="specs-name">Гарантия</div>
+                            <div class="specs-value">12 месяцев</div>
                         </div>
                     </div>
                 </div>
-                
                 <div class="tab-pane fade" id="delivery" role="tabpanel" aria-labelledby="delivery-tab">
-                    <div class="delivery-info">
-                        <h3>Доставка и оплата</h3>
-                        
-                        <div class="delivery-methods">
-                            <h4>Способы доставки:</h4>
-                            <ul>
-                                <li>
-                                    <div class="delivery-icon"><i class="fas fa-truck"></i></div>
-                                    <div class="delivery-details">
-                                        <h5>Курьерская доставка</h5>
-                                        <p>Доставка в течение 1-3 дней. Стоимость: от 300 ₽.</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="delivery-icon"><i class="fas fa-store-alt"></i></div>
-                                    <div class="delivery-details">
-                                        <h5>Самовывоз из магазина</h5>
-                                        <p>Бесплатно. Срок: 1-2 дня.</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="delivery-icon"><i class="fas fa-box"></i></div>
-                                    <div class="delivery-details">
-                                        <h5>Пункты выдачи</h5>
-                                        <p>Доставка в течение 2-5 дней. Стоимость: от 200 ₽.</p>
-                                    </div>
-                                </li>
-                            </ul>
+                    <div class="delivery-method">
+                        <div class="delivery-icon">
+                            <i class="fas fa-truck"></i>
                         </div>
-                        
-                        <div class="payment-methods">
-                            <h4>Способы оплаты:</h4>
-                            <ul>
-                                <li>
-                                    <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
-                                    <div class="payment-details">
-                                        <h5>Банковской картой на сайте</h5>
-                                        <p>Visa, MasterCard, МИР</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="payment-icon"><i class="fas fa-money-bill-wave"></i></div>
-                                    <div class="payment-details">
-                                        <h5>Наличными при получении</h5>
-                                        <p>Оплата курьеру или в пункте выдачи</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="payment-icon"><i class="fas fa-wallet"></i></div>
-                                    <div class="payment-details">
-                                        <h5>Электронные кошельки</h5>
-                                        <p>ЮMoney, WebMoney, QIWI</p>
-                                    </div>
-                                </li>
-                            </ul>
+                        <div class="delivery-content">
+                            <h4 class="delivery-title">Курьерская доставка</h4>
+                            <p class="delivery-description">Доставка в течение 1-3 дней. Стоимость: от 300 ₽.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="delivery-method">
+                        <div class="delivery-icon">
+                            <i class="fas fa-store-alt"></i>
+                        </div>
+                        <div class="delivery-content">
+                            <h4 class="delivery-title">Самовывоз из магазина</h4>
+                            <p class="delivery-description">Бесплатно. Срок: 1-2 дня.</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mt-4 mb-3">Способы оплаты:</h4>
+                    
+                    <div class="delivery-method">
+                        <div class="delivery-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="delivery-content">
+                            <h4 class="delivery-title">Банковской картой на сайте</h4>
+                            <p class="delivery-description">Visa, MasterCard, МИР</p>
+                        </div>
+                    </div>
+                    
+                    <div class="delivery-method">
+                        <div class="delivery-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="delivery-content">
+                            <h4 class="delivery-title">Наличными при получении</h4>
+                            <p class="delivery-description">Оплата курьеру или в пункте выдачи</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
-<!-- Похожие товары -->
-<section class="related-products section">
-    <div class="container">
-        <h2 class="section-title">Похожие товары</h2>
-        
-        <div class="products-slider">
-            <?php
-            // Здесь в реальном проекте будем выводить товары из той же категории
-            // Пока что выводим заглушки
-            for ($i = 0; $i < 4; $i++):
-                $isNew = rand(0, 1);
-                $isBestseller = rand(0, 1);
-                $hasDiscount = rand(0, 1);
-                $discount = $hasDiscount ? rand(10, 30) : 0;
-                
-                $price = rand(1000, 50000);
-                $oldPrice = $hasDiscount ? round($price * (100 / (100 - $discount))) : 0;
-                
-                $rating = rand(30, 50) / 10;
-                $reviews = rand(1, 50);
-            ?>
-            <div class="product-card">
-                <div class="product-badges">
-                    <?php if ($isNew): ?>
-                        <span class="badge badge-new">Новинка</span>
-                    <?php endif; ?>
-                    <?php if ($isBestseller): ?>
-                        <span class="badge badge-bestseller">Хит</span>
-                    <?php endif; ?>
-                    <?php if ($hasDiscount): ?>
-                        <span class="badge badge-sale">-<?php echo $discount; ?>%</span>
-                    <?php endif; ?>
-                </div>
-                <div class="product-image">
-                    <img src="/img/products/placeholder-<?php echo $i + 1; ?>.jpg" alt="Товар <?php echo $i + 1; ?>">
-                    <div class="product-actions">
-                        <button class="action-btn wishlist-btn"><i class="far fa-heart"></i></button>
-                        <button class="action-btn compare-btn"><i class="fas fa-exchange-alt"></i></button>
-                        <button class="action-btn quickview-btn"><i class="far fa-eye"></i></button>
-                    </div>
-                </div>
-                <div class="product-info">
-                    <div class="product-category"><?php echo $product['category']; ?></div>
-                    <h3 class="product-title"><a href="/product.php?id=<?php echo $i + 1; ?>">Похожий товар <?php echo $i + 1; ?></a></h3>
-                    <div class="product-rating">
-                        <?php
-                        // Выводим звезды рейтинга
-                        $fullStars = floor($rating);
-                        $halfStar = ($rating - $fullStars) >= 0.5;
-                        
-                        for ($j = 1; $j <= 5; $j++) {
-                            if ($j <= $fullStars) {
-                                echo '<i class="fas fa-star"></i>';
-                            } elseif ($j == $fullStars + 1 && $halfStar) {
-                                echo '<i class="fas fa-star-half-alt"></i>';
-                            } else {
-                                echo '<i class="far fa-star"></i>';
-                            }
-                        }
-                        ?>
-                        <span>(<?php echo $reviews; ?>)</span>
-                    </div>
-                    <div class="product-price">
-                        <span class="current-price"><?php echo number_format($price, 0, '.', ' '); ?> ₽</span>
-                        <?php if ($hasDiscount): ?>
-                            <span class="old-price"><?php echo number_format($oldPrice, 0, '.', ' '); ?> ₽</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <button class="btn btn-add-to-cart"><i class="fas fa-shopping-cart"></i> В корзину</button>
-            </div>
-            <?php endfor; ?>
-        </div>
-    </div>
-</section>
-
-<!-- Скрипт для работы с количеством товара -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Инициализация скриптов на странице товара');
+    // Проверка загрузки изображения товара
+    const productImage = document.querySelector('.product-image');
+    if (productImage) {
+        // Если изображение уже загружено или есть в кеше
+        if (productImage.complete) {
+            console.log('Изображение уже загружено');
+            if (productImage.naturalWidth === 0) {
+                console.log('Изображение не загрузилось корректно');
+                productImage.src = '/img/products/no-image.jpg';
+            }
+        } else {
+            // Если изображение еще загружается
+            productImage.addEventListener('load', function() {
+                console.log('Изображение успешно загружено');
+            });
+            
+            productImage.addEventListener('error', function() {
+                console.log('Ошибка загрузки изображения');
+                this.src = '/img/products/no-image.jpg';
+            });
+        }
+    }
     
+    // Обработчики для кнопок количества товара
     const minusBtn = document.querySelector('.quantity-btn.minus');
     const plusBtn = document.querySelector('.quantity-btn.plus');
     const quantityInput = document.getElementById('product-quantity');
     
     if (minusBtn && plusBtn && quantityInput) {
-        // Обработчик для кнопки уменьшения количества
         minusBtn.addEventListener('click', function() {
             let currentValue = parseInt(quantityInput.value);
             if (currentValue > 1) {
@@ -540,13 +697,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Обработчик для кнопки увеличения количества
         plusBtn.addEventListener('click', function() {
             let currentValue = parseInt(quantityInput.value);
             quantityInput.value = currentValue + 1;
         });
         
-        // Проверка введенного значения
         quantityInput.addEventListener('change', function() {
             let currentValue = parseInt(quantityInput.value);
             if (isNaN(currentValue) || currentValue < 1) {
@@ -554,6 +709,113 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Обработчик для добавления в корзину
+    const addToCartButtons = document.querySelectorAll('.product-add-to-cart');
+    
+    addToCartButtons.forEach(button => {
+        // Убедимся, что кнопка видна
+        button.style.opacity = '1';
+        button.style.visibility = 'visible';
+        
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            
+            const productId = this.getAttribute('data-product-id');
+            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+            
+            // Проверяем, что количество корректное
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Пожалуйста, укажите корректное количество товара');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Добавляем...';
+            this.disabled = true;
+            
+            // AJAX запрос для добавления товара в корзину
+            fetch('/ajax/add_to_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'product_id=' + productId + '&quantity=' + quantity
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Восстанавливаем кнопку
+                this.disabled = false;
+                
+                if (data.success) {
+                    // Обновляем счетчик товаров в корзине
+                    const cartCounter = document.querySelector('.cart-counter');
+                    if (cartCounter) {
+                        cartCounter.textContent = data.cart_count || 0;
+                        
+                        // Анимация счетчика корзины
+                        cartCounter.classList.add('cart-counter-animate');
+                        setTimeout(() => {
+                            cartCounter.classList.remove('cart-counter-animate');
+                        }, 500);
+                    }
+                    
+                    // Показываем уведомление об успешном добавлении
+                    this.innerHTML = '<i class="fas fa-check"></i> Добавлено';
+                    this.style.backgroundColor = '#34c759';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.style.backgroundColor = '';
+                    }, 2000);
+                } else {
+                    // Показываем сообщение об ошибке
+                    this.innerHTML = originalText;
+                    alert(data.message || 'Произошла ошибка при добавлении товара в корзину.');
+                }
+            })
+            .catch(error => {
+                // Восстанавливаем кнопку в случае ошибки
+                this.disabled = false;
+                this.innerHTML = originalText;
+                
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при добавлении товара в корзину.');
+            });
+        });
+    });
+    
+    // Добавляем стили для анимации счетчика корзины
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes cartCounterPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .cart-counter-animate {
+            animation: cartCounterPulse 0.5s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Анимация при наведении на карточки характеристик
+    const specsCards = document.querySelectorAll('.specs-card');
+    specsCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
 });
 </script>
 

@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Получаем данные из формы
     $login = trim($_POST["login"]);
     $password = $_POST["password"];
+    $remember = isset($_POST["remember"]) ? true : false;
     
     // Проверка на пустые поля
     if (empty($login) || empty($password)) {
@@ -31,6 +32,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['user_phone'] = $result['user_phone'];
         $_SESSION['user_login'] = $result['user_login'];
         $_SESSION['user_role'] = $result['user_role'];
+        
+        // Если пользователь выбрал "Запомнить меня", создаем токен и устанавливаем куку
+        if ($remember) {
+            $token = generateRememberToken($result['user_id']);
+            if (!empty($token)) {
+                // Устанавливаем куку на 30 дней
+                setcookie('remember_token', $token, time() + 30 * 24 * 60 * 60, '/', '', false, true);
+            }
+        }
         
         // Отправляем уведомление через Telegram
         $user_id = $result['user_id'];

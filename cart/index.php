@@ -92,9 +92,9 @@ $cart_is_empty = empty($cart_items);
                             <span>Итоговая сумма:</span>
                             <span class="fw-bold fs-5" id="cart-total-sum"><?php echo number_format($total_sum, 0, '.', ' '); ?> ₽</span>
                         </div>
-                        <button id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>
+                        <a href="/checkout.php" id="checkout-button" class="btn btn-primary w-100 mb-2 rounded-pill" <?php if ($total_count == 0) echo 'disabled'; ?>>
                             <i class="fas fa-check-circle me-2"></i>Оформить заказ
-                        </button>
+                        </a>
                         <a href="/catalog.php" class="btn btn-outline-secondary w-100 rounded-pill">
                             <i class="fas fa-shopping-bag me-2"></i>Продолжить покупки
                         </a>

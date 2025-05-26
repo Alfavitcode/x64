@@ -53,21 +53,6 @@ include_once 'includes/header/header.php';
                             $oldPriceHtml = '<span class="old-price">' . number_format($oldPrice, 0, '.', ' ') . ' ₽</span>';
                         }
 
-                        // Формируем рейтинг со звездами
-                        $ratingHtml = '';
-                        $fullStars = floor($product['rating']);
-                        $halfStar = ($product['rating'] - $fullStars) >= 0.5;
-                        
-                        for ($i = 1; $i <= 5; $i++) {
-                            if ($i <= $fullStars) {
-                                $ratingHtml .= '<i class="fas fa-star"></i>';
-                            } elseif ($i == $fullStars + 1 && $halfStar) {
-                                $ratingHtml .= '<i class="fas fa-star-half-alt"></i>';
-                            } else {
-                                $ratingHtml .= '<i class="far fa-star"></i>';
-                            }
-                        }
-
                         // Формируем изображение товара
                         $imageUrl = !empty($product['image']) ? $product['image'] : '/img/products/no-image.jpg';
                     ?>
@@ -91,10 +76,6 @@ include_once 'includes/header/header.php';
                         <div class="product-info">
                             <div class="product-category"><?php echo htmlspecialchars($product['category']); ?></div>
                             <h3 class="product-title"><a href="/product.php?id=<?php echo $product['id']; ?>"><?php echo htmlspecialchars($product['name']); ?></a></h3>
-                            <div class="product-rating">
-                                <?php echo $ratingHtml; ?>
-                                <span>(<?php echo $product['reviews_count']; ?>)</span>
-                            </div>
                             <div class="product-price">
                                 <span class="current-price"><?php echo number_format($product['price'], 0, '.', ' '); ?> ₽</span>
                                 <?php echo $oldPriceHtml; ?>

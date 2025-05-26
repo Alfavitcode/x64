@@ -1824,7 +1824,7 @@ include_once '../includes/header/header.php';
 /* Дополнительные стили для админ-панели */
 .admin-section {
     padding: 40px 0;
-    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f9 100%);
+    background: #f8f9fc;
     min-height: calc(100vh - 200px);
 }
 
@@ -1893,7 +1893,7 @@ include_once '../includes/header/header.php';
 }
 
 .profile-menu-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #3a4cd1 100%);
+    background: var(--primary-color);
     color: white;
     padding: 25px 20px;
     position: relative;

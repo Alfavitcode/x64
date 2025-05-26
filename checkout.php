@@ -14,7 +14,7 @@ $session_id = session_id();
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
 // Получаем содержимое корзины
-$cart_items = getCartItems($session_id, $user_id);
+$cart_items = getCartItems($user_id, $session_id);
 $cart_total = 0;
 $total_items = 0;
 
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             $order_id = $result['order_id'];
             
             // Очищаем корзину после успешного оформления заказа
-            clearCart($session_id, $user_id);
+            clearCart($user_id, $session_id);
         } else {
             $order_error = $result['message'];
         }
@@ -108,22 +108,39 @@ include_once 'includes/header/header.php';
         
         <?php if ($order_success): ?>
         <!-- Успешное оформление заказа -->
-        <div class="card mb-4">
+        <div class="card mb-4 order-success-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Заказ успешно оформлен</h5>
+            </div>
             <div class="card-body text-center py-5">
                 <div class="order-success-icon mb-4">
-                    <i class="fas fa-check-circle fa-5x text-success"></i>
+                    <i class="fas fa-check-circle text-success"></i>
                 </div>
-                <h2 class="mb-3">Заказ успешно оформлен!</h2>
-                <p class="mb-3">Ваш заказ №<?php echo $order_id; ?> успешно оформлен. Мы отправили подтверждение на указанный email.</p>
-                <?php if ($user_id): ?>
-                <p class="mb-4">Вы можете отслеживать статус заказа в <a href="/account/orders.php">личном кабинете</a>.</p>
-                <?php endif; ?>
+                <h2 class="mb-3 text-success fw-bold">Заказ успешно оформлен!</h2>
+                <p class="mb-3 fs-5">Ваш заказ №<?php echo $order_id; ?> успешно оформлен.</p>
+                <div class="success-details p-3 mb-4 mx-auto" style="max-width: 450px;">
+                    <div class="d-flex align-items-center mb-3 success-detail-item">
+                        <i class="fas fa-envelope text-primary me-3"></i>
+                        <p class="mb-0">Мы отправили подтверждение на указанный email</p>
+                    </div>
+                    <div class="d-flex align-items-center success-detail-item">
+                        <i class="fas fa-truck text-primary me-3"></i>
+                        <p class="mb-0">Статус заказа можно отслеживать в личном кабинете</p>
+                    </div>
+                </div>
+                
                 <div class="d-flex justify-content-center">
-                    <a href="/catalog.php" class="btn btn-primary me-2">Продолжить покупки</a>
+                    <a href="/catalog.php" class="btn btn-primary me-3">
+                        <i class="fas fa-shopping-bag me-2"></i>Продолжить покупки
+                    </a>
                     <?php if ($user_id): ?>
-                    <a href="/account/orders.php" class="btn btn-outline-secondary">Мои заказы</a>
+                    <a href="/account/orders.php" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Мои заказы
+                    </a>
                     <?php else: ?>
-                    <a href="/account/login.php" class="btn btn-outline-secondary">Войти в личный кабинет</a>
+                    <a href="/account/login.php" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти в личный кабинет
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -143,24 +160,30 @@ include_once 'includes/header/header.php';
                 <div class="col-lg-8">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Контактные данные</h5>
+                            <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Контактные данные</h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label for="fullname" class="form-label">ФИО <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="fullname" name="fullname" required
-                                           value="<?php echo $user ? htmlspecialchars($user['fullname']) : ''; ?>">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Ваше полное имя" required
+                                               value="<?php echo $user ? htmlspecialchars($user['fullname']) : ''; ?>">
+                                        <label for="fullname">ФИО <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email" required
-                                           value="<?php echo $user ? htmlspecialchars($user['email']) : ''; ?>">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="email@example.com" required
+                                               value="<?php echo $user ? htmlspecialchars($user['email']) : ''; ?>">
+                                        <label for="email">Email <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="phone" class="form-label">Телефон <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" required
-                                           value="<?php echo $user ? htmlspecialchars($user['phone']) : ''; ?>">
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+7 (XXX) XXX-XX-XX" required
+                                               value="<?php echo $user ? htmlspecialchars($user['phone']) : ''; ?>">
+                                        <label for="phone">Телефон <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -168,26 +191,33 @@ include_once 'includes/header/header.php';
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Адрес доставки</h5>
+                            <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Адрес доставки</h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="region" class="form-label">Регион</label>
-                                    <input type="text" class="form-control" id="region" name="region">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="region" name="region" placeholder="Ваш регион">
+                                        <label for="region">Регион</label>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="city" class="form-label">Город <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="city" name="city" required>
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="city" name="city" placeholder="Ваш город" required>
+                                        <label for="city">Город <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                                 <div class="col-12">
-                                    <label for="address" class="form-label">Адрес <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="address" name="address" required 
-                                           placeholder="Улица, дом, квартира">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Улица, дом, квартира" required>
+                                        <label for="address">Адрес <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="postal_code" class="form-label">Почтовый индекс</label>
-                                    <input type="text" class="form-control" id="postal_code" name="postal_code">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="postal_code" name="postal_code" placeholder="Почтовый индекс">
+                                        <label for="postal_code">Почтовый индекс</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +225,7 @@ include_once 'includes/header/header.php';
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Способ доставки</h5>
+                            <h5 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Способ доставки</h5>
                         </div>
                         <div class="card-body">
                             <div class="form-check mb-3">
@@ -203,10 +233,13 @@ include_once 'includes/header/header.php';
                                 <label class="form-check-label" for="delivery_courier">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div>
-                                            <strong>Курьерская доставка</strong>
-                                            <p class="mb-0 text-muted">Доставка в течение 1-3 дней</p>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-truck text-primary me-2"></i>
+                                                <strong>Курьерская доставка</strong>
+                                            </div>
+                                            <p class="mb-0 text-muted mt-1">Доставка в течение 1-3 дней</p>
                                         </div>
-                                        <span class="fw-bold">300 ₽</span>
+                                        <span class="delivery-price-badge">300 ₽</span>
                                     </div>
                                 </label>
                             </div>
@@ -215,10 +248,13 @@ include_once 'includes/header/header.php';
                                 <label class="form-check-label" for="delivery_pickup">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div>
-                                            <strong>Самовывоз из магазина</strong>
-                                            <p class="mb-0 text-muted">Срок: 1-2 дня</p>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-store text-primary me-2"></i>
+                                                <strong>Самовывоз из магазина</strong>
+                                            </div>
+                                            <p class="mb-0 text-muted mt-1">Срок: 1-2 дня</p>
                                         </div>
-                                        <span class="fw-bold">Бесплатно</span>
+                                        <span class="delivery-price-badge free">Бесплатно</span>
                                     </div>
                                 </label>
                             </div>
@@ -227,10 +263,13 @@ include_once 'includes/header/header.php';
                                 <label class="form-check-label" for="delivery_post">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div>
-                                            <strong>Почта России</strong>
-                                            <p class="mb-0 text-muted">Доставка в течение 5-10 дней</p>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-mail-bulk text-primary me-2"></i>
+                                                <strong>Почта России</strong>
+                                            </div>
+                                            <p class="mb-0 text-muted mt-1">Доставка в течение 5-10 дней</p>
                                         </div>
-                                        <span class="fw-bold">250 ₽</span>
+                                        <span class="delivery-price-badge">250 ₽</span>
                                     </div>
                                 </label>
                             </div>
@@ -239,33 +278,45 @@ include_once 'includes/header/header.php';
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Способ оплаты</h5>
+                            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Способ оплаты</h5>
                         </div>
                         <div class="card-body">
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="radio" name="payment_method" id="payment_card" value="card" checked>
                                 <label class="form-check-label" for="payment_card">
-                                    <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-credit-card text-primary me-2"></i>
                                         <strong>Банковской картой онлайн</strong>
-                                        <p class="mb-0 text-muted">Visa, MasterCard, МИР</p>
+                                    </div>
+                                    <div class="payment-icons">
+                                        <i class="fab fa-cc-visa me-1"></i>
+                                        <i class="fab fa-cc-mastercard me-1"></i>
+                                        <i class="fab fa-cc-jcb"></i>
+                                        <p class="mb-0 text-muted mt-1">Visa, MasterCard, МИР</p>
                                     </div>
                                 </label>
                             </div>
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="radio" name="payment_method" id="payment_cash" value="cash">
                                 <label class="form-check-label" for="payment_cash">
-                                    <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-money-bill-wave text-primary me-2"></i>
                                         <strong>Наличными при получении</strong>
-                                        <p class="mb-0 text-muted">Оплата курьеру или в пункте выдачи</p>
                                     </div>
+                                    <p class="mb-0 text-muted">Оплата курьеру или в пункте выдачи</p>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="payment_method" id="payment_wallet" value="wallet">
                                 <label class="form-check-label" for="payment_wallet">
-                                    <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-wallet text-primary me-2"></i>
                                         <strong>Электронные кошельки</strong>
-                                        <p class="mb-0 text-muted">ЮMoney, WebMoney, QIWI</p>
+                                    </div>
+                                    <div class="payment-icons">
+                                        <i class="fas fa-money-check me-1"></i>
+                                        <i class="fas fa-money-bill-alt me-1"></i>
+                                        <p class="mb-0 text-muted mt-1">ЮMoney, WebMoney, QIWI</p>
                                     </div>
                                 </label>
                             </div>
@@ -274,10 +325,13 @@ include_once 'includes/header/header.php';
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Комментарий к заказу</h5>
+                            <h5 class="mb-0"><i class="fas fa-comment-alt me-2"></i>Комментарий к заказу</h5>
                         </div>
                         <div class="card-body">
-                            <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Дополнительная информация к заказу"></textarea>
+                            <div class="form-floating">
+                                <textarea class="form-control" id="comment" name="comment" placeholder="Дополнительная информация к заказу" style="min-height: 120px;"></textarea>
+                                <label for="comment">Ваш комментарий</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -286,24 +340,27 @@ include_once 'includes/header/header.php';
                 <div class="col-lg-4">
                     <div class="card order-summary">
                         <div class="card-header">
-                            <h5 class="mb-0">Ваш заказ</h5>
+                            <h5 class="mb-0"><i class="fas fa-shopping-basket me-2"></i>Ваш заказ</h5>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 <?php foreach ($cart_items as $item): ?>
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="d-flex align-items-center">
+                                <div class="list-group-item p-3">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-start">
+                                        <div class="d-flex product-info">
                                             <div class="order-summary-img me-3">
                                                 <img src="<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>" class="img-fluid">
                                             </div>
-                                            <div>
-                                                <h6 class="mb-0"><?php echo $item['name']; ?></h6>
-                                                <small class="text-muted"><?php echo $item['quantity']; ?> шт.</small>
+                                            <div class="product-details">
+                                                <h6 class="mb-1 text-primary fw-semibold"><?php echo $item['name']; ?></h6>
+                                                <div class="d-flex flex-wrap align-items-center mt-1">
+                                                    <span class="badge bg-light text-dark me-2"><?php echo $item['quantity']; ?> шт.</span>
+                                                    <span class="text-muted small"><?php echo number_format($item['price'], 0, '.', ' '); ?> ₽/шт.</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="text-end">
-                                            <span class="fw-bold"><?php echo number_format($item['subtotal'], 0, '.', ' '); ?> ₽</span>
+                                        <div class="text-end ms-2 product-price">
+                                            <span class="item-price-badge"><?php echo number_format($item['subtotal'], 0, '.', ' '); ?> ₽</span>
                                         </div>
                                     </div>
                                 </div>
@@ -313,18 +370,22 @@ include_once 'includes/header/header.php';
                         <div class="card-footer">
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Товары (<?php echo $total_items; ?>):</span>
-                                <span><?php echo number_format($cart_total, 0, '.', ' '); ?> ₽</span>
+                                <span class="text-primary fw-semibold"><?php echo number_format($cart_total, 0, '.', ' '); ?> ₽</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2 delivery-cost">
                                 <span>Доставка:</span>
-                                <span>300 ₽</span>
+                                <span class="delivery-value">300 ₽</span>
                             </div>
                             <hr>
-                            <div class="d-flex justify-content-between total-amount">
-                                <strong>Итого:</strong>
-                                <strong class="total-price"><?php echo number_format($cart_total + 300, 0, '.', ' '); ?> ₽</strong>
+                            <div class="d-flex justify-content-between total-amount align-items-center mb-3">
+                                <span class="fw-bold fs-5">Итого:</span>
+                                <div class="total-price-wrapper">
+                                    <span class="total-price"><?php echo number_format($cart_total + 300, 0, '.', ' '); ?> ₽</span>
+                                </div>
                             </div>
-                            <button type="submit" name="checkout" class="btn btn-primary w-100 mt-3">Оформить заказ</button>
+                            <button type="submit" name="checkout" class="btn btn-primary w-100">
+                                <i class="fas fa-check-circle me-2"></i>Оформить заказ
+                            </button>
                             <div class="form-text text-center mt-2">
                                 Нажимая на кнопку, вы даете согласие на обработку персональных данных и соглашаетесь с <a href="/privacy.php">политикой конфиденциальности</a>
                             </div>
@@ -336,70 +397,6 @@ include_once 'includes/header/header.php';
         <?php endif; ?>
     </div>
 </main>
-
-<style>
-/* Стили для страницы оформления заказа */
-.order-summary-img {
-    width: 50px;
-    height: 50px;
-    overflow: hidden;
-    border-radius: 4px;
-}
-
-.order-summary-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.total-amount {
-    font-size: 1.2rem;
-}
-
-.form-check-label {
-    width: 100%;
-    padding: 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.form-check-input:checked + .form-check-label {
-    background-color: rgba(var(--primary-color-rgb), 0.05);
-}
-
-.form-check {
-    padding: 0;
-    margin-bottom: 5px;
-}
-
-.form-check-input {
-    position: relative;
-    margin-left: 15px;
-    margin-top: 15px;
-}
-
-.order-success-icon {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background-color: rgba(40, 167, 69, 0.1);
-}
-
-@media (max-width: 767px) {
-    .form-check-label {
-        flex-direction: column;
-        align-items: flex-start !important;
-    }
-    
-    .form-check-label span.fw-bold {
-        margin-top: 5px;
-    }
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -432,22 +429,166 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkoutForm = document.getElementById('checkout-form');
     
     if (checkoutForm) {
+        // Добавляем подсветку текущего выбранного способа оплаты и доставки
+        const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+        const deliveryMethods = document.querySelectorAll('input[name="delivery_method"]');
+        
+        // Функция для анимации выбора опции
+        function animateSelection(element) {
+            element.closest('.form-check').querySelector('.form-check-label').classList.add('pulse-animation');
+            setTimeout(() => {
+                element.closest('.form-check').querySelector('.form-check-label').classList.remove('pulse-animation');
+            }, 500);
+        }
+        
+        // Добавляем обработчики для красивой анимации при выборе
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                animateSelection(this);
+            });
+        });
+        
+        deliveryMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                animateSelection(this);
+                
+                // Обновляем стоимость доставки
+                updateDeliveryCost(this.value);
+            });
+        });
+        
+        // Обновление стоимости доставки и итоговой суммы
+        function updateDeliveryCost(deliveryType) {
+            let deliveryPrice = 0;
+            
+            // Определяем стоимость доставки
+            if (deliveryType === 'courier') {
+                deliveryPrice = 300;
+            } else if (deliveryType === 'post') {
+                deliveryPrice = 250;
+            }
+            
+            // Добавляем анимацию к изменению стоимости
+            const deliveryCostElement = document.querySelector('.delivery-cost span:last-child');
+            const totalPriceElement = document.querySelector('.total-price');
+            
+            // Добавляем класс для анимации
+            deliveryCostElement.classList.add('price-update');
+            totalPriceElement.classList.add('price-update');
+            
+            // Обновляем отображение стоимости доставки
+            deliveryCostElement.textContent = deliveryPrice === 0 ? 'Бесплатно' : deliveryPrice + ' ₽';
+            
+            // Обновляем итоговую сумму
+            const cartTotal = <?php echo $cart_total; ?>;
+            totalPriceElement.textContent = new Intl.NumberFormat('ru-RU').format(cartTotal + deliveryPrice) + ' ₽';
+            
+            // Удаляем класс анимации через время
+            setTimeout(() => {
+                deliveryCostElement.classList.remove('price-update');
+                totalPriceElement.classList.remove('price-update');
+            }, 500);
+        }
+        
+        // Валидация формы для мгновенной обратной связи
+        const requiredFields = checkoutForm.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            // Проверка при потере фокуса
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            // Очистка ошибки при вводе
+            field.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    this.classList.remove('is-invalid');
+                    const errorElement = this.nextElementSibling;
+                    if (errorElement && errorElement.classList.contains('invalid-feedback')) {
+                        errorElement.remove();
+                    }
+                }
+            });
+        });
+        
+        // Функция для валидации поля
+        function validateField(field) {
+            // Удаляем существующие сообщения об ошибках
+            const existingError = field.nextElementSibling;
+            if (existingError && existingError.classList.contains('invalid-feedback')) {
+                existingError.remove();
+            }
+            
+            // Проверяем заполнение поля
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                
+                // Создаем сообщение об ошибке
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'invalid-feedback';
+                errorMessage.textContent = 'Это поле обязательно для заполнения';
+                
+                // Вставляем сообщение после поля
+                field.insertAdjacentElement('afterend', errorMessage);
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                
+                // Дополнительная валидация для email
+                if (field.type === 'email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(field.value)) {
+                        field.classList.add('is-invalid');
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'invalid-feedback';
+                        errorMessage.textContent = 'Пожалуйста, введите корректный email';
+                        field.insertAdjacentElement('afterend', errorMessage);
+                        return false;
+                    }
+                }
+                
+                // Дополнительная валидация для телефона
+                if (field.id === 'phone') {
+                    const phoneRegex = /^[\d\+][\d\(\)\ -]{7,14}\d$/;
+                    if (!phoneRegex.test(field.value)) {
+                        field.classList.add('is-invalid');
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'invalid-feedback';
+                        errorMessage.textContent = 'Пожалуйста, введите корректный номер телефона';
+                        field.insertAdjacentElement('afterend', errorMessage);
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+        }
+        
+        // Отправка формы
         checkoutForm.addEventListener('submit', function(event) {
-            const requiredFields = checkoutForm.querySelectorAll('[required]');
             let isValid = true;
             
+            // Проверяем все обязательные поля
             requiredFields.forEach(field => {
-                if (!field.value.trim()) {
+                if (!validateField(field)) {
                     isValid = false;
-                    field.classList.add('is-invalid');
-                } else {
-                    field.classList.remove('is-invalid');
                 }
             });
             
             if (!isValid) {
                 event.preventDefault();
-                alert('Пожалуйста, заполните все обязательные поля!');
+                
+                // Плавно прокручиваем к первому полю с ошибкой
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            } else {
+                // Добавляем анимацию загрузки при отправке формы
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Оформление...';
+                submitBtn.disabled = true;
             }
         });
     }

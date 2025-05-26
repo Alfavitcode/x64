@@ -1019,17 +1019,19 @@ function addToCart($product_id, $quantity = 1, $user_id = null, $session_id = nu
 /**
  * Обновление количества товара в корзине
  * 
+ * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии для неавторизованных пользователей
  * @param int $cart_id ID записи в корзине
  * @param int $quantity Новое количество товара
- * @param string $session_id ID сессии для неавторизованных пользователей
- * @param int|null $user_id ID пользователя (если авторизован)
  * @return array Результат операции
  */
-function updateCartItemQuantity($cart_id, $quantity, $session_id, $user_id = null) {
+function updateCartItemQuantity($user_id = null, $session_id = null, $cart_id = 0, $quantity = 1) {
     global $conn;
     
+    if (!$session_id) $session_id = session_id();
+    
     if ($quantity <= 0) {
-        return removeFromCart($cart_id, $session_id, $user_id);
+        return removeFromCart($user_id, $session_id, $cart_id);
     }
     
     if ($user_id) {
@@ -1062,13 +1064,15 @@ function updateCartItemQuantity($cart_id, $quantity, $session_id, $user_id = nul
 /**
  * Удаление товара из корзины
  * 
- * @param int $cart_id ID записи в корзине
- * @param string $session_id ID сессии для неавторизованных пользователей
  * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии для неавторизованных пользователей
+ * @param int $cart_id ID записи в корзине
  * @return array Результат операции
  */
-function removeFromCart($cart_id, $session_id, $user_id = null) {
+function removeFromCart($user_id = null, $session_id = null, $cart_id = 0) {
     global $conn;
+    
+    if (!$session_id) $session_id = session_id();
     
     if ($user_id) {
         $delete_sql = "DELETE FROM cart WHERE id = " . (int)$cart_id . " AND user_id = " . (int)$user_id;
@@ -1099,41 +1103,51 @@ function removeFromCart($cart_id, $session_id, $user_id = null) {
 /**
  * Получение содержимого корзины
  * 
- * @param string $session_id ID сессии для неавторизованных пользователей
  * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии для неавторизованных пользователей
  * @return array Массив товаров в корзине с деталями
  */
 function getCartItems($user_id = null, $session_id = null) {
     global $conn;
+    
+    // Создаем таблицу корзины, если её не существует
+    createCartTableIfNotExists();
+    
     if (!$session_id) $session_id = session_id();
+    
     if ($user_id) {
-        $sql = "SELECT c.*, p.name, p.price, p.image FROM cart c JOIN product p ON c.product_id = p.id WHERE c.user_id = $user_id";
+        $sql = "SELECT c.*, p.name, p.price, p.image FROM cart c JOIN product p ON c.product_id = p.id WHERE c.user_id = " . (int)$user_id;
     } else {
         $sql = "SELECT c.*, p.name, p.price, p.image FROM cart c JOIN product p ON c.product_id = p.id WHERE c.session_id = '" . mysqli_real_escape_string($conn, $session_id) . "' AND c.user_id IS NULL";
     }
+    
     $result = mysqli_query($conn, $sql);
     $items = [];
+    
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             $row['subtotal'] = $row['price'] * $row['quantity'];
             $items[] = $row;
         }
     }
+    
     return $items;
 }
 
 /**
  * Получение количества товаров в корзине
  * 
- * @param string $session_id ID сессии для неавторизованных пользователей
  * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии для неавторизованных пользователей
  * @return int Количество товаров
  */
-function getCartItemCount($session_id, $user_id = null) {
+function getCartItemCount($user_id = null, $session_id = null) {
     global $conn;
     
     // Создаем таблицу корзины, если её не существует
     createCartTableIfNotExists();
+    
+    if (!$session_id) $session_id = session_id();
     
     if ($user_id) {
         $sql = "SELECT SUM(quantity) as total FROM cart WHERE user_id = " . (int)$user_id;
@@ -1154,12 +1168,14 @@ function getCartItemCount($session_id, $user_id = null) {
 /**
  * Очистка корзины пользователя
  * 
- * @param string $session_id ID сессии для неавторизованных пользователей
  * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии для неавторизованных пользователей
  * @return array Результат операции
  */
-function clearCart($session_id, $user_id = null) {
+function clearCart($user_id = null, $session_id = null) {
     global $conn;
+    
+    if (!$session_id) $session_id = session_id();
     
     if ($user_id) {
         $sql = "DELETE FROM cart WHERE user_id = " . (int)$user_id;
@@ -1308,7 +1324,7 @@ function createOrder($order_data) {
                 " . (int)$order_id . ",
                 " . (int)$item['product_id'] . ",
                 '" . mysqli_real_escape_string($conn, $item['name']) . "',
-                " . (float)$item['price_final'] . ",
+                " . (float)$item['price'] . ",
                 " . (int)$item['quantity'] . ",
                 " . (float)$item['subtotal'] . "
             )";
@@ -1710,13 +1726,15 @@ function getFilteredReportData($dateFrom, $dateTo, $category) {
 /**
  * Получить элемент корзины по его ID
  * 
- * @param int $cart_id ID элемента корзины
- * @param string $session_id ID сессии
  * @param int|null $user_id ID пользователя (если авторизован)
+ * @param string $session_id ID сессии
+ * @param int $cart_id ID элемента корзины
  * @return array|false Данные элемента корзины или false, если не найден
  */
-function getCartItemById($cart_id, $session_id, $user_id = null) {
+function getCartItemById($user_id = null, $session_id = null, $cart_id = 0) {
     global $conn;
+    
+    if (!$session_id) $session_id = session_id();
     
     // Формируем условие для поиска по user_id или session_id
     if ($user_id) {
@@ -1738,5 +1756,113 @@ function getCartItemById($cart_id, $session_id, $user_id = null) {
     }
     
     return false;
+}
+
+/**
+ * Создание таблицы для хранения токенов "Запомнить меня", если она не существует
+ */
+function createRememberTokensTableIfNotExists() {
+    global $conn;
+    
+    $sql = "CREATE TABLE IF NOT EXISTS remember_tokens (
+        id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_id INT(11) NOT NULL,
+        token VARCHAR(255) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    
+    mysqli_query($conn, $sql);
+}
+
+/**
+ * Генерация токена для функции "Запомнить меня"
+ * 
+ * @param int $user_id ID пользователя
+ * @param int $days Количество дней, на которое действует токен
+ * @return string Сгенерированный токен
+ */
+function generateRememberToken($user_id, $days = 30) {
+    global $conn;
+    
+    // Создаем таблицу, если её не существует
+    createRememberTokensTableIfNotExists();
+    
+    // Генерируем уникальный токен
+    $token = bin2hex(random_bytes(32));
+    
+    // Вычисляем дату истечения токена
+    $expires_at = date('Y-m-d H:i:s', strtotime("+{$days} days"));
+    
+    // Удаляем старые токены этого пользователя
+    $sql = "DELETE FROM remember_tokens WHERE user_id = " . (int)$user_id;
+    mysqli_query($conn, $sql);
+    
+    // Сохраняем новый токен в базе данных
+    $sql = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (
+        " . (int)$user_id . ",
+        '" . mysqli_real_escape_string($conn, $token) . "',
+        '" . $expires_at . "'
+    )";
+    
+    if (mysqli_query($conn, $sql)) {
+        return $token;
+    }
+    
+    return '';
+}
+
+/**
+ * Проверка токена "Запомнить меня" и авторизация пользователя
+ * 
+ * @param string $token Токен из куки
+ * @return array|null Данные пользователя или null, если токен недействителен
+ */
+function validateRememberToken($token) {
+    global $conn;
+    
+    if (empty($token)) {
+        return null;
+    }
+    
+    // Создаем таблицу, если её не существует
+    createRememberTokensTableIfNotExists();
+    
+    // Ищем токен в базе данных
+    $sql = "SELECT rt.user_id, u.fullname, u.email, u.phone, u.login, u.role 
+            FROM remember_tokens rt 
+            JOIN users u ON rt.user_id = u.id 
+            WHERE rt.token = '" . mysqli_real_escape_string($conn, $token) . "' 
+            AND rt.expires_at > NOW()";
+    
+    $result = mysqli_query($conn, $sql);
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+        return [
+            'user_id' => $user['user_id'],
+            'user_fullname' => $user['fullname'],
+            'user_email' => $user['email'],
+            'user_phone' => $user['phone'],
+            'user_login' => $user['login'],
+            'user_role' => $user['role']
+        ];
+    }
+    
+    // Если токен не найден или истек, удаляем его из куки
+    return null;
+}
+
+/**
+ * Удаление токена "Запомнить меня" при выходе из системы
+ * 
+ * @param int $user_id ID пользователя
+ */
+function removeRememberToken($user_id) {
+    global $conn;
+    
+    $sql = "DELETE FROM remember_tokens WHERE user_id = " . (int)$user_id;
+    mysqli_query($conn, $sql);
 }
  

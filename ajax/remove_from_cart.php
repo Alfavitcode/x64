@@ -59,7 +59,7 @@ try {
             exit;
         }
         
-        $result = removeFromCart($cart_id, $session_id, $user_id);
+        $result = removeFromCart($user_id, $session_id, $cart_id);
         
         if ($result['success']) {
             // Получаем обновленные данные корзины

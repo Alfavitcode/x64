@@ -195,7 +195,7 @@ img {
 
 /* Стиль для кнопки 'Все товары' */
 .btn-catalog {
-    background: linear-gradient(45deg, var(--primary-color), #6d83ff);
+    background: var(--primary-color);
     color: white;
     box-shadow: 0 8px 20px rgba(77, 97, 252, 0.3);
     border: none;
@@ -210,23 +210,15 @@ img {
     color: white;
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(77, 97, 252, 0.4);
+    background: var(--primary-color-hover);
 }
 
 .btn-catalog::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #6d83ff, var(--primary-color));
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.5s ease;
+    display: none;
 }
 
 .btn-catalog:hover::before {
-    opacity: 1;
+    display: none;
 }
 
 .btn-catalog::after {
@@ -1191,7 +1183,7 @@ img {
 /* Стили для страницы профиля пользователя */
 .profile-section {
     padding: 40px 0;
-    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f9 100%);
+    background: #f8f9fc;
     min-height: calc(100vh - 200px);
 }
 
@@ -1223,7 +1215,7 @@ img {
 }
 
 .profile-menu-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #3a4cd1 100%);
+    background: var(--primary-color);
     color: white;
     padding: 25px 20px;
     position: relative;
@@ -1231,35 +1223,11 @@ img {
 }
 
 .profile-menu-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 80%);
-    opacity: 0;
-    transition: opacity 0.5s;
+    display: none;
 }
 
 .profile-sidebar:hover .profile-menu-header::before {
-    opacity: 1;
-    animation: pulse-light 2s infinite;
-}
-
-@keyframes pulse-light {
-    0% {
-        transform: scale(0.95);
-        opacity: 0.5;
-    }
-    50% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(0.95);
-        opacity: 0.5;
-    }
+    display: none;
 }
 
 .profile-menu {
@@ -1343,7 +1311,7 @@ img {
 }
 
 .profile-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #3a4cd1 100%);
+    background: var(--primary-color);
     color: white;
     padding: 30px;
     position: relative;
@@ -1351,19 +1319,11 @@ img {
 }
 
 .profile-header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 30%;
-    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 100%);
-    transform: skewX(-20deg) translateX(100%);
-    transition: all 0.8s ease;
+    display: none;
 }
 
 .profile-main-card:hover .profile-header::after {
-    transform: skewX(-20deg) translateX(30%);
+    display: none;
 }
 
 .profile-welcome {
@@ -1442,7 +1402,7 @@ img {
     transform: translateY(-50%);
     width: 5px;
     height: 20px;
-    background: linear-gradient(to bottom, var(--primary-color), #3a4cd1);
+    background: var(--primary-color);
     border-radius: 20px;
 }
 

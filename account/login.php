@@ -50,7 +50,7 @@ if (isset($_GET['error'])) {
         }
         
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--background-color);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -79,7 +79,7 @@ if (isset($_GET['error'])) {
         }
         
         .card-header {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
             color: white;
             border-bottom: none;
             padding: 25px;
@@ -134,7 +134,7 @@ if (isset($_GET['error'])) {
         }
         
         .btn-primary {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: var(--primary-color);
             border: none;
             border-radius: 10px;
             padding: 12px 25px;
@@ -335,19 +335,7 @@ if (isset($_GET['error'])) {
                         </button>
                     </div>
                     
-                    <div class="divider">или войдите через</div>
-                    
-                    <div class="social-login">
-                        <a href="#" class="social-btn google">
-                            <i class="fab fa-google"></i>
-                        </a>
-                        <a href="#" class="social-btn facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-btn vk">
-                            <i class="fab fa-vk"></i>
-                        </a>
-                    </div>
+              
                     
                     <div class="text-center mt-3">
                         <span>Нет аккаунта?</span>

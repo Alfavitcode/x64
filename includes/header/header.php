@@ -139,10 +139,10 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                 <ul class="nav-menu">
                     <li class="nav-menu__item"><a href="/" class="nav-menu__link<?php echo $currentFile === 'index.php' ? ' active' : ''; ?>">Главная</a></li>
                     <li class="nav-menu__item nav-menu__item--dropdown">
-                        <a href="catalog.php" class="nav-menu__link<?php echo $currentFile === 'catalog.php' ? ' active' : ''; ?>">Каталог</a>
+                        <a href="/catalog.php" class="nav-menu__link<?php echo $currentFile === 'catalog.php' ? ' active' : ''; ?>">Каталог</a>
                     </li>
-                    <li class="nav-menu__item"><a href="about.php" class="nav-menu__link<?php echo $currentFile === 'about.php' ? ' active' : ''; ?>">О нас</a></li>
-                    <li class="nav-menu__item"><a href="contacts.php" class="nav-menu__link<?php echo $currentFile === 'contacts.php' ? ' active' : ''; ?>">Контакты</a></li>
+                    <li class="nav-menu__item"><a href="/about.php" class="nav-menu__link<?php echo $currentFile === 'about.php' ? ' active' : ''; ?>">О нас</a></li>
+                    <li class="nav-menu__item"><a href="/contacts.php" class="nav-menu__link<?php echo $currentFile === 'contacts.php' ? ' active' : ''; ?>">Контакты</a></li>
                 </ul>
             </nav>
             
@@ -204,9 +204,9 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                     <nav class="mobile-menu__nav">
                         <ul class="mobile-menu__list">
                             <li><a href="/"<?php echo $currentFile === 'index.php' ? ' class="active"' : ''; ?>>Главная</a></li>
-                            <li><a href="catalog.php"<?php echo $currentFile === 'catalog.php' ? ' class="active"' : ''; ?>>Каталог</a></li>
-                            <li><a href="about.php"<?php echo $currentFile === 'about.php' ? ' class="active"' : ''; ?>>О нас</a></li>
-                            <li><a href="contacts.php"<?php echo $currentFile === 'contacts.php' ? ' class="active"' : ''; ?>>Контакты</a></li>
+                            <li><a href="/catalog.php"<?php echo $currentFile === 'catalog.php' ? ' class="active"' : ''; ?>>Каталог</a></li>
+                            <li><a href="/about.php"<?php echo $currentFile === 'about.php' ? ' class="active"' : ''; ?>>О нас</a></li>
+                            <li><a href="/contacts.php"<?php echo $currentFile === 'contacts.php' ? ' class="active"' : ''; ?>>Контакты</a></li>
                             <?php if ($isAdmin): ?>
                             <li><a href="/admin/"<?php echo strpos($currentFile, 'admin') !== false ? ' class="active"' : ''; ?>>Админ-панель</a></li>
                             <?php endif; ?>

@@ -38,7 +38,7 @@ try {
         }
         
         // Получаем текущий элемент корзины для проверки
-        $currentItem = getCartItemById($cart_id, $session_id, $user_id);
+        $currentItem = getCartItemById($user_id, $session_id, $cart_id);
         if (!$currentItem) {
             echo json_encode(['success' => false, 'message' => 'Товар не найден в корзине', 'debug' => $debug]);
             exit;
@@ -84,7 +84,7 @@ try {
             exit;
         }
         
-        $result = updateCartItemQuantity($cart_id, $quantity, $session_id, $user_id);
+        $result = updateCartItemQuantity($user_id, $session_id, $cart_id, $quantity);
         
         if ($result['success']) {
             // Получаем обновленные данные о товаре в корзине

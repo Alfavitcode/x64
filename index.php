@@ -126,22 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         $oldPriceHtml = '<span class="old-price">' . number_format($oldPrice, 0, '.', ' ') . ' ₽</span>';
                     }
 
-                    // Формируем рейтинг со звездами
-                    $ratingHtml = '';
-                    $rating = isset($product['rating']) ? $product['rating'] : 0;
-                    $fullStars = floor($rating);
-                    $halfStar = ($rating - $fullStars) >= 0.5;
-                    
-                    for ($i = 1; $i <= 5; $i++) {
-                        if ($i <= $fullStars) {
-                            $ratingHtml .= '<i class="fas fa-star"></i>';
-                        } elseif ($i == $fullStars + 1 && $halfStar) {
-                            $ratingHtml .= '<i class="fas fa-star-half-alt"></i>';
-                        } else {
-                            $ratingHtml .= '<i class="far fa-star"></i>';
-                        }
-                    }
-
                     // Формируем изображение товара
                     $imageUrl = isset($product['image']) && !empty($product['image']) ? $product['image'] : '/img/products/placeholder.jpg';
                     
@@ -165,10 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="product-info">
                                 <div class="product-category">' . htmlspecialchars(isset($product['category']) ? $product['category'] : '') . '</div>
                                 <h3 class="product-title"><a href="/product.php?id=' . (isset($product['id']) ? $product['id'] : 0) . '">' . htmlspecialchars(isset($product['name']) ? $product['name'] : '') . '</a></h3>
-                                <div class="product-rating">
-                                    ' . $ratingHtml . '
-                                    <span>(' . (isset($product['reviews_count']) ? $product['reviews_count'] : 0) . ')</span>
-                                </div>
                                 <div class="product-price">
                                     <span class="current-price">' . number_format(isset($product['price']) ? $product['price'] : 0, 0, '.', ' ') . ' ₽</span>
                                     ' . $oldPriceHtml . '
@@ -198,14 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="product-info">
                             <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/123">Смартфон XYZ Pro</a></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(24)</span>
-                            </div>
                             <div class="product-price">
                                 <span class="current-price">29 990 ₽</span>
                             </div>
@@ -230,14 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="product-info">
                             <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/124">Умные часы SmartLife</a></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(15)</span>
-                            </div>
                             <div class="product-price">
                                 <span class="current-price">7 990 ₽</span>
                                 <span class="old-price">9 990 ₽</span>
@@ -263,14 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="product-info">
                             <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/125">Беспроводные наушники SoundPro</a></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(42)</span>
-                            </div>
                             <div class="product-price">
                                 <span class="current-price">5 490 ₽</span>
                             </div>
@@ -296,14 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="product-info">
                             <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/126">Фотокамера ProShot</a></h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <i class="far fa-star"></i>
-                                <span>(7)</span>
-                            </div>
                             <div class="product-price">
                                 <span class="current-price">42 490 ₽</span>
                                 <span class="old-price">49 990 ₽</span>
