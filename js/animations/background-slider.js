@@ -13,12 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
         overlayOpacity: 0 // Прозрачность белого оверлея (0 = полностью прозрачный)
     };
     
-    // Путь к изображению для фона (проверяем разные пути)
-    const paths = [
-        '../img/backgrounds/slider.png', // Относительный путь от account/
-        '/img/backgrounds/slider.png', // Путь от корня сайта
-        'img/backgrounds/slider.png' // Альтернативный путь
-    ];
+    // Определяем путь к изображению в зависимости от текущей страницы
+    let imagePath = 'img/backgrounds/slider.png';
+    
+    // Проверяем, находимся ли мы в директории account
+    if (window.location.pathname.includes('/account/')) {
+        imagePath = '../img/backgrounds/slider.png';
+    }
+    
+    console.log('Using image path:', imagePath);
     
     // Создаем контейнер для фона, если он еще не существует
     let backgroundContainer = document.querySelector('.background-slider');
@@ -26,10 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         backgroundContainer = document.createElement('div');
         backgroundContainer.className = 'background-slider';
         document.body.insertBefore(backgroundContainer, document.body.firstChild);
-        
-        // Проверяем, какой путь работает
-        const img = new Image();
-        let validPath = paths[0]; // По умолчанию используем первый путь
         
         // Создаем стили для контейнера
         const style = document.createElement('style');
@@ -84,20 +83,25 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         document.head.appendChild(style);
         
-        // Создаем панораму из дублированного изображения для бесконечной прокрутки
+        // Создаем панораму для бесконечной прокрутки
         const panorama = document.createElement('div');
-        panorama.className = 'background-panorama';
+        panorama.className = 'background-panorama animate-bg';
         
-        // Пробуем разные пути к изображению
-        for (let i = 0; i < paths.length; i++) {
-            panorama.style.backgroundImage = `url('${paths[i]}')`;
-            panorama.style.backgroundSize = '50% 100%'; // Размер одной картинки
-            
-            // Если последний путь, добавляем класс для CSS анимации как запасной вариант
-            if (i === paths.length - 1) {
-                panorama.classList.add('animate-bg');
-            }
-        }
+        // Устанавливаем фоновое изображение напрямую через style
+        panorama.style.backgroundImage = `url('${imagePath}')`;
+        panorama.style.backgroundSize = '50% 100%';
+        
+        // Добавляем обработчик ошибки загрузки изображения
+        const handleImageError = function() {
+            console.error('Failed to load background image');
+            panorama.style.backgroundImage = 'linear-gradient(45deg, #4e73df, #6f42c1, #4e73df)';
+            panorama.style.backgroundSize = '200% 100%';
+        };
+        
+        // Проверяем загрузку изображения
+        const testImg = new Image();
+        testImg.onerror = handleImageError;
+        testImg.src = imagePath;
         
         backgroundContainer.appendChild(panorama);
         
