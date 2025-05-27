@@ -10,18 +10,25 @@ document.addEventListener('DOMContentLoaded', function() {
         direction: 'right', // Направление прокрутки: 'left' или 'right'
         transitionDuration: 2, // Длительность перехода между слайдами в секундах
         blurAmount: '5px', // Размытие фона (средняя размытость)
+        darkenAmount: 0.3, // Затемнение фона (0 - без затемнения, 1 - полностью темный)
         overlayOpacity: 0 // Прозрачность белого оверлея (0 = полностью прозрачный)
     };
     
-    // Определяем путь к изображению в зависимости от текущей страницы
-    let imagePath = 'img/backgrounds/slider.png';
+    // Определяем устройство
+    const isMobile = window.innerWidth <= 768;
+    
+    // Определяем путь к изображению в зависимости от текущей страницы и устройства
+    let baseDir = 'img/backgrounds/';
+    let imageName = isMobile ? 'mobile.PNG' : 'slider.png';
     
     // Проверяем, находимся ли мы в директории account
     if (window.location.pathname.includes('/account/')) {
-        imagePath = '../img/backgrounds/slider.png';
+        baseDir = '../img/backgrounds/';
     }
     
+    const imagePath = baseDir + imageName;
     console.log('Using image path:', imagePath);
+    console.log('Is mobile device:', isMobile);
     
     // Создаем контейнер для фона, если он еще не существует
     let backgroundContainer = document.querySelector('.background-slider');
@@ -52,6 +59,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 background-repeat: repeat-x;
                 will-change: transform;
                 filter: blur(${config.blurAmount}); /* Добавляем размытие */
+            }
+            
+            .background-darken {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, ${config.darkenAmount}); /* Затемнение */
+                z-index: 0;
             }
             
             .background-overlay {
@@ -93,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Добавляем обработчик ошибки загрузки изображения
         const handleImageError = function() {
-            console.error('Failed to load background image');
+            console.error('Failed to load background image:', imagePath);
             panorama.style.backgroundImage = 'linear-gradient(45deg, #4e73df, #6f42c1, #4e73df)';
             panorama.style.backgroundSize = '200% 100%';
         };
@@ -105,6 +122,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         backgroundContainer.appendChild(panorama);
         
+        // Создаем затемнение
+        const darken = document.createElement('div');
+        darken.className = 'background-darken';
+        backgroundContainer.appendChild(darken);
+        
         // Создаем полупрозрачный оверлей (только если нужен)
         if (config.overlayOpacity > 0) {
             const overlay = document.createElement('div');
@@ -114,6 +136,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Запускаем анимацию бесконечной прокрутки
         animateBackground(panorama);
+        
+        // Обработчик изменения размера окна для адаптации к мобильным устройствам
+        window.addEventListener('resize', function() {
+            const newIsMobile = window.innerWidth <= 768;
+            if (newIsMobile !== isMobile) {
+                // Перезагрузить страницу для применения новой версии изображения
+                window.location.reload();
+            }
+        });
         
         // Выводим отладочную информацию в консоль
         console.log('Background slider initialized');
