@@ -42,6 +42,20 @@ if (!$order) {
 // Получаем товары в заказе
 $order_items = getOrderItems($order_id);
 
+// Получаем информацию об изображениях товаров из базы данных
+global $conn;
+foreach ($order_items as &$item) {
+    $product_id = (int)$item['product_id'];
+    $sql = "SELECT image FROM product WHERE id = $product_id";
+    $result = mysqli_query($conn, $sql);
+    if ($result && $row = mysqli_fetch_assoc($result)) {
+        $item['image'] = $row['image'];
+    } else {
+        $item['image'] = null;
+    }
+}
+unset($item); // Разрываем ссылку
+
 // Подключаем шапку сайта
 include_once '../includes/header/header.php';
 
@@ -243,7 +257,22 @@ $statusInfo = getOrderStatusInfo($order['status']);
                             <?php foreach ($order_items as $item): ?>
                             <div class="order-item">
                                 <div class="item-image">
-                                    <img src="/img/products/placeholder.jpg" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                    <?php if (!empty($item['image']) && file_exists('../' . ltrim($item['image'], '/'))): ?>
+                                        <img src="<?php echo $item['image']; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                    <?php else: ?>
+                                        <div class="placeholder-text">
+                                            <?php 
+                                            // Получаем первые буквы слов из названия товара
+                                            $words = explode(' ', $item['name']);
+                                            $initials = '';
+                                            foreach ($words as $word) {
+                                                $initials .= mb_substr($word, 0, 1, 'UTF-8');
+                                                if (strlen($initials) >= 2) break;
+                                            }
+                                            echo htmlspecialchars($initials);
+                                            ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="item-details">
                                     <h4 class="item-name"><?php echo htmlspecialchars($item['name']); ?></h4>
@@ -412,6 +441,19 @@ $statusInfo = getOrderStatusInfo($order['status']);
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+.item-image .placeholder-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #5165F6;
+    background-color: rgba(81, 101, 246, 0.1);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
 }
 
 .item-details {
