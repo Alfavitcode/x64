@@ -45,7 +45,7 @@ if (isset($_GET['error'])) {
             --primary-color: #4e73df;
             --secondary-color: #6f42c1;
             --success-color: #1cc88a;
-            --background-color: #f8f9fc;
+            --background-color: transparent; /* Изменено с f8f9fc на transparent */
             --text-color: #5a5c69;
             --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             --input-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -61,11 +61,14 @@ if (isset($_GET['error'])) {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 30px 0;
             color: var(--text-color);
+            position: relative; /* Добавлено для корректного позиционирования */
         }
         
         .register-container {
             max-width: 500px;
             width: 100%;
+            position: relative; /* Добавлено для корректного позиционирования */
+            z-index: 10; /* Добавлено для отображения поверх фона */
         }
         
         .card {
@@ -74,6 +77,8 @@ if (isset($_GET['error'])) {
             box-shadow: var(--card-shadow);
             overflow: hidden;
             transition: all var(--transition-speed);
+            backdrop-filter: blur(5px); /* Добавлен эффект размытия */
+            background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
         }
         
         .card:hover {
@@ -105,7 +110,7 @@ if (isset($_GET['error'])) {
             padding-left: 45px; /* Увеличиваем отступ слева для иконки */
             font-size: 16px;
             border: 1px solid #e0e0e0;
-            background-color: #fafafa;
+            background-color: rgba(250, 250, 250, 0.95); /* Немного прозрачный фон для полей ввода */
             box-shadow: var(--input-shadow);
             transition: all var(--transition-speed);
         }
@@ -361,6 +366,8 @@ if (isset($_GET['error'])) {
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="../js/animations/background-slider.js"></script>
     <script>
         $(document).ready(function() {
             // Маска для телефона
