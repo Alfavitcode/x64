@@ -188,13 +188,13 @@ $orderCount = count($orders);
                 <div class="profile-info-card mt-4">
                     <div class="profile-info-header">
                         <h5 class="profile-info-title">Последние заказы</h5>
-                        <a href="orders.php" class="profile-edit-btn">
+                        <a href="orders.php" class="profile-view-all-btn">
                             <i class="fas fa-eye"></i> Все заказы
                         </a>
                     </div>
                     <div class="profile-info-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
+                        <div class="orders-table-container">
+                            <table class="orders-table">
                                 <thead>
                                     <tr>
                                         <th>№ Заказа</th>
@@ -215,37 +215,39 @@ $orderCount = count($orders);
                                         
                                         switch($order['status']) {
                                             case 'pending':
-                                                $statusClass = 'bg-warning';
+                                                $statusClass = 'status-pending';
                                                 $statusText = 'Ожидает';
                                                 break;
                                             case 'processing':
-                                                $statusClass = 'bg-info';
-                                                $statusText = 'Обрабатывается';
+                                                $statusClass = 'status-processing';
+                                                $statusText = 'В обработке';
                                                 break;
                                             case 'completed':
-                                                $statusClass = 'bg-success';
+                                                $statusClass = 'status-completed';
                                                 $statusText = 'Выполнен';
                                                 break;
                                             case 'cancelled':
-                                                $statusClass = 'bg-danger';
+                                                $statusClass = 'status-cancelled';
                                                 $statusText = 'Отменен';
                                                 break;
                                             case 'closed':
-                                                $statusClass = 'bg-secondary';
+                                                $statusClass = 'status-closed';
                                                 $statusText = 'Закрыт';
                                                 break;
                                             default:
-                                                $statusClass = 'bg-secondary';
+                                                $statusClass = 'status-default';
                                                 $statusText = 'Неизвестно';
                                         }
                                     ?>
                                     <tr>
-                                        <td>#<?php echo $order['id']; ?></td>
-                                        <td><?php echo date('d.m.Y', strtotime($order['created_at'])); ?></td>
-                                        <td><?php echo number_format($order['total_amount'], 0, ',', ' '); ?> ₽</td>
-                                        <td><span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span></td>
-                                        <td>
-                                            <a href="view_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                        <td class="order-id">#<?php echo $order['id']; ?></td>
+                                        <td class="order-date"><?php echo date('d.m.Y', strtotime($order['created_at'])); ?></td>
+                                        <td class="order-amount"><?php echo number_format($order['total_amount'], 0, '.', ' '); ?> ₽</td>
+                                        <td class="order-status">
+                                            <span class="status-badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                                        </td>
+                                        <td class="order-actions">
+                                            <a href="view_order.php?id=<?php echo $order['id']; ?>" class="view-order-btn">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         </td>
@@ -323,6 +325,24 @@ document.addEventListener('DOMContentLoaded', function() {
     .profile-body {
         padding: 15px;
     }
+    
+    .orders-table {
+        font-size: 14px;
+    }
+    
+    .orders-table th, 
+    .orders-table td {
+        padding: 10px 5px;
+    }
+    
+    .status-badge {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+    
+    .view-order-btn {
+        padding: 5px;
+    }
 }
 
 /* Улучшения для всех устройств */
@@ -367,6 +387,160 @@ document.addEventListener('DOMContentLoaded', function() {
     letter-spacing: 1px;
 }
 
+/* Стили для таблицы заказов */
+.profile-info-card {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.profile-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f7;
+}
+
+.profile-info-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: #333;
+}
+
+.profile-view-all-btn {
+    display: inline-flex;
+    align-items: center;
+    color: #5165F6;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 30px;
+    background-color: rgba(81, 101, 246, 0.1);
+    transition: all 0.3s ease;
+}
+
+.profile-view-all-btn:hover {
+    background-color: #5165F6;
+    color: white;
+}
+
+.profile-view-all-btn i {
+    margin-right: 6px;
+}
+
+.profile-info-body {
+    padding: 0;
+}
+
+.orders-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.orders-table th {
+    color: #666;
+    font-weight: 500;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f7;
+    font-size: 14px;
+}
+
+.orders-table td {
+    padding: 15px 20px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f7;
+}
+
+.orders-table tr:last-child td {
+    border-bottom: none;
+}
+
+.order-id {
+    font-weight: 600;
+    color: #333;
+}
+
+.order-date {
+    color: #666;
+}
+
+.order-amount {
+    font-weight: 600;
+    color: #333;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 100px;
+}
+
+.status-pending {
+    background-color: #FFD166;
+    color: #333;
+}
+
+.status-processing {
+    background-color: #06AED5;
+    color: white;
+}
+
+.status-completed {
+    background-color: #42BA96;
+    color: white;
+}
+
+.status-cancelled {
+    background-color: #DF4759;
+    color: white;
+}
+
+.status-closed {
+    background-color: #6c757d;
+    color: white;
+}
+
+.status-default {
+    background-color: #6c757d;
+    color: white;
+}
+
+.order-actions {
+    text-align: center;
+}
+
+.view-order-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(81, 101, 246, 0.1);
+    color: #5165F6;
+    transition: all 0.3s ease;
+}
+
+.view-order-btn:hover {
+    background-color: #5165F6;
+    color: white;
+    transform: scale(1.1);
+}
+
 /* Адаптация для разных устройств */
 @media (max-width: 991px) {
     .profile-stats {
@@ -386,6 +560,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .stat-label {
         font-size: 12px;
+    }
+    
+    .profile-info-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-view-all-btn {
+        margin-top: 10px;
+    }
+    
+    .orders-table th:nth-child(2), 
+    .orders-table td:nth-child(2) {
+        display: none;
     }
 }
 </style>
