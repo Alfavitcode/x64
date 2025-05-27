@@ -29,25 +29,11 @@ function initPHPMailer() {
         
         if (!file_exists($file_path)) {
             file_put_contents($file_path, file_get_contents($url));
-            
-            // Модифицируем файл, чтобы убрать зависимость от пространств имен
-            $content = file_get_contents($file_path);
-            
-            // Убираем namespace из файла
-            $content = preg_replace('/namespace PHPMailer\\\\PHPMailer;/', '', $content);
-            
-            // Исправляем use внутри файла (заменяем на полный путь или убираем)
-            $content = preg_replace('/use PHPMailer\\\\PHPMailer\\\\(.*?);/', '', $content);
-            
-            // Записываем обратно
-            file_put_contents($file_path, $content);
         }
     }
     
-    // Подключаем файлы
-    require_once $phpmailer_dir . 'Exception.php';
-    require_once $phpmailer_dir . 'PHPMailer.php';
-    require_once $phpmailer_dir . 'SMTP.php';
+    // Подключаем автозагрузчик для PHPMailer
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/autoload.php';
 }
 
 // Инициализируем PHPMailer
@@ -99,8 +85,8 @@ class Mailer {
      * @return array Результат отправки ['success' => bool, 'message' => string]
      */
     public function send($to, $subject, $body, $attachments = []) {
-        // Создаем экземпляр PHPMailer
-        $mail = new PHPMailer();
+        // Создаем экземпляр PHPMailer с использованием пространства имен
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         
         try {
             // Настройки сервера
@@ -143,10 +129,15 @@ class Mailer {
                 'success' => true,
                 'message' => 'Письмо успешно отправлено'
             ];
-        } catch (Exception $e) {
+        } catch (\PHPMailer\PHPMailer\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Ошибка при отправке письма: ' . $mail->ErrorInfo
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Общая ошибка: ' . $e->getMessage()
             ];
         }
     }

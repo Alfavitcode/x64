@@ -10,8 +10,10 @@
 try {
     require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/Mailer.php';
     $mailer_class_available = true;
+    $mailer_class_error = null;
 } catch (Exception $e) {
     $mailer_class_available = false;
+    $mailer_class_error = $e->getMessage();
 }
 
 // Подключаем простой класс для отправки писем
@@ -79,6 +81,7 @@ if (php_sapi_name() !== 'cli') {
             button { background-color: #5165F6; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
             button:hover { background-color: #3951e7; }
             .info { background-color: #cce5ff; color: #004085; padding: 15px; border-radius: 5px; margin: 15px 0; }
+            .error { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0; }
             .mailer-options { display: flex; gap: 10px; margin-bottom: 15px; }
             .mailer-option { padding: 10px; border-radius: 5px; border: 1px solid #ddd; cursor: pointer; }
             .mailer-option.active { background-color: #e2e6ea; border-color: #5165F6; }
@@ -87,7 +90,18 @@ if (php_sapi_name() !== 'cli') {
     </head>
     <body>
         <h1>Тестирование отправки писем</h1>
+        ';
         
+    // Отображение ошибки, если есть
+    if (!$mailer_class_available && $mailer_class_error) {
+        echo '<div class="error">
+            <h4>Ошибка подключения PHPMailer:</h4>
+            <p>' . htmlspecialchars($mailer_class_error) . '</p>
+            <p>Будет использоваться SimpleMailer в качестве резервного варианта.</p>
+        </div>';
+    }
+        
+    echo '
         <div class="info">
             <p><strong>Текущий почтовый сервис:</strong> ' . $mail_service . '</p>
             <p><strong>SMTP сервер:</strong> ' . MAIL_HOST . '</p>

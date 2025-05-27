@@ -14,6 +14,8 @@ try {
     // В случае ошибки подключаем простую версию отправки
     require_once 'includes/mail/SimpleMailer.php';
     $use_simple_mailer = true;
+    // Логируем ошибку
+    error_log('PHPMailer error: ' . $e->getMessage());
 }
 
 // Создаем таблицы заказов, если они не существуют или не содержат необходимые поля
