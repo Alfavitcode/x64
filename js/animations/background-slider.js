@@ -6,14 +6,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Конфигурация анимации
     const config = {
-        scrollSpeed: 120, // Скорость прокрутки (секунд на полный цикл) - увеличена для более медленного движения
+        scrollSpeed: 120, // Скорость прокрутки (секунд на полный цикл)
         direction: 'right', // Направление прокрутки: 'left' или 'right'
         transitionDuration: 2, // Длительность перехода между слайдами в секундах
-        overlayOpacity: 0.85 // Прозрачность белого оверлея
+        blurAmount: '5px', // Размытие фона (средняя размытость)
+        overlayOpacity: 0 // Прозрачность белого оверлея (0 = полностью прозрачный)
     };
     
-    // Путь к изображению для фона
-    const backgroundImage = '../img/backgrounds/slider.png';
+    // Путь к изображению для фона (проверяем разные пути)
+    const paths = [
+        '../img/backgrounds/slider.png', // Относительный путь от account/
+        '/img/backgrounds/slider.png', // Путь от корня сайта
+        'img/backgrounds/slider.png' // Альтернативный путь
+    ];
     
     // Создаем контейнер для фона, если он еще не существует
     let backgroundContainer = document.querySelector('.background-slider');
@@ -22,7 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
         backgroundContainer.className = 'background-slider';
         document.body.insertBefore(backgroundContainer, document.body.firstChild);
         
-        // Добавляем стили для контейнера
+        // Проверяем, какой путь работает
+        const img = new Image();
+        let validPath = paths[0]; // По умолчанию используем первый путь
+        
+        // Создаем стили для контейнера
         const style = document.createElement('style');
         style.textContent = `
             .background-slider {
@@ -41,10 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 0;
                 width: 200%; /* Двойная ширина для бесконечной прокрутки */
                 height: 100%;
-                background-image: url('${backgroundImage}');
-                background-size: 50% 100%; /* Размер одной картинки */
                 background-repeat: repeat-x;
                 will-change: transform;
+                filter: blur(${config.blurAmount}); /* Добавляем размытие */
             }
             
             .background-overlay {
@@ -59,9 +67,19 @@ document.addEventListener('DOMContentLoaded', function() {
             
             /* Адаптация для мобильных устройств */
             @media (max-width: 768px) {
-                .background-overlay {
-                    background: rgba(255, 255, 255, 0.9);
+                .background-panorama {
+                    filter: blur(calc(${config.blurAmount} * 1.5)); /* Увеличиваем размытие на мобильных */
                 }
+            }
+            
+            /* CSS анимация для случая, если GSAP не работает */
+            @keyframes slideBackground {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(${config.direction === 'left' ? 50 : -50}%); }
+            }
+            
+            .animate-bg {
+                animation: slideBackground ${config.scrollSpeed}s linear infinite;
             }
         `;
         document.head.appendChild(style);
@@ -69,15 +87,33 @@ document.addEventListener('DOMContentLoaded', function() {
         // Создаем панораму из дублированного изображения для бесконечной прокрутки
         const panorama = document.createElement('div');
         panorama.className = 'background-panorama';
+        
+        // Пробуем разные пути к изображению
+        for (let i = 0; i < paths.length; i++) {
+            panorama.style.backgroundImage = `url('${paths[i]}')`;
+            panorama.style.backgroundSize = '50% 100%'; // Размер одной картинки
+            
+            // Если последний путь, добавляем класс для CSS анимации как запасной вариант
+            if (i === paths.length - 1) {
+                panorama.classList.add('animate-bg');
+            }
+        }
+        
         backgroundContainer.appendChild(panorama);
         
-        // Создаем полупрозрачный оверлей
-        const overlay = document.createElement('div');
-        overlay.className = 'background-overlay';
-        backgroundContainer.appendChild(overlay);
+        // Создаем полупрозрачный оверлей (только если нужен)
+        if (config.overlayOpacity > 0) {
+            const overlay = document.createElement('div');
+            overlay.className = 'background-overlay';
+            backgroundContainer.appendChild(overlay);
+        }
         
         // Запускаем анимацию бесконечной прокрутки
         animateBackground(panorama);
+        
+        // Выводим отладочную информацию в консоль
+        console.log('Background slider initialized');
+        console.log('Using GSAP:', typeof gsap !== 'undefined');
     }
     
     // Функция анимации бесконечной прокрутки
@@ -87,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Используем GSAP, если доступен
             if (typeof gsap !== 'undefined') {
+                console.log('Animating with GSAP');
                 // Создаем бесконечную анимацию
                 gsap.to(element, {
                     x: direction * '50%', // Смещение на половину ширины (одно изображение)
@@ -99,36 +136,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             } else {
-                // Запасной вариант с CSS анимацией, если GSAP не доступен
-                const styleAnimation = document.createElement('style');
-                styleAnimation.textContent = `
-                    @keyframes slideBackground {
-                        0% { transform: translateX(0); }
-                        100% { transform: translateX(${direction * 50}%); }
-                    }
-                    
-                    .background-panorama {
-                        animation: slideBackground ${config.scrollSpeed}s linear infinite;
-                    }
-                `;
-                document.head.appendChild(styleAnimation);
+                console.log('GSAP not found, using CSS animation');
+                // CSS анимация уже применена через класс animate-bg
             }
         } catch (e) {
-            console.warn('Ошибка при создании анимации:', e);
-            
-            // Запасной вариант с CSS анимацией при ошибке
-            const styleAnimation = document.createElement('style');
-            styleAnimation.textContent = `
-                @keyframes slideBackground {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(${direction * 50}%); }
-                }
-                
-                .background-panorama {
-                    animation: slideBackground ${config.scrollSpeed}s linear infinite;
-                }
-            `;
-            document.head.appendChild(styleAnimation);
+            console.warn('Animation error:', e);
+            // CSS анимация уже применена через класс animate-bg
         }
     }
 }); 
