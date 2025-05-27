@@ -14,6 +14,7 @@ try {
 } catch (Exception $e) {
     $mailer_class_available = false;
     $mailer_class_error = $e->getMessage();
+    error_log('PHPMailer Error in test_email.php: ' . $e->getMessage());
 }
 
 // Подключаем простой класс для отправки писем

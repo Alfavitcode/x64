@@ -15,7 +15,7 @@ try {
     require_once 'includes/mail/SimpleMailer.php';
     $use_simple_mailer = true;
     // Логируем ошибку
-    error_log('PHPMailer error: ' . $e->getMessage());
+    error_log('PHPMailer initialization error: ' . $e->getMessage());
 }
 
 // Создаем таблицы заказов, если они не существуют или не содержат необходимые поля
@@ -101,24 +101,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             
             // Отправляем электронное письмо покупателю
             if ($order) {
-                // Создаем экземпляр нужного класса для отправки писем
-                if ($use_simple_mailer) {
-                    $mailer = new SimpleMailer();
-                } else {
-                    $mailer = new Mailer();
+                try {
+                    // Создаем экземпляр нужного класса для отправки писем
+                    if ($use_simple_mailer) {
+                        $mailer = new SimpleMailer();
+                    } else {
+                        $mailer = new Mailer();
+                    }
+                    
+                    // Получаем товары заказа для отображения в письме
+                    $order_items = getOrderItems($order_id);
+                    
+                    // Отправляем уведомление покупателю
+                    $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
+                    
+                    // Отправляем уведомление администратору
+                    $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
+                    
+                    // Проверяем успешность отправки писем
+                    $mail_sent = $customer_notification['success'];
+                    
+                    if (!$mail_sent && !$use_simple_mailer) {
+                        // Если PHPMailer не сработал, пробуем SimpleMailer как запасной вариант
+                        error_log('Falling back to SimpleMailer due to PHPMailer failure');
+                        $mailer = new SimpleMailer();
+                        $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
+                        $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
+                        $mail_sent = $customer_notification['success'];
+                    }
+                } catch (Exception $e) {
+                    error_log('Email sending error in checkout: ' . $e->getMessage());
+                    // Даже если отправка писем не удалась, заказ все равно оформлен
+                    $mail_sent = false;
                 }
-                
-                // Получаем товары заказа для отображения в письме
-                $order_items = getOrderItems($order_id);
-                
-                // Отправляем уведомление покупателю
-                $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
-                
-                // Отправляем уведомление администратору
-                $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
-                
-                // Проверяем успешность отправки писем
-                $mail_sent = $customer_notification['success'];
             }
             
             // Очищаем корзину после успешного оформления заказа

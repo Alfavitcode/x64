@@ -32,8 +32,10 @@ function initPHPMailer() {
         }
     }
     
-    // Подключаем автозагрузчик для PHPMailer
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/autoload.php';
+    // Подключаем файлы напрямую, а не через автозагрузчик
+    require_once $phpmailer_dir . 'Exception.php';
+    require_once $phpmailer_dir . 'PHPMailer.php';
+    require_once $phpmailer_dir . 'SMTP.php';
 }
 
 // Инициализируем PHPMailer
@@ -130,11 +132,13 @@ class Mailer {
                 'message' => 'Письмо успешно отправлено'
             ];
         } catch (\PHPMailer\PHPMailer\Exception $e) {
+            error_log('PHPMailer Exception: ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Ошибка при отправке письма: ' . $mail->ErrorInfo
             ];
         } catch (\Exception $e) {
+            error_log('General Exception: ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Общая ошибка: ' . $e->getMessage()
