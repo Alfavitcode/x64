@@ -1367,8 +1367,7 @@ function createOrder($order_data) {
         // Фиксируем транзакцию
         mysqli_commit($conn);
         
-        // Отправляем уведомление администратору
-        // TODO: реализовать уведомления
+        // Уведомления отправляются в файле checkout.php после создания заказа
         
         return [
             'success' => true,

@@ -6,6 +6,16 @@ require_once 'includes/config/session.php';
 require_once 'includes/config/db_config.php';
 require_once 'includes/config/db_functions.php';
 
+// Подключаем класс для отправки писем
+try {
+    require_once 'includes/mail/Mailer.php';
+    $use_simple_mailer = false;
+} catch (Exception $e) {
+    // В случае ошибки подключаем простую версию отправки
+    require_once 'includes/mail/SimpleMailer.php';
+    $use_simple_mailer = true;
+}
+
 // Создаем таблицы заказов, если они не существуют или не содержат необходимые поля
 createOrdersTablesIfNotExists();
 
@@ -41,6 +51,7 @@ if ($user_id) {
 $order_success = false;
 $order_error = '';
 $order_id = 0;
+$mail_sent = false; // Флаг успешной отправки письма
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     // Получаем данные из формы
@@ -60,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         $order_error = 'Пожалуйста, заполните все обязательные поля';
     } else {
         // Создаем заказ в базе данных
-        // Функция createOrder ещё не реализована, нужно добавить её в db_functions.php
         $order_data = [
             'user_id' => $user_id,
             'session_id' => $session_id,
@@ -83,6 +93,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         if ($result['success']) {
             $order_success = true;
             $order_id = $result['order_id'];
+            
+            // Получаем данные созданного заказа
+            $order = getOrderById($order_id);
+            
+            // Отправляем электронное письмо покупателю
+            if ($order) {
+                // Создаем экземпляр нужного класса для отправки писем
+                if ($use_simple_mailer) {
+                    $mailer = new SimpleMailer();
+                } else {
+                    $mailer = new Mailer();
+                }
+                
+                // Получаем товары заказа для отображения в письме
+                $order_items = getOrderItems($order_id);
+                
+                // Отправляем уведомление покупателю
+                $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
+                
+                // Отправляем уведомление администратору
+                $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
+                
+                // Проверяем успешность отправки писем
+                $mail_sent = $customer_notification['success'];
+            }
             
             // Очищаем корзину после успешного оформления заказа
             clearCart($user_id, $session_id);
@@ -121,7 +156,13 @@ include_once 'includes/header/header.php';
                 <div class="success-details p-3 mb-4 mx-auto" style="max-width: 450px;">
                     <div class="d-flex align-items-center mb-3 success-detail-item">
                         <i class="fas fa-envelope text-primary me-3"></i>
-                        <p class="mb-0">Мы отправили подтверждение на указанный email</p>
+                        <p class="mb-0">
+                            <?php if ($mail_sent): ?>
+                                Мы отправили подтверждение на указанный email
+                            <?php else: ?>
+                                Подробная информация о заказе отправлена на указанный email
+                            <?php endif; ?>
+                        </p>
                     </div>
                     <div class="d-flex align-items-center success-detail-item">
                         <i class="fas fa-truck text-primary me-3"></i>
