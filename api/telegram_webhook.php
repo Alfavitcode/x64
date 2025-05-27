@@ -8,10 +8,24 @@ require_once '../includes/config/telegram_config.php';
 $update = json_decode(file_get_contents('php://input'), true);
 
 // Логирование входящих данных для отладки
-$log_file = __DIR__ . '/telegram_log.txt';
-file_put_contents($log_file, date('Y-m-d H:i:s') . " - Получен запрос\n", FILE_APPEND);
-file_put_contents($log_file, date('Y-m-d H:i:s') . " - Входящие данные: " . file_get_contents('php://input') . "\n", FILE_APPEND);
-file_put_contents($log_file, date('Y-m-d H:i:s') . " - Декодированные данные: " . print_r($update, true) . "\n\n", FILE_APPEND);
+$log_dir = __DIR__;
+$log_file = $log_dir . '/telegram_log.txt';
+
+// Проверяем, доступна ли директория для записи
+if (is_writable($log_dir)) {
+    // Ограничиваем размер лога
+    if (file_exists($log_file) && filesize($log_file) > 1024 * 1024) { // 1MB
+        // Сохраняем только последние 100 КБ
+        $content = file_get_contents($log_file);
+        $content = substr($content, -102400);
+        file_put_contents($log_file, $content);
+    }
+    
+    // Логируем запрос
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Получен запрос\n", FILE_APPEND);
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Входящие данные: " . file_get_contents('php://input') . "\n", FILE_APPEND);
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Декодированные данные: " . print_r($update, true) . "\n\n", FILE_APPEND);
+}
 
 // Проверяем, что это сообщение
 if (isset($update['message'])) {
@@ -202,6 +216,25 @@ if (isset($update['message'])) {
             sendTelegramMessage($chat_id, "Неверный код подтверждения. Пожалуйста, проверьте код и попробуйте снова.");
         }
         
+        exit;
+    }
+    
+    // Обработка обычного текста, который не является командой
+    if (substr($text, 0, 1) !== '/' && preg_match('/^\d{5}$/', $text) === 0) {
+        // Проверяем, есть ли сохраненная информация о пользователе
+        $sessions_dir = __DIR__ . '/telegram_sessions';
+        $session_file = $sessions_dir . '/' . $chat_id . '.json';
+        
+        if (file_exists($session_file)) {
+            // Предполагаем, что пользователь хочет получить код
+            $response = "Привет! Похоже, вы хотите получить код для привязки аккаунта.\n\n";
+            $response .= "Для получения кода отправьте команду /code\n\n";
+            $response .= "Для просмотра всех команд отправьте /help";
+            sendTelegramMessage($chat_id, $response);
+        } else {
+            $response = "Для начала работы с ботом, отправьте команду /start";
+            sendTelegramMessage($chat_id, $response);
+        }
         exit;
     }
     

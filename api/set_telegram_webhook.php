@@ -7,11 +7,19 @@ function setTelegramWebhook() {
     $bot_token = TELEGRAM_BOT_TOKEN;
     $webhook_url = TELEGRAM_WEBHOOK_URL;
     
-    // Формируем URL для запроса
-    $url = "https://api.telegram.org/bot$bot_token/setWebhook?url=$webhook_url";
+    // Сначала удаляем текущий вебхук
+    $delete_url = "https://api.telegram.org/bot$bot_token/deleteWebhook";
+    $ch = curl_init($delete_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $delete_result = curl_exec($ch);
+    curl_close($ch);
+    
+    // Формируем URL для установки нового вебхука
+    $set_url = "https://api.telegram.org/bot$bot_token/setWebhook?url=$webhook_url&drop_pending_updates=true";
     
     // Отправляем запрос
-    $ch = curl_init($url);
+    $ch = curl_init($set_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $result = curl_exec($ch);
