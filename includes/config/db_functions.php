@@ -1141,7 +1141,7 @@ function getCartItems($user_id = null, $session_id = null) {
  * @param string $session_id ID сессии для неавторизованных пользователей
  * @return int Количество товаров
  */
-function getCartItemCount($user_id = null, $session_id = null) {
+function getCartItemCount($session_id = null, $user_id = null) {
     global $conn;
     
     // Создаем таблицу корзины, если её не существует
@@ -1149,18 +1149,40 @@ function getCartItemCount($user_id = null, $session_id = null) {
     
     if (!$session_id) $session_id = session_id();
     
+    // Отладочная информация
+    $debug = [
+        'function' => 'getCartItemCount',
+        'session_id' => $session_id,
+        'user_id' => $user_id
+    ];
+    
     if ($user_id) {
         $sql = "SELECT SUM(quantity) as total FROM cart WHERE user_id = " . (int)$user_id;
     } else {
         $sql = "SELECT SUM(quantity) as total FROM cart WHERE session_id = '" . mysqli_real_escape_string($conn, $session_id) . "' AND user_id IS NULL";
     }
     
+    // Добавляем SQL запрос в отладочную информацию
+    $debug['sql'] = $sql;
+    
     $result = mysqli_query($conn, $sql);
     
     if ($result && mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
-        return (int)$row['total'];
+        $total = (int)$row['total'];
+        
+        // Добавляем результат в отладочную информацию
+        $debug['result'] = $total;
+        
+        // Записываем отладочную информацию в лог-файл
+        error_log(print_r($debug, true));
+        
+        return $total;
     }
+    
+    // Записываем отладочную информацию в лог-файл (нулевой результат)
+    $debug['result'] = 0;
+    error_log(print_r($debug, true));
     
     return 0;
 }

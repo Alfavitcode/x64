@@ -755,14 +755,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (data.success) {
                     // Обновляем счетчик товаров в корзине
-                    const cartCounter = document.querySelector('.cart-counter');
+                    const cartCounter = document.querySelector('.cart-count');
                     if (cartCounter) {
                         cartCounter.textContent = data.cart_count || 0;
                         
                         // Анимация счетчика корзины
-                        cartCounter.classList.add('cart-counter-animate');
+                        cartCounter.classList.add('cart-count-animate');
                         setTimeout(() => {
-                            cartCounter.classList.remove('cart-counter-animate');
+                            cartCounter.classList.remove('cart-count-animate');
                         }, 500);
                     }
                     
@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
             50% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
-        .cart-counter-animate {
+        .cart-count-animate {
             animation: cartCounterPulse 0.5s ease-out;
         }
     `;

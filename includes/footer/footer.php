@@ -86,5 +86,46 @@
     <script src="/js/phone-case-effects.js"></script>
     <!-- Скрипт для работы с корзиной -->
     <script src="/js/cart.js"></script>
+    
+    <!-- Отладочный скрипт для проверки элементов корзины -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== ОТЛАДКА КОРЗИНЫ ===');
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            console.log('Элементы .cart-count найдены:', cartCountElements.length);
+            
+            cartCountElements.forEach((element, index) => {
+                console.log(`Элемент #${index}:`, element.textContent, element);
+            });
+            
+            // Проверяем, загружен ли объект Cart
+            if (window.Cart) {
+                console.log('Объект Cart загружен:', window.Cart);
+                console.log('Пробуем принудительно обновить счетчик...');
+                setTimeout(function() {
+                    window.Cart.getCount();
+                }, 1000);
+            } else {
+                console.error('Объект Cart не найден в глобальной области видимости!');
+            }
+            
+            // Проверяем, есть ли доступ к AJAX
+            console.log('Проверка доступа к AJAX...');
+            fetch('/ajax/get_cart_count.php')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Ответ от get_cart_count.php:', data);
+                    try {
+                        const jsonData = JSON.parse(data);
+                        console.log('Распарсенные данные:', jsonData);
+                    } catch (e) {
+                        console.error('Ошибка парсинга JSON:', e);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при запросе к серверу:', error);
+                });
+        });
+    </script>
 </body>
 </html> 

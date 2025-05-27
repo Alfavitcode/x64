@@ -14,18 +14,34 @@
     const Cart = {
         // Обновление количества товаров в корзине
         updateCount: function(count) {
-            document.querySelectorAll('.cart-count').forEach(element => {
+            console.log('Обновление счетчика корзины, новое значение:', count);
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            console.log('Найдено элементов счетчика корзины:', cartCountElements.length);
+            
+            cartCountElements.forEach((element, index) => {
+                console.log(`Элемент счетчика #${index}:`, element);
                 element.textContent = count;
             });
+            
+            if (cartCountElements.length === 0) {
+                console.error('Не найдены элементы с классом .cart-count!');
+            }
         },
 
         // Получение количества товаров в корзине
         getCount: function() {
+            console.log('Запрос количества товаров в корзине...');
             fetch('/ajax/get_cart_count.php')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Получен ответ от сервера:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Данные о количестве товаров:', data);
                     if (data.success) {
                         this.updateCount(data.cart_count);
+                    } else {
+                        console.error('Ошибка в ответе сервера:', data);
                     }
                 })
                 .catch(error => {
@@ -284,6 +300,7 @@
             }
             
             // Получаем количество товаров в корзине
+            console.log('Запрашиваем количество товаров при инициализации...');
             this.getCount();
             
             // Инициализируем кнопки
@@ -329,9 +346,11 @@
 
     // Инициализация при загрузке DOM
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOMContentLoaded сработал, инициализируем корзину...');
         Cart.init();
     });
 
     // Добавляем Cart в глобальную область видимости для доступа из других скриптов
     window.Cart = Cart;
+    console.log('Объект Cart добавлен в глобальную область видимости');
 })(); 
