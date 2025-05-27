@@ -7,7 +7,7 @@
 // Подключаем файл конфигурации для почты
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/mail_config.php';
 
-// Встроенная функция для скачивания и подключения PHPMailer
+// Встроенная функция для загрузки PHPMailer
 function initPHPMailer() {
     $phpmailer_dir = $_SERVER['DOCUMENT_ROOT'] . '/vendor/phpmailer/';
     
@@ -16,14 +16,13 @@ function initPHPMailer() {
         mkdir($phpmailer_dir, 0777, true);
     }
     
-    // Список файлов, которые нужно скачать
+    // Список файлов, которые нужно проверить
     $files = [
         'PHPMailer.php' => 'https://raw.githubusercontent.com/PHPMailer/PHPMailer/master/src/PHPMailer.php',
-        'SMTP.php' => 'https://raw.githubusercontent.com/PHPMailer/PHPMailer/master/src/SMTP.php',
-        'Exception.php' => 'https://raw.githubusercontent.com/PHPMailer/PHPMailer/master/src/Exception.php'
+        'SMTP.php' => 'https://raw.githubusercontent.com/PHPMailer/PHPMailer/master/src/SMTP.php'
     ];
     
-    // Скачиваем файлы, если их нет
+    // Проверяем и скачиваем файлы, если их нет
     foreach ($files as $filename => $url) {
         $file_path = $phpmailer_dir . $filename;
         
@@ -32,14 +31,17 @@ function initPHPMailer() {
         }
     }
     
-    // Подключаем файлы напрямую, а не через автозагрузчик
-    require_once $phpmailer_dir . 'Exception.php';
+    // Подключаем файлы напрямую
     require_once $phpmailer_dir . 'PHPMailer.php';
     require_once $phpmailer_dir . 'SMTP.php';
 }
 
 // Инициализируем PHPMailer
-initPHPMailer();
+try {
+    initPHPMailer();
+} catch (Exception $e) {
+    error_log('Failed to initialize PHPMailer: ' . $e->getMessage());
+}
 
 /**
  * Класс для отправки электронных писем
@@ -87,10 +89,15 @@ class Mailer {
      * @return array Результат отправки ['success' => bool, 'message' => string]
      */
     public function send($to, $subject, $body, $attachments = []) {
-        // Создаем экземпляр PHPMailer с использованием пространства имен
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-        
         try {
+            // Проверяем, доступен ли класс PHPMailer
+            if (!class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
+                throw new Exception('PHPMailer class not available');
+            }
+            
+            // Создаем экземпляр PHPMailer
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            
             // Настройки сервера
             $mail->isSMTP();
             $mail->Host = $this->host;
@@ -100,9 +107,6 @@ class Mailer {
             $mail->SMTPSecure = $this->encryption;
             $mail->Port = $this->port;
             $mail->CharSet = 'UTF-8';
-            
-            // Режим отладки (при необходимости)
-            // $mail->SMTPDebug = 2;
             
             // Отправитель
             $mail->setFrom($this->sender_email, $this->sender_name);
@@ -131,17 +135,14 @@ class Mailer {
                 'success' => true,
                 'message' => 'Письмо успешно отправлено'
             ];
-        } catch (\PHPMailer\PHPMailer\Exception $e) {
-            error_log('PHPMailer Exception: ' . $e->getMessage());
+        } catch (Exception $e) {
+            error_log('Email sending error: ' . $e->getMessage());
+            // Если у нас есть объект $mail, используем его информацию об ошибке
+            $error_message = isset($mail) && $mail->ErrorInfo ? $mail->ErrorInfo : $e->getMessage();
+            
             return [
                 'success' => false,
-                'message' => 'Ошибка при отправке письма: ' . $mail->ErrorInfo
-            ];
-        } catch (\Exception $e) {
-            error_log('General Exception: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Общая ошибка: ' . $e->getMessage()
+                'message' => 'Ошибка при отправке письма: ' . $error_message
             ];
         }
     }
