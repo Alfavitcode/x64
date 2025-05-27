@@ -92,11 +92,8 @@ $orderCount = count($orders);
                         <div class="profile-stats-wrapper">
                             <div class="profile-stats">
                                 <div class="stat-item">
-                                    <div class="stat-icon mb-2">
-                                        <i class="fas fa-shopping-bag text-primary"></i>
-                                    </div>
-                                    <span class="stat-value"><?php echo $orderCount; ?></span>
-                                    <span class="stat-label">Заказов</span>
+                                    <div class="stat-value"><?php echo $orderCount; ?></div>
+                                    <div class="stat-label">ЗАКАЗОВ</div>
                                 </div>
                             </div>
                         </div>
@@ -344,50 +341,30 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .stat-item {
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    padding: 20px;
+    background-color: #5165F6;
+    border-radius: 15px;
+    padding: 20px 35px;
     text-align: center;
     min-width: 150px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border: 1px solid #eaeaea;
+    box-shadow: 0 4px 10px rgba(81, 101, 246, 0.3);
     transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    border-color: var(--primary-color);
-}
-
-.stat-icon {
-    font-size: 22px;
-    color: var(--primary-color);
-    background-color: rgba(77, 97, 252, 0.1);
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin: 0 auto 10px;
+    border: none;
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 700;
-    color: var(--primary-color);
+    color: white;
     margin-bottom: 5px;
     display: block;
+    line-height: 1.2;
 }
 
 .stat-label {
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 14px;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 /* Адаптация для разных устройств */
@@ -399,22 +376,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @media (max-width: 576px) {
     .stat-item {
-        padding: 15px;
+        padding: 15px 25px;
         min-width: 120px;
     }
     
     .stat-value {
-        font-size: 24px;
+        font-size: 30px;
     }
     
     .stat-label {
         font-size: 12px;
-    }
-    
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
     }
 }
 </style>
