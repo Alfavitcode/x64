@@ -89,10 +89,15 @@ $orderCount = count($orders);
                         <p>Здесь вы можете управлять своим профилем, заказами и настройками учетной записи.</p>
                         
                         <!-- Статистика -->
-                        <div class="profile-stats">
-                            <div class="stat-item">
-                                <div class="stat-value"><?php echo $orderCount; ?></div>
-                                <div class="stat-label">Заказов</div>
+                        <div class="profile-stats-wrapper">
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon mb-2">
+                                        <i class="fas fa-shopping-bag text-primary"></i>
+                                    </div>
+                                    <span class="stat-value"><?php echo $orderCount; ?></span>
+                                    <span class="stat-label">Заказов</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -328,26 +333,89 @@ document.addEventListener('DOMContentLoaded', function() {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Улучшенные стили для статистики */
+.profile-stats-wrapper {
+    margin: 25px 0;
+}
+
 .profile-stats {
     display: flex;
-    gap: 30px;
-    margin-top: 20px;
+    justify-content: flex-start;
 }
 
 .stat-item {
-    background-color: rgba(77, 97, 252, 0.1);
-    padding: 10px 20px;
+    background-color: #f8f9fa;
     border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    min-width: 150px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-color: var(--primary-color);
+}
+
+.stat-icon {
+    font-size: 22px;
+    color: var(--primary-color);
+    background-color: rgba(77, 97, 252, 0.1);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 10px;
 }
 
 .stat-value {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 28px;
+    font-weight: 700;
     color: var(--primary-color);
+    margin-bottom: 5px;
+    display: block;
 }
 
 .stat-label {
     color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Адаптация для разных устройств */
+@media (max-width: 991px) {
+    .profile-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .stat-item {
+        padding: 15px;
+        min-width: 120px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
 }
 </style>
 
