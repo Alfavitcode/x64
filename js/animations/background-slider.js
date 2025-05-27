@@ -6,21 +6,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Конфигурация анимации
     const config = {
-        scrollSpeed: 60, // Скорость прокрутки (секунд на полный цикл)
+        scrollSpeed: 120, // Скорость прокрутки (секунд на полный цикл) - увеличена для более медленного движения
         direction: 'right', // Направление прокрутки: 'left' или 'right'
         transitionDuration: 2, // Длительность перехода между слайдами в секундах
         overlayOpacity: 0.85 // Прозрачность белого оверлея
     };
     
-    // Массив с панорамными изображениями для фона
-    const backgroundImages = [
-        '../img/backgrounds/panorama-1.jpg',
-        '../img/backgrounds/panorama-2.jpg',
-        '../img/backgrounds/panorama-3.jpg'
-    ];
-    
-    // Выбираем случайное изображение для фона
-    const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+    // Путь к изображению для фона
+    const backgroundImage = '../img/backgrounds/slider.png';
     
     // Создаем контейнер для фона, если он еще не существует
     let backgroundContainer = document.querySelector('.background-slider');
@@ -48,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 0;
                 width: 200%; /* Двойная ширина для бесконечной прокрутки */
                 height: 100%;
-                background-image: url('${randomImage}');
+                background-image: url('${backgroundImage}');
                 background-size: 50% 100%; /* Размер одной картинки */
                 background-repeat: repeat-x;
                 will-change: transform;
