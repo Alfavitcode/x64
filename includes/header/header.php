@@ -22,6 +22,15 @@ if ($isLoggedIn) {
 // Определяем URL для кнопки "Кабинет"
 $accountUrl = $isLoggedIn ? "/account/profile.php" : "/account/register.php";
 
+// Получаем количество товаров в корзине
+if (!isset($conn)) {
+    require_once __DIR__ . '/../config/db_config.php';
+    require_once __DIR__ . '/../config/db_functions.php';
+}
+$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+$session_id = session_id();
+$cart_count = getCartItemCount($session_id, $user_id);
+
 // Проверяем флаг для стандартного хедера (по умолчанию false)
 $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
 ?>
@@ -160,7 +169,7 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                 <a href="/cart/index.php" class="header__action header__cart">
                     <div class="cart-icon-container">
                     <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">0</span>
+                        <span class="cart-count"><?php echo $cart_count; ?></span>
                     </div>
                     <span class="action-text">Корзина</span>
                 </a>
@@ -220,7 +229,7 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                         <a href="/cart" class="mobile-action">
                             <div class="cart-icon-container">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="cart-count">0</span>
+                                <span class="cart-count"><?php echo $cart_count; ?></span>
                             </div>
                             Корзина
                         </a>
