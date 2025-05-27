@@ -1,9 +1,9 @@
 <?php
 /**
- * Скрипт для создания тестовых фоновых изображений
+ * Скрипт для создания панорамного фонового изображения
  * 
- * Этот скрипт создает градиентные изображения для использования
- * в качестве фона для слайдера
+ * Этот скрипт создает широкое панорамное изображение для
+ * бесконечной плавной прокрутки фона
  */
 
 // Создаем директорию для фоновых изображений, если она не существует
@@ -13,57 +13,64 @@ if (!file_exists($directory)) {
     echo "Директория создана: $directory\n";
 }
 
+// Размеры панорамного изображения (широкое для горизонтального скроллинга)
+$width = 3840; // Ширина панорамы (2x стандартного экрана)
+$height = 1080; // Высота панорамы
+
 // Массив с цветами для градиентов
 $gradients = [
     // Синий градиент
     [
-        'start' => [41, 128, 185],
-        'end' => [109, 213, 250],
-        'name' => 'blue-gradient'
+        'colors' => [
+            [41, 128, 185],   // Синий
+            [52, 152, 219],   // Светло-синий
+            [41, 128, 185],   // Синий (повтор для плавного перехода)
+        ],
+        'name' => 'blue-panorama'
     ],
     // Фиолетовый градиент
     [
-        'start' => [142, 68, 173],
-        'end' => [155, 89, 182],
-        'name' => 'purple-gradient'
+        'colors' => [
+            [142, 68, 173],   // Фиолетовый
+            [155, 89, 182],   // Светло-фиолетовый
+            [142, 68, 173],   // Фиолетовый (повтор для плавного перехода)
+        ],
+        'name' => 'purple-panorama'
     ],
     // Зелено-синий градиент
     [
-        'start' => [26, 188, 156],
-        'end' => [41, 128, 185],
-        'name' => 'teal-gradient'
-    ],
-    // Оранжево-красный градиент
-    [
-        'start' => [231, 76, 60],
-        'end' => [241, 196, 15],
-        'name' => 'orange-gradient'
-    ],
-    // Темно-синий градиент
-    [
-        'start' => [44, 62, 80],
-        'end' => [52, 152, 219],
-        'name' => 'dark-blue-gradient'
+        'colors' => [
+            [26, 188, 156],   // Зеленый
+            [41, 128, 185],   // Синий
+            [26, 188, 156],   // Зеленый (повтор для плавного перехода)
+        ],
+        'name' => 'teal-panorama'
     ]
 ];
 
-// Размеры изображения
-$width = 1920;
-$height = 1080;
-
-// Создаем изображения для каждого градиента
+// Создаем панорамные изображения
 foreach ($gradients as $index => $gradient) {
     // Создаем изображение
     $image = imagecreatetruecolor($width, $height);
     
     // Получаем цвета градиента
-    $startColor = $gradient['start'];
-    $endColor = $gradient['end'];
+    $colors = $gradient['colors'];
+    $colorCount = count($colors);
     
-    // Создаем градиент
-    for ($y = 0; $y < $height; $y++) {
-        // Вычисляем процент позиции
-        $percent = $y / $height;
+    // Создаем горизонтальный градиент
+    $segmentWidth = $width / ($colorCount - 1);
+    
+    for ($x = 0; $x < $width; $x++) {
+        // Определяем, в каком сегменте находится текущая точка
+        $segment = floor($x / $segmentWidth);
+        $segment = min($segment, $colorCount - 2); // Не выходим за пределы массива
+        
+        // Вычисляем процент позиции внутри сегмента
+        $percent = ($x - $segment * $segmentWidth) / $segmentWidth;
+        
+        // Получаем цвета для интерполяции
+        $startColor = $colors[$segment];
+        $endColor = $colors[$segment + 1];
         
         // Интерполируем цвета
         $r = $startColor[0] + ($endColor[0] - $startColor[0]) * $percent;
@@ -73,12 +80,29 @@ foreach ($gradients as $index => $gradient) {
         // Создаем цвет
         $color = imagecolorallocate($image, $r, $g, $b);
         
-        // Рисуем линию
-        imageline($image, 0, $y, $width, $y, $color);
+        // Рисуем вертикальную линию
+        imageline($image, $x, 0, $x, $height, $color);
     }
     
+    // Добавляем текстуру и эффекты
+    addTextureAndEffects($image, $width, $height);
+    
+    // Формируем путь для сохранения
+    $path = $directory . "/panorama-" . ($index + 1) . ".jpg";
+    
+    // Сохраняем изображение
+    imagejpeg($image, $path, 90);
+    
+    // Освобождаем память
+    imagedestroy($image);
+    
+    echo "Панорамное изображение создано: $path\n";
+}
+
+// Функция для добавления текстуры и эффектов
+function addTextureAndEffects($image, $width, $height) {
     // Добавляем немного шума для текстуры
-    for ($i = 0; $i < 10000; $i++) {
+    for ($i = 0; $i < 50000; $i++) {
         $x = mt_rand(0, $width - 1);
         $y = mt_rand(0, $height - 1);
         
@@ -99,28 +123,43 @@ foreach ($gradients as $index => $gradient) {
         imagesetpixel($image, $x, $y, $color);
     }
     
-    // Добавляем узор
-    for ($i = 0; $i < 50; $i++) {
-        $x1 = mt_rand(0, $width);
-        $y1 = mt_rand(0, $height);
-        $x2 = $x1 + mt_rand(-200, 200);
-        $y2 = $y1 + mt_rand(-200, 200);
+    // Добавляем волнистые линии для создания эффекта движения
+    for ($i = 0; $i < 30; $i++) {
+        $startY = mt_rand(0, $height);
+        $amplitude = mt_rand(10, 50);
+        $period = mt_rand(200, 800);
+        $thickness = mt_rand(1, 3);
+        $alpha = mt_rand(10, 40); // Прозрачность (0-127)
         
-        $color = imagecolorallocatealpha($image, 255, 255, 255, 120); // Полупрозрачный белый
-        imageline($image, $x1, $y1, $x2, $y2, $color);
+        $color = imagecolorallocatealpha($image, 255, 255, 255, $alpha);
+        
+        // Рисуем волнистую линию
+        for ($x = 0; $x < $width; $x += 2) {
+            $y = $startY + $amplitude * sin($x / $period * 2 * M_PI);
+            
+            // Рисуем точку с заданной толщиной
+            for ($t = 0; $t < $thickness; $t++) {
+                imagesetpixel($image, $x, $y + $t, $color);
+            }
+        }
     }
     
-    // Формируем путь для сохранения
-    $path = $directory . "/bg-" . ($index + 1) . ".jpg";
-    
-    // Сохраняем изображение
-    imagejpeg($image, $path, 90);
-    
-    // Освобождаем память
-    imagedestroy($image);
-    
-    echo "Изображение создано: $path\n";
+    // Добавляем градиентные круги для создания эффекта глубины
+    for ($i = 0; $i < 10; $i++) {
+        $centerX = mt_rand(0, $width);
+        $centerY = mt_rand(0, $height);
+        $maxRadius = mt_rand(100, 300);
+        
+        // Рисуем градиентный круг
+        for ($radius = $maxRadius; $radius > 0; $radius -= 2) {
+            $alpha = 127 - (127 * $radius / $maxRadius); // Прозрачность увеличивается к центру
+            $color = imagecolorallocatealpha($image, 255, 255, 255, $alpha);
+            
+            // Рисуем окружность
+            imagearc($image, $centerX, $centerY, $radius * 2, $radius * 2, 0, 360, $color);
+        }
+    }
 }
 
-echo "Создание изображений завершено. Изображения сохранены в директории: $directory\n";
+echo "Создание панорамных изображений завершено. Изображения сохранены в директории: $directory\n";
 ?> 
