@@ -28,9 +28,6 @@ if (!$user) {
 // Получаем заказы пользователя
 $orders = getUserOrders($user_id);
 $orderCount = count($orders);
-
-// Для отзывов (заглушка)
-$reviewCount = 0; 
 ?>
 
 <section class="profile-section">
@@ -59,6 +56,13 @@ $reviewCount = 0;
                             </a>
                         </li>
                      
+                        <li class="profile-menu-item">
+                            <a href="telegram.php">
+                                <i class="fab fa-telegram"></i>
+                                Привязка Telegram
+                            </a>
+                        </li>
+                        
                         <li class="profile-menu-item">
                             <a href="settings.php">
                                 <i class="fas fa-cog"></i>
@@ -89,11 +93,6 @@ $reviewCount = 0;
                             <div class="stat-item">
                                 <div class="stat-value"><?php echo $orderCount; ?></div>
                                 <div class="stat-label">Заказов</div>
-                            </div>
-                            
-                            <div class="stat-item">
-                                <div class="stat-value"><?php echo $reviewCount; ?></div>
-                                <div class="stat-label">Отзывов</div>
                             </div>
                         </div>
                     </div>
@@ -135,20 +134,6 @@ $reviewCount = 0;
                                     <div class="card h-100 border-0 rounded-4 shadow-sm">
                                         <div class="card-body p-4">
                                             <div class="d-flex align-items-center mb-3">
-                                                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
-                                                    <i class="fas fa-star text-info"></i>
-                                                </div>
-                                                <h5 class="card-title mb-0">Отзывы</h5>
-                                            </div>
-                                            <p class="card-text text-muted">Оставляйте отзывы о приобретенных товарах</p>
-                                            <a href="#" class="btn btn-sm btn-outline-info rounded-pill">Перейти <i class="fas fa-arrow-right ms-1"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100 border-0 rounded-4 shadow-sm">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
                                                 <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
                                                     <i class="fab fa-telegram-plane text-primary"></i>
                                                 </div>
@@ -158,6 +143,7 @@ $reviewCount = 0;
                                             <a href="telegram.php" class="btn btn-sm btn-outline-primary rounded-pill">Перейти <i class="fas fa-arrow-right ms-1"></i></a>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -293,6 +279,77 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* Стили для мобильной адаптивности */
+@media (max-width: 767px) {
+    .profile-content .card {
+        margin-bottom: 15px;
+    }
+    
+    .profile-stats {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0 10px;
+    }
+    
+    .profile-info-row {
+        flex-direction: column;
+        padding: 8px 0;
+    }
+    
+    .profile-info-label {
+        margin-bottom: 5px;
+    }
+    
+    .profile-info-value {
+        padding-left: 0;
+    }
+    
+    .profile-main-card {
+        padding: 15px;
+    }
+    
+    .profile-header {
+        padding: 15px;
+    }
+    
+    .profile-body {
+        padding: 15px;
+    }
+}
+
+/* Улучшения для всех устройств */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.stat-item {
+    background-color: rgba(77, 97, 252, 0.1);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    color: #6c757d;
+}
+</style>
 
 <?php
 // Подключаем подвал сайта

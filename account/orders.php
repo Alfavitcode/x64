@@ -96,6 +96,13 @@ if (isset($_GET['order_id']) && !empty($_GET['order_id'])) {
                         </li>
                         
                         <li class="profile-menu-item">
+                            <a href="telegram.php">
+                                <i class="fab fa-telegram"></i>
+                                Привязка Telegram
+                            </a>
+                        </li>
+                        
+                        <li class="profile-menu-item">
                             <a href="settings.php">
                                 <i class="fas fa-cog"></i>
                                 Настройки

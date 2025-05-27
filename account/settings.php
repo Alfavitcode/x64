@@ -49,6 +49,13 @@ if (!$user) {
                             </a>
                         </li>
                         
+                        <li class="profile-menu-item">
+                            <a href="telegram.php">
+                                <i class="fab fa-telegram"></i>
+                                Привязка Telegram
+                            </a>
+                        </li>
+                        
                         <li class="profile-menu-item active">
                             <a href="settings.php">
                                 <i class="fas fa-cog"></i>

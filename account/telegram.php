@@ -113,12 +113,6 @@ include_once '../includes/header/header.php';
                                 Мои заказы
                             </a>
                         </li>
-                        <li class="profile-menu-item">
-                            <a href="wishlist.php">
-                                <i class="fas fa-heart"></i>
-                                Избранное
-                            </a>
-                        </li>
                         <li class="profile-menu-item active">
                             <a href="telegram.php">
                                 <i class="fab fa-telegram"></i>
