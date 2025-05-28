@@ -8,6 +8,31 @@
 // Выберите почтовый сервис, указав его название: 'yandex', 'gmail' или 'mail'
 $mail_service = 'mail';
 
+// Настройки отладки
+$mail_debug = true; // Включить/выключить подробное логирование
+$mail_log_path = $_SERVER['DOCUMENT_ROOT'] . '/logs/mail.log'; // Путь к файлу логов
+
+// Создаем директорию для логов, если она не существует
+if ($mail_debug) {
+    $log_dir = dirname($mail_log_path);
+    if (!is_dir($log_dir)) {
+        mkdir($log_dir, 0755, true);
+    }
+}
+
+// Функция для логирования сообщений отладки
+function mail_log($message) {
+    global $mail_debug, $mail_log_path;
+    if ($mail_debug) {
+        $timestamp = date('Y-m-d H:i:s');
+        $log_message = "[{$timestamp}] {$message}" . PHP_EOL;
+        error_log($log_message, 3, $mail_log_path);
+    }
+}
+
+// Логируем информацию о запуске
+mail_log('Mail config loaded. Service: ' . $mail_service);
+
 // Настройки для разных почтовых сервисов
 $mail_configs = [
     // Настройки для Яндекс.Почты

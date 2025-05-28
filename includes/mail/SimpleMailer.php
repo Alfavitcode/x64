@@ -76,7 +76,7 @@ class SimpleMailer {
         if ($result) {
             return [
                 'success' => true,
-                'message' => 'Письмо успешно отправлено через PHP mail()'
+                'message' => 'Письмо успешно отправлено через PHP mail(). Если вы не видите письмо во входящих, проверьте папку СПАМ.'
             ];
         } else {
             $error = error_get_last();

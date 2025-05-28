@@ -158,7 +158,7 @@ class Mailer {
             
             return [
                 'success' => true,
-                'message' => 'Письмо успешно отправлено'
+                'message' => 'Письмо успешно отправлено. Если вы не видите письмо во входящих, проверьте папку СПАМ.'
             ];
         } catch (Exception $e) {
             error_log('Email sending error with PHPMailer: ' . $e->getMessage());
