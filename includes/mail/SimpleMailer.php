@@ -51,6 +51,9 @@ class SimpleMailer {
      * @return array Результат отправки ['success' => bool, 'message' => string]
      */
     public function send($to, $subject, $body) {
+        // Логируем попытку отправки через SimpleMailer
+        error_log('SimpleMailer: Attempting to send email to: ' . $to . ' with subject: ' . $subject);
+        
         // Заголовки письма
         $headers = [
             'From: ' . $this->sender_name . ' <' . $this->sender_email . '>',
@@ -63,8 +66,12 @@ class SimpleMailer {
         // Преобразуем массив заголовков в строку
         $headers_string = implode("\r\n", $headers);
         
+        error_log('SimpleMailer: Using mail() function with headers: ' . $headers_string);
+        
         // Пытаемся отправить письмо встроенной функцией PHP
         $result = mail($to, $subject, $body, $headers_string);
+        
+        error_log('SimpleMailer: mail() result: ' . ($result ? 'success' : 'failed'));
         
         if ($result) {
             return [
@@ -72,9 +79,13 @@ class SimpleMailer {
                 'message' => 'Письмо успешно отправлено через PHP mail()'
             ];
         } else {
+            $error = error_get_last();
+            $error_message = $error ? ' Error: ' . $error['message'] : '';
+            error_log('SimpleMailer: Failed to send email.' . $error_message);
+            
             return [
                 'success' => false,
-                'message' => 'Ошибка при отправке письма через PHP mail()'
+                'message' => 'Ошибка при отправке письма через PHP mail()' . $error_message
             ];
         }
     }

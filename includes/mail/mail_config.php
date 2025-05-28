@@ -6,7 +6,7 @@
  */
 
 // Выберите почтовый сервис, указав его название: 'yandex', 'gmail' или 'mail'
-$mail_service = 'yandex';
+$mail_service = 'mail';
 
 // Настройки для разных почтовых сервисов
 $mail_configs = [

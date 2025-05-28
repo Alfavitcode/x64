@@ -39,8 +39,14 @@ function initPHPMailer() {
 // Инициализируем PHPMailer
 try {
     initPHPMailer();
+    // Проверяем, доступен ли класс после инициализации
+    $phpmailer_available = class_exists('\\PHPMailer\\PHPMailer\\PHPMailer');
+    if (!$phpmailer_available) {
+        error_log('PHPMailer class not available after initialization');
+    }
 } catch (Exception $e) {
     error_log('Failed to initialize PHPMailer: ' . $e->getMessage());
+    $phpmailer_available = false;
 }
 
 /**
@@ -90,13 +96,24 @@ class Mailer {
      */
     public function send($to, $subject, $body, $attachments = []) {
         try {
+            // Логируем попытку отправки
+            error_log('Attempting to send email to: ' . $to . ' with subject: ' . $subject);
+            
             // Проверяем, доступен ли класс PHPMailer
             if (!class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
-                throw new Exception('PHPMailer class not available');
+                error_log('PHPMailer class not available, using SimpleMailer as fallback');
+                
+                // Используем SimpleMailer как запасной вариант
+                require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/SimpleMailer.php';
+                $simpleMailer = new SimpleMailer();
+                return $simpleMailer->send($to, $subject, $body);
             }
             
             // Создаем экземпляр PHPMailer
             $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            
+            // Логируем настройки SMTP
+            error_log('SMTP settings - Host: ' . $this->host . ', Port: ' . $this->port . ', Username: ' . $this->username);
             
             // Настройки сервера
             $mail->isSMTP();
@@ -107,6 +124,12 @@ class Mailer {
             $mail->SMTPSecure = $this->encryption;
             $mail->Port = $this->port;
             $mail->CharSet = 'UTF-8';
+            
+            // Включаем режим отладки
+            $mail->SMTPDebug = 2;
+            $mail->Debugoutput = function($str, $level) {
+                error_log('PHPMailer Debug: ' . $str);
+            };
             
             // Отправитель
             $mail->setFrom($this->sender_email, $this->sender_name);
@@ -129,16 +152,38 @@ class Mailer {
             }
             
             // Отправляем письмо
-            $mail->send();
+            error_log('Sending email...');
+            $result = $mail->send();
+            error_log('Email sent: ' . ($result ? 'success' : 'failed'));
             
             return [
                 'success' => true,
                 'message' => 'Письмо успешно отправлено'
             ];
         } catch (Exception $e) {
-            error_log('Email sending error: ' . $e->getMessage());
+            error_log('Email sending error with PHPMailer: ' . $e->getMessage());
+            
+            // Пробуем отправить через SimpleMailer как запасной вариант
+            error_log('Trying SimpleMailer as fallback...');
+            try {
+                require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/SimpleMailer.php';
+                $simpleMailer = new SimpleMailer();
+                $result = $simpleMailer->send($to, $subject, $body);
+                error_log('SimpleMailer result: ' . ($result['success'] ? 'success' : 'failed'));
+                
+                if ($result['success']) {
+                    return [
+                        'success' => true,
+                        'message' => 'Письмо успешно отправлено через SimpleMailer (резервный метод)'
+                    ];
+                }
+            } catch (Exception $simple_e) {
+                error_log('SimpleMailer error: ' . $simple_e->getMessage());
+            }
+            
             // Если у нас есть объект $mail, используем его информацию об ошибке
             $error_message = isset($mail) && $mail->ErrorInfo ? $mail->ErrorInfo : $e->getMessage();
+            error_log('Full error details: ' . $error_message);
             
             return [
                 'success' => false,
