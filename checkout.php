@@ -6,13 +6,15 @@ require_once 'includes/config/session.php';
 require_once 'includes/config/db_config.php';
 require_once 'includes/config/db_functions.php';
 
+// Всегда подключаем простую версию отправки как запасной вариант
+require_once 'includes/mail/SimpleMailer.php';
+
 // Подключаем класс для отправки писем
 try {
     require_once 'includes/mail/Mailer.php';
     $use_simple_mailer = false;
 } catch (Exception $e) {
-    // В случае ошибки подключаем простую версию отправки
-    require_once 'includes/mail/SimpleMailer.php';
+    // В случае ошибки используем простую версию отправки
     $use_simple_mailer = true;
     // Логируем ошибку
     error_log('PHPMailer initialization error: ' . $e->getMessage());
@@ -106,7 +108,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     if ($use_simple_mailer) {
                         $mailer = new SimpleMailer();
                     } else {
-                        $mailer = new Mailer();
+                        try {
+                            $mailer = new Mailer();
+                        } catch (Exception $e) {
+                            // Если произошла ошибка с Mailer, используем SimpleMailer
+                            error_log('Error creating Mailer, falling back to SimpleMailer: ' . $e->getMessage());
+                            $mailer = new SimpleMailer();
+                        }
                     }
                     
                     // Получаем товары заказа для отображения в письме
@@ -121,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     // Проверяем успешность отправки писем
                     $mail_sent = $customer_notification['success'];
                     
-                    if (!$mail_sent && !$use_simple_mailer) {
+                    if (!$mail_sent && !$use_simple_mailer && !($mailer instanceof SimpleMailer)) {
                         // Если PHPMailer не сработал, пробуем SimpleMailer как запасной вариант
                         error_log('Falling back to SimpleMailer due to PHPMailer failure');
                         $mailer = new SimpleMailer();

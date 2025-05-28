@@ -6,6 +6,10 @@
  * Запустите его в браузере или через командную строку
  */
 
+// Подключаем простой класс для отправки писем
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/SimpleMailer.php';
+$simple_mailer_available = true;
+
 // Подключаем класс для работы с почтой
 try {
     require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/Mailer.php';
@@ -16,10 +20,6 @@ try {
     $mailer_class_error = $e->getMessage();
     error_log('PHPMailer Error in test_email.php: ' . $e->getMessage());
 }
-
-// Подключаем простой класс для отправки писем
-require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail/SimpleMailer.php';
-$simple_mailer_available = true;
 
 // Определяем переменные для тестирования
 $test_email = isset($_GET['email']) ? $_GET['email'] : 'test@example.com';
