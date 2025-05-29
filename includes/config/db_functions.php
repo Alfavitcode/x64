@@ -1658,69 +1658,96 @@ function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = nu
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN product p ON oi.product_id = p.id
-            WHERE (o.status = 'completed' OR o.status = 'closed')";
+            WHERE 1=1";
     
-    // Основной запрос для получения данных
+    // Запрос для получения данных отчета
     $sql = "SELECT 
                 p.id,
                 p.name,
-                p.category as category,
+                p.category,
                 SUM(oi.quantity) as quantity,
                 SUM(oi.price * oi.quantity) as total_amount,
                 AVG(oi.price) as avg_price
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN product p ON oi.product_id = p.id
-            WHERE (o.status = 'completed' OR o.status = 'closed')";
+            WHERE 1=1";
     
-    // Добавляем фильтры по датам, если указаны
-    if ($dateFrom) {
-        $dateFrom = mysqli_real_escape_string($conn, $dateFrom);
-        $sql .= " AND o.created_at >= '$dateFrom 00:00:00'";
-        $count_sql .= " AND o.created_at >= '$dateFrom 00:00:00'";
+    // Добавляем условия фильтрации
+    $params = [];
+    
+    // Фильтрация по статусу заказа (только выполненные заказы)
+    $sql .= " AND o.status = 'completed'";
+    $count_sql .= " AND o.status = 'completed'";
+    
+    // Фильтрация по дате
+    if ($dateFrom && $dateTo) {
+        $sql .= " AND o.created_at BETWEEN ? AND ?";
+        $count_sql .= " AND o.created_at BETWEEN ? AND ?";
+        $params[] = $dateFrom;
+        $params[] = $dateTo;
+    } else if ($dateFrom) {
+        $sql .= " AND o.created_at >= ?";
+        $count_sql .= " AND o.created_at >= ?";
+        $params[] = $dateFrom;
+    } else if ($dateTo) {
+        $sql .= " AND o.created_at <= ?";
+        $count_sql .= " AND o.created_at <= ?";
+        $params[] = $dateTo;
     }
     
-    if ($dateTo) {
-        $dateTo = mysqli_real_escape_string($conn, $dateTo);
-        $sql .= " AND o.created_at <= '$dateTo 23:59:59'";
-        $count_sql .= " AND o.created_at <= '$dateTo 23:59:59'";
-    }
-    
-    // Добавляем фильтр по категории, если указан
+    // Фильтрация по категории
     if ($category) {
-        $category = mysqli_real_escape_string($conn, $category);
-        $sql .= " AND p.category = '$category'";
-        $count_sql .= " AND p.category = '$category'";
+        $sql .= " AND p.category = ?";
+        $count_sql .= " AND p.category = ?";
+        $params[] = $category;
     }
     
-    $sql .= " GROUP BY p.id, p.name, p.category
-              ORDER BY total_amount DESC";
+    // Группировка и сортировка
+    $sql .= " GROUP BY p.id, p.name, p.category ORDER BY total_amount DESC";
     
-    // Получаем общее количество записей
-    $count_result = mysqli_query($conn, $count_sql);
-    $total_count = 0;
-    if ($count_result && $count_row = mysqli_fetch_assoc($count_result)) {
-        $total_count = (int)$count_row['total_count'];
+    // Подготавливаем и выполняем запрос для подсчета общего количества записей
+    $stmt = mysqli_prepare($conn, $count_sql);
+    
+    if ($stmt) {
+        if (!empty($params)) {
+            $types = str_repeat('s', count($params));
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+        }
+        
+        mysqli_stmt_execute($stmt);
+        $count_result = mysqli_stmt_get_result($stmt);
+        $total_count = mysqli_fetch_assoc($count_result)['total_count'];
+        mysqli_stmt_close($stmt);
+    } else {
+        error_log("Error preparing count statement: " . mysqli_error($conn));
+        $total_count = 0;
     }
     
-    // Вычисляем общее количество страниц
+    // Добавляем пагинацию
     $total_pages = ceil($total_count / $per_page);
-    
-    // Проверяем корректность номера страницы
     $page = max(1, min($page, $total_pages));
-    
-    // Вычисляем смещение для запроса
     $offset = ($page - 1) * $per_page;
     
-    // Добавляем ограничение для пагинации
-    $sql .= " LIMIT $offset, $per_page";
+    $sql .= " LIMIT ?, ?";
+    $params[] = $offset;
+    $params[] = $per_page;
     
-    $result = mysqli_query($conn, $sql);
-    $report = [];
+    // Подготавливаем и выполняем запрос для получения данных
+    $stmt = mysqli_prepare($conn, $sql);
+    $data = [];
     
-    if ($result && mysqli_num_rows($result) > 0) {
+    if ($stmt) {
+        if (!empty($params)) {
+            $types = str_repeat('s', count($params) - 2) . 'ii'; // Типы для offset и limit - целые числа
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+        }
+        
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
         while ($row = mysqli_fetch_assoc($result)) {
-            $report[] = [
+            $data[] = [
                 'id' => $row['id'],
                 'name' => $row['name'],
                 'category' => $row['category'],
@@ -1729,13 +1756,17 @@ function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = nu
                 'avg_price' => (float)$row['avg_price']
             ];
         }
+        
+        mysqli_stmt_close($stmt);
+    } else {
+        error_log("Error preparing data statement: " . mysqli_error($conn));
     }
     
-    // Возвращаем данные отчета и информацию о пагинации
+    // Возвращаем результат
     return [
-        'data' => $report,
+        'data' => $data,
         'pagination' => [
-            'total_count' => $total_count,
+            'total_records' => $total_count,
             'total_pages' => $total_pages,
             'current_page' => $page,
             'per_page' => $per_page
@@ -1744,44 +1775,74 @@ function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = nu
 }
 
 /**
- * Получает данные о продажах по месяцам для графика
+ * Получает данные о продажах по месяцам для построения графика
  * 
- * @param int $year Год для отчета (по умолчанию текущий)
+ * @param int $year Год для получения данных (по умолчанию текущий год)
+ * @param string $dateFrom Начальная дата для фильтрации (опционально)
+ * @param string $dateTo Конечная дата для фильтрации (опционально)
  * @return array Массив с данными о продажах по месяцам
  */
-function getMonthlySalesData($year = null) {
+function getMonthlySalesData($year = null, $dateFrom = null, $dateTo = null) {
     global $conn;
     
+    // Если год не указан, используем текущий год
     if (!$year) {
         $year = date('Y');
     }
     
-    $year = (int)$year;
-    
-    $sql = "SELECT 
-                MONTH(o.created_at) as month,
-                SUM(oi.price * oi.quantity) as total
-            FROM order_items oi
-            JOIN orders o ON oi.order_id = o.id
-            JOIN product p ON oi.product_id = p.id
-            WHERE (o.status = 'completed' OR o.status = 'closed')
-            AND YEAR(o.created_at) = $year
-            GROUP BY MONTH(o.created_at)
-            ORDER BY MONTH(o.created_at)";
-    
-    $result = mysqli_query($conn, $sql);
-    
     // Инициализируем массив с нулевыми значениями для всех месяцев
-    $monthlySales = array_fill(1, 12, 0);
+    $monthlySales = array_fill(0, 12, 0);
     
-    if ($result && mysqli_num_rows($result) > 0) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $month = (int)$row['month'];
-            $monthlySales[$month] = (float)$row['total'];
-        }
+    // Подготавливаем SQL запрос с использованием подготовленных выражений
+    $sql = "SELECT 
+                MONTH(o.created_at) as month, 
+                SUM(oi.price * oi.quantity) as total 
+            FROM orders o 
+            JOIN order_items oi ON o.id = oi.order_id 
+            WHERE o.status = 'completed' AND YEAR(o.created_at) = ?";
+    
+    $params = [$year];
+    $types = 'i'; // i для целого числа (год)
+    
+    // Добавляем фильтры по датам, если они указаны
+    if ($dateFrom) {
+        $sql .= " AND o.created_at >= ?";
+        $params[] = $dateFrom;
+        $types .= 's'; // s для строки (дата)
     }
     
-    return array_values($monthlySales); // Возвращаем только значения, без ключей
+    if ($dateTo) {
+        $sql .= " AND o.created_at <= ?";
+        $params[] = $dateTo;
+        $types .= 's'; // s для строки (дата)
+    }
+    
+    $sql .= " GROUP BY MONTH(o.created_at)";
+    
+    // Подготавливаем и выполняем запрос
+    $stmt = mysqli_prepare($conn, $sql);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        // Заполняем массив данными из результата запроса
+        while ($row = mysqli_fetch_assoc($result)) {
+            $month = (int)$row['month'];
+            if ($month >= 1 && $month <= 12) {
+                $monthlySales[$month - 1] = (float)$row['total'];
+            }
+        }
+        
+        mysqli_stmt_close($stmt);
+    } else {
+        error_log("Error preparing statement in getMonthlySalesData: " . mysqli_error($conn));
+    }
+    
+    return [
+        'monthlySales' => $monthlySales
+    ];
 }
 
 /**
@@ -1795,27 +1856,35 @@ function getMonthlySalesData($year = null) {
  * @return array Данные для отчета
  */
 function getFilteredReportData($dateFrom, $dateTo, $category, $page = 1, $per_page = 10) {
-    // Получаем основные данные для отчета с пагинацией
-    $reportResult = getProductsSalesReport($dateFrom, $dateTo, $category, $page, $per_page);
+    // Устанавливаем максимальное время выполнения запроса
+    set_time_limit(60);
     
-    // Получаем статистику
-    $totalSales = getTotalSalesAmount($dateFrom, $dateTo, $category);
-    $totalItems = getTotalSoldItemsCount($dateFrom, $dateTo, $category);
-    $totalOrders = getCompletedOrdersCount($dateFrom, $dateTo);
-    $averageOrder = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+    // Проверяем входные параметры
+    $page = max(1, (int)$page);
+    $per_page = max(1, min(100, (int)$per_page));
     
-    // Формируем и возвращаем данные
-    return [
-        'reportData' => $reportResult['data'],
-        'pagination' => $reportResult['pagination'],
-        'statistics' => [
+    try {
+        // Получаем основные данные для отчета с пагинацией
+        $reportResult = getProductsSalesReport($dateFrom, $dateTo, $category, $page, $per_page);
+        
+        // Получаем статистику с использованием оптимизированных запросов
+        $totalSales = getTotalSalesAmount($dateFrom, $dateTo, $category);
+        $totalItems = getTotalSoldItemsCount($dateFrom, $dateTo, $category);
+        $totalOrders = getCompletedOrdersCount($dateFrom, $dateTo);
+        
+        // Формируем результат
+        return [
+            'reportData' => $reportResult['data'],
+            'pagination' => $reportResult['pagination'],
             'totalSales' => $totalSales,
             'totalItems' => $totalItems,
-            'totalOrders' => $totalOrders,
-            'averageOrder' => $averageOrder
-        ],
-        'chart' => getMonthlySalesData(date('Y'))
-    ];
+            'totalOrders' => $totalOrders
+        ];
+    } catch (Exception $e) {
+        // Логируем ошибку
+        error_log('Error in getFilteredReportData: ' . $e->getMessage());
+        throw $e; // Перебрасываем исключение для обработки на уровне выше
+    }
 }
 
 /**

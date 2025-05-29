@@ -8,6 +8,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Устанавливаем больший лимит времени выполнения для предотвращения тайм-аутов
+set_time_limit(120); // 2 минуты
+
 // Проверяем авторизацию
 if(!isset($_SESSION['user_id'])) {
     header('Content-Type: application/json');
@@ -33,74 +36,45 @@ $category = isset($_POST['category']) && !empty($_POST['category']) ? $_POST['ca
 $page = isset($_POST['page']) && is_numeric($_POST['page']) ? (int)$_POST['page'] : 1;
 $per_page = isset($_POST['per_page']) && is_numeric($_POST['per_page']) ? (int)$_POST['per_page'] : 10;
 
-// Получаем отфильтрованные данные с пагинацией
-$data = getFilteredReportData($dateFrom, $dateTo, $category, $page, $per_page);
+// Валидация параметров
+if ($page < 1) $page = 1;
+if ($per_page < 1) $per_page = 10;
+if ($per_page > 100) $per_page = 100; // Ограничиваем максимальное количество записей
 
-// Получаем данные для графика с учетом выбранного периода
-if ($dateFrom && $dateTo) {
-    // Если выбран диапазон дат, получаем данные только за этот период
-    $year = date('Y', strtotime($dateFrom));
-    $chart_data = getMonthlySalesData($year);
+try {
+    // Получаем отфильтрованные данные отчета
+    $data = getFilteredReportData($dateFrom, $dateTo, $category, $page, $per_page);
     
-    // Если период захватывает другой год, получаем данные для него тоже
-    $year_to = date('Y', strtotime($dateTo));
-    if ($year_to > $year) {
-        $chart_data_next_year = getMonthlySalesData($year_to);
-        
-        // Объединяем данные
-        $month_from = (int)date('n', strtotime($dateFrom));
-        $month_to = (int)date('n', strtotime($dateTo));
-        
-        // Сбрасываем месяцы вне выбранного периода
-        for ($i = 1; $i < $month_from; $i++) {
-            $chart_data[$i - 1] = 0;
-        }
-        
-        for ($i = $month_to + 1; $i <= 12; $i++) {
-            $chart_data_next_year[$i - 1] = 0;
-        }
-        
-        // Если выбран период, включающий два года, комбинируем данные
-        if ($year_to - $year == 1) {
-            for ($i = 1; $i <= $month_to; $i++) {
-                $chart_data[11 + $i] = $chart_data_next_year[$i - 1];
-            }
-        }
-    } else {
-        // Если период в пределах одного года, обнуляем месяцы вне периода
-        $month_from = (int)date('n', strtotime($dateFrom));
-        $month_to = (int)date('n', strtotime($dateTo));
-        
-        for ($i = 1; $i < $month_from; $i++) {
-            $chart_data[$i - 1] = 0;
-        }
-        
-        for ($i = $month_to + 1; $i <= 12; $i++) {
-            $chart_data[$i - 1] = 0;
-        }
-    }
-} else {
-    // Если период не выбран, используем текущий год
-    $chart_data = getMonthlySalesData(date('Y'));
+    // Форматируем статистику для вывода
+    $statistics = [
+        'totalSales' => number_format($data['totalSales'], 0, '.', ' ') . ' ₽',
+        'totalItems' => number_format($data['totalItems'], 0, '.', ' '),
+        'totalOrders' => number_format($data['totalOrders'], 0, '.', ' '),
+        'averageOrder' => $data['totalOrders'] > 0 ? 
+            number_format($data['totalSales'] / $data['totalOrders'], 0, '.', ' ') . ' ₽' : 
+            '0 ₽'
+    ];
+    
+    // Получаем данные для графика
+    $chartData = getMonthlySalesData();
+    
+    // Формируем ответ
+    $response = [
+        'reportData' => $data['reportData'],
+        'pagination' => $data['pagination'],
+        'statistics' => $statistics,
+        'chart' => $chartData['monthlySales']
+    ];
+    
+    // Отправляем ответ
+    header('Content-Type: application/json');
+    echo json_encode($response);
+} catch (Exception $e) {
+    // Логируем ошибку
+    error_log('Error in get_filtered_reports.php: ' . $e->getMessage());
+    
+    // Отправляем сообщение об ошибке
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Произошла ошибка при получении данных: ' . $e->getMessage()]);
 }
-
-// Добавляем данные графика в результат
-$data['chart'] = $chart_data;
-
-// Форматируем данные для отправки
-$formattedData = [
-    'reportData' => $data['reportData'],
-    'pagination' => $data['pagination'],
-    'statistics' => [
-        'totalSales' => number_format($data['statistics']['totalSales'], 0, '.', ' ') . ' ₽',
-        'totalItems' => number_format($data['statistics']['totalItems'], 0, '.', ' '),
-        'totalOrders' => number_format($data['statistics']['totalOrders'], 0, '.', ' '),
-        'averageOrder' => number_format($data['statistics']['averageOrder'], 0, '.', ' ') . ' ₽'
-    ],
-    'chart' => $data['chart']
-];
-
-// Отправляем данные в формате JSON
-header('Content-Type: application/json');
-echo json_encode($formattedData);
 ?> 

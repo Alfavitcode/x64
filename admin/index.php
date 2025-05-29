@@ -2074,10 +2074,39 @@ document.addEventListener('DOMContentLoaded', function() {
         function initSalesChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
             
-            // Загружаем актуальные данные для графика через AJAX
-            fetch('get_monthly_sales.php')
-                .then(response => response.json())
+            // Показываем индикатор загрузки
+            ctx.canvas.style.opacity = 0.5;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'chart-loading';
+            loadingDiv.style.position = 'absolute';
+            loadingDiv.style.left = '50%';
+            loadingDiv.style.top = '50%';
+            loadingDiv.style.transform = 'translate(-50%, -50%)';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x"></i>';
+            ctx.canvas.parentNode.appendChild(loadingDiv);
+            
+            // Загружаем актуальные данные для графика через AJAX с таймаутом
+            const fetchTimeout = new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, 10000); // 10 секунд таймаут
+                
+                fetch('get_monthly_sales.php')
+                    .then(response => {
+                        clearTimeout(timeoutId);
+                        return response.json();
+                    })
+                    .then(resolve)
+                    .catch(reject);
+            });
+            
+            fetchTimeout
                 .then(data => {
+                    // Удаляем индикатор загрузки
+                    const loadingDiv = document.getElementById('chart-loading');
+                    if (loadingDiv) loadingDiv.remove();
+                    ctx.canvas.style.opacity = 1;
+                    
                     const monthNames = ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
                     
                     const salesData = {
@@ -2115,6 +2144,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке данных графика:', error);
+                    
+                    // Удаляем индикатор загрузки
+                    const loadingDiv = document.getElementById('chart-loading');
+                    if (loadingDiv) loadingDiv.remove();
+                    ctx.canvas.style.opacity = 1;
+                    
                     // В случае ошибки показываем пустой график
                     const salesData = {
                         labels: ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
@@ -2162,38 +2197,58 @@ document.addEventListener('DOMContentLoaded', function() {
             const reportData = document.getElementById('report-data');
             reportData.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Загрузка данных...</td></tr>';
             
-            // Отправляем AJAX-запрос к серверу для получения отфильтрованных данных
-            fetch('get_filtered_reports.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `dateFrom=${dateFrom}&dateTo=${dateTo}&category=${category}&page=${page}&per_page=${per_page}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    // Если есть ошибка, отображаем ее
-                    reportData.innerHTML = `<tr><td colspan="6" class="text-center text-danger">${data.error}</td></tr>`;
-                    return;
-                }
+            // Создаем FormData для отправки данных
+            const formData = new FormData();
+            formData.append('dateFrom', dateFrom);
+            formData.append('dateTo', dateTo);
+            formData.append('category', category);
+            formData.append('page', page);
+            formData.append('per_page', per_page);
+            
+            // Устанавливаем таймаут для запроса
+            const fetchTimeout = new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, 30000); // 30 секунд таймаут
                 
-                // Обновляем таблицу данными
-                updateReportTable(data.reportData);
-                
-                // Обновляем статистику
-                updateStatistics(data.statistics);
-                
-                // Обновляем пагинацию
-                updatePagination(data.pagination);
-                
-                // Обновляем график
-                updateSalesChart(data.chart);
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                reportData.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Ошибка при загрузке данных</td></tr>';
+                fetch('get_filtered_reports.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        clearTimeout(timeoutId);
+                        return response.json();
+                    })
+                    .then(resolve)
+                    .catch(reject);
             });
+            
+            fetchTimeout
+                .then(data => {
+                    if (data.error) {
+                        // Если есть ошибка, отображаем ее
+                        reportData.innerHTML = `<tr><td colspan="6" class="text-center text-danger">${data.error}</td></tr>`;
+                        return;
+                    }
+                    
+                    // Обновляем таблицу данными
+                    updateReportTable(data.reportData);
+                    
+                    // Обновляем статистику
+                    updateStatistics(data.statistics);
+                    
+                    // Обновляем пагинацию
+                    updatePagination(data.pagination);
+                    
+                    // Обновляем график, если он существует
+                    if (window.salesChart && data.chart) {
+                        updateSalesChart(data.chart);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    reportData.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Ошибка при загрузке данных. Пожалуйста, попробуйте еще раз или сузьте диапазон дат.</td></tr>';
+                });
         }
         
         // Функция экспорта таблицы в Excel
@@ -2208,78 +2263,99 @@ document.addEventListener('DOMContentLoaded', function() {
             exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Выгрузка...';
             exportBtn.disabled = true;
             
-            // Получаем все данные для экспорта (без пагинации)
-            fetch('get_filtered_reports.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `dateFrom=${dateFrom}&dateTo=${dateTo}&category=${category}&page=1&per_page=1000`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('Ошибка: ' + data.error);
-                    return;
-                }
+            // Создаем FormData для отправки данных
+            const formData = new FormData();
+            formData.append('dateFrom', dateFrom);
+            formData.append('dateTo', dateTo);
+            formData.append('category', category);
+            formData.append('page', 1);
+            formData.append('per_page', 1000); // Большое значение для получения всех данных
+            formData.append('export', 'true');
+            
+            // Устанавливаем таймаут для запроса
+            const fetchTimeout = new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, 60000); // 60 секунд таймаут для экспорта
                 
-                // Создаем рабочую книгу и лист
-                const wb = XLSX.utils.book_new();
-                
-                // Подготавливаем данные для экспорта
-                const exportData = [
-                    ['№', 'Наименование товара', 'Категория', 'Кол-во продаж', 'Сумма продаж (₽)', 'Средняя цена (₽)']
-                ];
-                
-                // Добавляем данные из отчета
-                data.reportData.forEach((item, index) => {
-                    exportData.push([
-                        index + 1,
-                        item.name,
-                        item.category,
-                        item.quantity,
-                        item.total_amount,
-                        item.avg_price
-                    ]);
-                });
-                
-                // Создаем лист с данными
-                const ws = XLSX.utils.aoa_to_sheet(exportData);
-                
-                // Задаем ширину столбцов
-                const colWidths = [
-                    { wch: 5 },  // №
-                    { wch: 40 }, // Наименование товара
-                    { wch: 20 }, // Категория
-                    { wch: 15 }, // Кол-во продаж
-                    { wch: 15 }, // Сумма продаж
-                    { wch: 15 }  // Средняя цена
-                ];
-                ws['!cols'] = colWidths;
-                
-                // Добавляем лист в книгу
-                XLSX.utils.book_append_sheet(wb, ws, "Отчет по продажам");
-                
-                // Генерируем имя файла с текущей датой
-                const now = new Date();
-                const dateStr = now.toISOString().split('T')[0];
-                const fileName = `Отчет_по_продажам_${dateStr}.xlsx`;
-                
-                // Сохраняем файл
-                XLSX.writeFile(wb, fileName);
-                
-                // Восстанавливаем кнопку
-                exportBtn.innerHTML = originalText;
-                exportBtn.disabled = false;
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Произошла ошибка при выгрузке данных');
-                
-                // Восстанавливаем кнопку
-                exportBtn.innerHTML = originalText;
-                exportBtn.disabled = false;
+                fetch('get_filtered_reports.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        clearTimeout(timeoutId);
+                        return response.json();
+                    })
+                    .then(resolve)
+                    .catch(reject);
             });
+            
+            fetchTimeout
+                .then(data => {
+                    if (data.error) {
+                        alert('Ошибка: ' + data.error);
+                        exportBtn.innerHTML = originalText;
+                        exportBtn.disabled = false;
+                        return;
+                    }
+                    
+                    // Создаем рабочую книгу и лист
+                    const wb = XLSX.utils.book_new();
+                    
+                    // Подготавливаем данные для экспорта
+                    const exportData = [
+                        ['№', 'Наименование товара', 'Категория', 'Кол-во продаж', 'Сумма продаж (₽)', 'Средняя цена (₽)']
+                    ];
+                    
+                    // Добавляем данные из отчета
+                    data.reportData.forEach((item, index) => {
+                        exportData.push([
+                            index + 1,
+                            item.name,
+                            item.category,
+                            item.quantity,
+                            item.total_amount,
+                            item.avg_price
+                        ]);
+                    });
+                    
+                    // Создаем лист с данными
+                    const ws = XLSX.utils.aoa_to_sheet(exportData);
+                    
+                    // Задаем ширину столбцов
+                    const colWidths = [
+                        { wch: 5 },  // №
+                        { wch: 40 }, // Наименование товара
+                        { wch: 20 }, // Категория
+                        { wch: 15 }, // Кол-во продаж
+                        { wch: 15 }, // Сумма продаж
+                        { wch: 15 }  // Средняя цена
+                    ];
+                    ws['!cols'] = colWidths;
+                    
+                    // Добавляем лист в книгу
+                    XLSX.utils.book_append_sheet(wb, ws, "Отчет по продажам");
+                    
+                    // Генерируем имя файла с текущей датой
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const fileName = `Отчет_по_продажам_${dateStr}.xlsx`;
+                    
+                    // Сохраняем файл
+                    XLSX.writeFile(wb, fileName);
+                    
+                    // Восстанавливаем кнопку
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при выгрузке данных. Пожалуйста, попробуйте еще раз или сузьте диапазон дат.');
+                    
+                    // Восстанавливаем кнопку
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+                });
         }
         
         // Функция обновления таблицы отчета
@@ -2310,6 +2386,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Функция обновления статистики
         function updateStatistics(statistics) {
+            if (!statistics) return;
+            
             document.getElementById('totalSales').textContent = statistics.totalSales;
             document.getElementById('totalItems').textContent = statistics.totalItems;
             document.getElementById('totalOrders').textContent = statistics.totalOrders;
@@ -2318,7 +2396,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Функция обновления графика
         function updateSalesChart(chartData) {
-            if (!window.salesChart) {
+            if (!window.salesChart || !chartData) {
                 return;
             }
             
