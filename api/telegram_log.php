@@ -5,39 +5,97 @@ $allow_access = true;
 // Путь к файлу логов
 $log_file = __DIR__ . '/telegram_log.txt';
 
-// Очистка лога, если нужно
-if (isset($_GET['clear']) && $_GET['clear'] == 1) {
-    file_put_contents($log_file, '');
-    header('Location: telegram_log.php');
-    exit;
-}
+// Проверяем действие
+$action = isset($_GET['action']) ? $_GET['action'] : 'view';
 
-// Чтение логов
-$logs = 'Файл логов не найден или пуст.';
-if (file_exists($log_file)) {
-    $logs = file_get_contents($log_file);
-    
-    // Если логов нет
-    if (empty($logs)) {
-        $logs = 'Лог пуст. Нет записей.';
-    } else {
-        // Преобразуем все символы < и > в HTML-сущности для безопасности
-        $logs = htmlspecialchars($logs);
-        // Делаем ссылки кликабельными
-        $logs = preg_replace('/(https?:\/\/[^\s]+)/', '<a href="$1" target="_blank">$1</a>', $logs);
-        // Форматируем JSON для более удобного чтения
-        $logs = preg_replace_callback('/({(?:[^{}]|(?R))*})/', function($match) {
-            $json = json_decode($match[0], true);
-            if ($json) {
-                return '<pre>' . json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
+switch ($action) {
+    case 'clear':
+        // Очищаем лог-файл
+        if (file_exists($log_file)) {
+            file_put_contents($log_file, '');
+            echo "Лог-файл очищен успешно!";
+            echo "<p><a href='?action=view'>Вернуться к просмотру</a></p>";
+        } else {
+            echo "Лог-файл не существует!";
+        }
+        break;
+        
+    case 'view':
+    default:
+        // Выводим содержимое лог-файла
+        echo "<h1>Содержимое лог-файла Telegram</h1>";
+        
+        if (file_exists($log_file)) {
+            $log_content = file_get_contents($log_file);
+            
+            if (empty($log_content)) {
+                echo "<div style='color: orange; font-weight: bold;'>Лог-файл пуст!</div>";
+            } else {
+                echo "<div style='text-align: right; margin-bottom: 10px;'>";
+                echo "<a href='?action=clear' onclick='return confirm(\"Вы уверены, что хотите очистить лог-файл?\")' style='padding: 5px 10px; background-color: #f44336; color: white; text-decoration: none; border-radius: 3px;'>Очистить лог</a>";
+                echo "</div>";
+                
+                // Выводим содержимое в обратном порядке (новые записи сверху)
+                $lines = explode("\n", $log_content);
+                $chunks = [];
+                $current_chunk = [];
+                
+                // Группируем связанные записи
+                foreach ($lines as $line) {
+                    if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} - Получен запрос/', $line)) {
+                        if (!empty($current_chunk)) {
+                            $chunks[] = $current_chunk;
+                            $current_chunk = [];
+                        }
+                    }
+                    $current_chunk[] = $line;
+                }
+                
+                if (!empty($current_chunk)) {
+                    $chunks[] = $current_chunk;
+                }
+                
+                // Выводим чанки в обратном порядке
+                foreach (array_reverse($chunks) as $index => $chunk) {
+                    echo "<div style='margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f9f9f9;'>";
+                    echo "<h3>Запрос #" . ($index + 1) . "</h3>";
+                    echo "<pre style='white-space: pre-wrap; max-height: 400px; overflow-y: auto;'>";
+                    foreach ($chunk as $line) {
+                        // Подсветка ошибок
+                        if (strpos($line, 'Ошибка') !== false) {
+                            echo "<span style='color: red;'>" . htmlspecialchars($line) . "</span>\n";
+                        }
+                        // Подсветка успешных действий
+                        else if (strpos($line, 'успешно') !== false || strpos($line, 'Успешно') !== false) {
+                            echo "<span style='color: green;'>" . htmlspecialchars($line) . "</span>\n";
+                        }
+                        else {
+                            echo htmlspecialchars($line) . "\n";
+                        }
+                    }
+                    echo "</pre>";
+                    echo "</div>";
+                }
             }
-            return $match[0];
-        }, $logs);
-        // Добавляем переносы строк
-        $logs = nl2br($logs);
-        // Выделяем даты жирным
-        $logs = preg_replace('/([\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2})/', '<strong>$1</strong>', $logs);
-    }
+        } else {
+            echo "<div style='color: red; font-weight: bold;'>Лог-файл не существует!</div>";
+        }
+        
+        // Добавляем ссылки для навигации
+        echo "<div style='margin-top: 20px;'>";
+        echo "<a href='check_webhook.php' style='margin-right: 10px;'>Проверить webhook</a> | ";
+        echo "<a href='reset_webhook.php' style='margin: 0 10px;'>Сбросить webhook</a> | ";
+        echo "<a href='check_orders_table.php' style='margin-left: 10px;'>Проверить таблицу заказов</a>";
+        echo "</div>";
+        
+        // Автоматическое обновление страницы каждые 5 секунд
+        echo "<script>
+        setTimeout(function() {
+            location.reload();
+        }, 5000);
+        </script>";
+        
+        break;
 }
 
 // Чтение данных сессий
