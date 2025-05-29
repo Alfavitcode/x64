@@ -1495,11 +1495,28 @@ function updateOrderStatus($order_id, $status) {
         return false;
     }
     
+    // Получаем текущий статус заказа перед обновлением
+    $current_status_query = "SELECT status FROM orders WHERE id = " . (int)$order_id;
+    $current_status_result = mysqli_query($conn, $current_status_query);
+    $current_status_row = mysqli_fetch_assoc($current_status_result);
+    $current_status = $current_status_row ? $current_status_row['status'] : '';
+    
+    // Обновляем статус заказа
     $sql = "UPDATE `orders` SET 
             `status` = '" . mysqli_real_escape_string($conn, $status) . "'
             WHERE `id` = " . (int)$order_id;
     
-    return mysqli_query($conn, $sql);
+    $result = mysqli_query($conn, $sql);
+    
+    // Если статус изменен на "completed" или "closed" и предыдущий статус не был "completed" или "closed",
+    // обновляем статистику продаж
+    if ($result && ($status === 'completed' || $status === 'closed') && 
+        $current_status !== 'completed' && $current_status !== 'closed') {
+        // Здесь статистика продаж обновляется автоматически, так как функции отчетов
+        // учитывают заказы со статусами 'completed' и 'closed'
+    }
+    
+    return $result;
 }
 
 /**
@@ -1628,11 +1645,22 @@ function getCompletedOrdersCount($dateFrom = null, $dateTo = null) {
  * @param string $dateFrom Дата начала периода (опционально)
  * @param string $dateTo Дата окончания периода (опционально)
  * @param string $category Название категории (опционально)
- * @return array Массив с данными отчета
+ * @param int $page Номер страницы (опционально)
+ * @param int $per_page Количество записей на странице (опционально)
+ * @return array Массив с данными отчета и информацией о пагинации
  */
-function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = null) {
+function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = null, $page = 1, $per_page = 10) {
     global $conn;
     
+    // Запрос для подсчета общего количества записей
+    $count_sql = "SELECT 
+                COUNT(DISTINCT p.id) as total_count
+            FROM order_items oi
+            JOIN orders o ON oi.order_id = o.id
+            JOIN product p ON oi.product_id = p.id
+            WHERE (o.status = 'completed' OR o.status = 'closed')";
+    
+    // Основной запрос для получения данных
     $sql = "SELECT 
                 p.id,
                 p.name,
@@ -1649,21 +1677,43 @@ function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = nu
     if ($dateFrom) {
         $dateFrom = mysqli_real_escape_string($conn, $dateFrom);
         $sql .= " AND o.created_at >= '$dateFrom 00:00:00'";
+        $count_sql .= " AND o.created_at >= '$dateFrom 00:00:00'";
     }
     
     if ($dateTo) {
         $dateTo = mysqli_real_escape_string($conn, $dateTo);
         $sql .= " AND o.created_at <= '$dateTo 23:59:59'";
+        $count_sql .= " AND o.created_at <= '$dateTo 23:59:59'";
     }
     
     // Добавляем фильтр по категории, если указан
     if ($category) {
         $category = mysqli_real_escape_string($conn, $category);
         $sql .= " AND p.category = '$category'";
+        $count_sql .= " AND p.category = '$category'";
     }
     
     $sql .= " GROUP BY p.id, p.name, p.category
               ORDER BY total_amount DESC";
+    
+    // Получаем общее количество записей
+    $count_result = mysqli_query($conn, $count_sql);
+    $total_count = 0;
+    if ($count_result && $count_row = mysqli_fetch_assoc($count_result)) {
+        $total_count = (int)$count_row['total_count'];
+    }
+    
+    // Вычисляем общее количество страниц
+    $total_pages = ceil($total_count / $per_page);
+    
+    // Проверяем корректность номера страницы
+    $page = max(1, min($page, $total_pages));
+    
+    // Вычисляем смещение для запроса
+    $offset = ($page - 1) * $per_page;
+    
+    // Добавляем ограничение для пагинации
+    $sql .= " LIMIT $offset, $per_page";
     
     $result = mysqli_query($conn, $sql);
     $report = [];
@@ -1681,7 +1731,16 @@ function getProductsSalesReport($dateFrom = null, $dateTo = null, $category = nu
         }
     }
     
-    return $report;
+    // Возвращаем данные отчета и информацию о пагинации
+    return [
+        'data' => $report,
+        'pagination' => [
+            'total_count' => $total_count,
+            'total_pages' => $total_pages,
+            'current_page' => $page,
+            'per_page' => $per_page
+        ]
+    ];
 }
 
 /**
@@ -1731,11 +1790,13 @@ function getMonthlySalesData($year = null) {
  * @param string $dateFrom Дата начала периода
  * @param string $dateTo Дата окончания периода
  * @param string $category Название категории
+ * @param int $page Номер страницы
+ * @param int $per_page Количество записей на странице
  * @return array Данные для отчета
  */
-function getFilteredReportData($dateFrom, $dateTo, $category) {
-    // Получаем основные данные для отчета
-    $reportData = getProductsSalesReport($dateFrom, $dateTo, $category);
+function getFilteredReportData($dateFrom, $dateTo, $category, $page = 1, $per_page = 10) {
+    // Получаем основные данные для отчета с пагинацией
+    $reportResult = getProductsSalesReport($dateFrom, $dateTo, $category, $page, $per_page);
     
     // Получаем статистику
     $totalSales = getTotalSalesAmount($dateFrom, $dateTo, $category);
@@ -1745,7 +1806,8 @@ function getFilteredReportData($dateFrom, $dateTo, $category) {
     
     // Формируем и возвращаем данные
     return [
-        'reportData' => $reportData,
+        'reportData' => $reportResult['data'],
+        'pagination' => $reportResult['pagination'],
         'statistics' => [
             'totalSales' => $totalSales,
             'totalItems' => $totalItems,

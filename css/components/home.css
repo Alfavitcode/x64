@@ -6,7 +6,7 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-/* Исправление размера поисковой строки на главной странице */
+/* Исправление размера поисковой строки на главной страницее */
 .header.standard-header .search-form {
     position: relative;
     max-width: 500px;

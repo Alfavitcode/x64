@@ -12,7 +12,7 @@ $searchResults = !empty($query) ? searchProducts($query) : [];
 include_once 'includes/header/header.php';
 ?>
 
-<!-- Заголовок страницы -->
+<!-- Заголовок страницыы -->
 <section class="page-header">
     <div class="container">
         <h1 class="page-title">Результаты поиска</h1>

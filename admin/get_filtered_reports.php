@@ -30,9 +30,11 @@ if (!$user || $user['role'] !== 'Администратор') {
 $dateFrom = isset($_POST['dateFrom']) && !empty($_POST['dateFrom']) ? $_POST['dateFrom'] : null;
 $dateTo = isset($_POST['dateTo']) && !empty($_POST['dateTo']) ? $_POST['dateTo'] : null;
 $category = isset($_POST['category']) && !empty($_POST['category']) ? $_POST['category'] : null;
+$page = isset($_POST['page']) && is_numeric($_POST['page']) ? (int)$_POST['page'] : 1;
+$per_page = isset($_POST['per_page']) && is_numeric($_POST['per_page']) ? (int)$_POST['per_page'] : 10;
 
-// Получаем отфильтрованные данные
-$data = getFilteredReportData($dateFrom, $dateTo, $category);
+// Получаем отфильтрованные данные с пагинацией
+$data = getFilteredReportData($dateFrom, $dateTo, $category, $page, $per_page);
 
 // Получаем данные для графика с учетом выбранного периода
 if ($dateFrom && $dateTo) {
@@ -88,6 +90,7 @@ $data['chart'] = $chart_data;
 // Форматируем данные для отправки
 $formattedData = [
     'reportData' => $data['reportData'],
+    'pagination' => $data['pagination'],
     'statistics' => [
         'totalSales' => number_format($data['statistics']['totalSales'], 0, '.', ' ') . ' ₽',
         'totalItems' => number_format($data['statistics']['totalItems'], 0, '.', ' '),

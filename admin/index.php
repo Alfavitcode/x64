@@ -1755,7 +1755,8 @@ include_once '../includes/header/header.php';
                                                 </thead>
                                                 <tbody id="report-data">
                                                     <?php 
-                                                    $reportData = getProductsSalesReport();
+                                                    $reportResult = getProductsSalesReport();
+                                                    $reportData = $reportResult['data'];
                                                     if (!empty($reportData)) {
                                                         $counter = 1;
                                                         foreach ($reportData as $item) {
@@ -1774,6 +1775,34 @@ include_once '../includes/header/header.php';
                                                     ?>
                                                 </tbody>
                                             </table>
+                                        </div>
+                                        
+                                        <!-- Пагинация -->
+                                        <div class="mt-3" id="pagination-container">
+                                            <?php if (!empty($reportResult['pagination']) && $reportResult['pagination']['total_pages'] > 1): ?>
+                                            <nav aria-label="Навигация по страницам">
+                                                <ul class="pagination justify-content-center">
+                                                    <li class="page-item <?php echo $reportResult['pagination']['current_page'] <= 1 ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="#" data-page="<?php echo $reportResult['pagination']['current_page'] - 1; ?>">Предыдущая</a>
+                                                    </li>
+                                                    
+                                                    <?php 
+                                                    $start_page = max(1, $reportResult['pagination']['current_page'] - 2);
+                                                    $end_page = min($reportResult['pagination']['total_pages'], $start_page + 4);
+                                                    
+                                                    for ($i = $start_page; $i <= $end_page; $i++): 
+                                                    ?>
+                                                        <li class="page-item <?php echo $i === $reportResult['pagination']['current_page'] ? 'active' : ''; ?>">
+                                                            <a class="page-link" href="#" data-page="<?php echo $i; ?>"><?php echo $i; ?></a>
+                                                        </li>
+                                                    <?php endfor; ?>
+                                                    
+                                                    <li class="page-item <?php echo $reportResult['pagination']['current_page'] >= $reportResult['pagination']['total_pages'] ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="#" data-page="<?php echo $reportResult['pagination']['current_page'] + 1; ?>">Следующая</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -2014,7 +2043,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (reportsFilter) {
                 reportsFilter.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    filterReports();
+                    filterReports(1); // Загружаем первую страницу при применении фильтров
                 });
             }
             
@@ -2023,6 +2052,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (exportBtn) {
                 exportBtn.addEventListener('click', function() {
                     exportToExcel();
+                });
+            }
+            
+            // Обработчик пагинации
+            const paginationContainer = document.getElementById('pagination-container');
+            if (paginationContainer) {
+                paginationContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('page-link')) {
+                        e.preventDefault();
+                        const page = parseInt(e.target.getAttribute('data-page'));
+                        if (!isNaN(page)) {
+                            filterReports(page);
+                        }
+                    }
                 });
             }
         });
@@ -2109,10 +2152,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Функция фильтрации отчетов
-        function filterReports() {
+        function filterReports(page = 1) {
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
             const category = document.getElementById('category').value;
+            const per_page = 10; // Количество записей на странице
             
             // Показываем индикатор загрузки
             const reportData = document.getElementById('report-data');
@@ -2124,7 +2168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `dateFrom=${dateFrom}&dateTo=${dateTo}&category=${category}`
+                body: `dateFrom=${dateFrom}&dateTo=${dateTo}&category=${category}&page=${page}&per_page=${per_page}`
             })
             .then(response => response.json())
             .then(data => {
@@ -2140,6 +2184,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Обновляем статистику
                 updateStatistics(data.statistics);
                 
+                // Обновляем пагинацию
+                updatePagination(data.pagination);
+                
                 // Обновляем график
                 updateSalesChart(data.chart);
             })
@@ -2151,33 +2198,88 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Функция экспорта таблицы в Excel
         function exportToExcel() {
-            const table = document.getElementById('products-report');
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const category = document.getElementById('category').value;
             
-            // Создаем рабочую книгу и лист
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.table_to_sheet(table);
+            // Показываем индикатор загрузки
+            const exportBtn = document.getElementById('exportExcel');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Выгрузка...';
+            exportBtn.disabled = true;
             
-            // Задаем ширину столбцов
-            const colWidths = [
-                { wch: 5 },  // #
-                { wch: 40 }, // Наименование товара
-                { wch: 20 }, // Категория
-                { wch: 15 }, // Кол-во продаж
-                { wch: 15 }, // Сумма продаж
-                { wch: 15 }  // Средняя цена
-            ];
-            ws['!cols'] = colWidths;
-            
-            // Добавляем лист в книгу
-            XLSX.utils.book_append_sheet(wb, ws, "Отчет по продажам");
-            
-            // Генерируем имя файла с текущей датой
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const fileName = `Отчет_по_продажам_${dateStr}.xlsx`;
-            
-            // Сохраняем файл
-            XLSX.writeFile(wb, fileName);
+            // Получаем все данные для экспорта (без пагинации)
+            fetch('get_filtered_reports.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `dateFrom=${dateFrom}&dateTo=${dateTo}&category=${category}&page=1&per_page=1000`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Ошибка: ' + data.error);
+                    return;
+                }
+                
+                // Создаем рабочую книгу и лист
+                const wb = XLSX.utils.book_new();
+                
+                // Подготавливаем данные для экспорта
+                const exportData = [
+                    ['№', 'Наименование товара', 'Категория', 'Кол-во продаж', 'Сумма продаж (₽)', 'Средняя цена (₽)']
+                ];
+                
+                // Добавляем данные из отчета
+                data.reportData.forEach((item, index) => {
+                    exportData.push([
+                        index + 1,
+                        item.name,
+                        item.category,
+                        item.quantity,
+                        item.total_amount,
+                        item.avg_price
+                    ]);
+                });
+                
+                // Создаем лист с данными
+                const ws = XLSX.utils.aoa_to_sheet(exportData);
+                
+                // Задаем ширину столбцов
+                const colWidths = [
+                    { wch: 5 },  // №
+                    { wch: 40 }, // Наименование товара
+                    { wch: 20 }, // Категория
+                    { wch: 15 }, // Кол-во продаж
+                    { wch: 15 }, // Сумма продаж
+                    { wch: 15 }  // Средняя цена
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Добавляем лист в книгу
+                XLSX.utils.book_append_sheet(wb, ws, "Отчет по продажам");
+                
+                // Генерируем имя файла с текущей датой
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0];
+                const fileName = `Отчет_по_продажам_${dateStr}.xlsx`;
+                
+                // Сохраняем файл
+                XLSX.writeFile(wb, fileName);
+                
+                // Восстанавливаем кнопку
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при выгрузке данных');
+                
+                // Восстанавливаем кнопку
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            });
         }
         
         // Функция обновления таблицы отчета
@@ -2228,6 +2330,52 @@ document.addEventListener('DOMContentLoaded', function() {
         // Функция форматирования чисел
         function numberFormat(value) {
             return new Intl.NumberFormat('ru-RU').format(value);
+        }
+        
+        // Функция обновления пагинации
+        function updatePagination(pagination) {
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (!pagination || pagination.total_pages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            const currentPage = pagination.current_page;
+            const totalPages = pagination.total_pages;
+            
+            // Определяем диапазон страниц для отображения
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // Корректируем начальную страницу, если диапазон меньше 5
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            let html = `
+            <nav aria-label="Навигация по страницам">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}">Предыдущая</a>
+                    </li>`;
+            
+            // Добавляем номера страниц
+            for (let i = startPage; i <= endPage; i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`;
+            }
+            
+            html += `
+                    <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}">Следующая</a>
+                    </li>
+                </ul>
+            </nav>`;
+            
+            paginationContainer.innerHTML = html;
         }
     </script>
 </body>

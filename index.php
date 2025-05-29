@@ -11,7 +11,7 @@ $featuredProducts = getProducts(4);
 // Устанавливаем флаг для хедера, чтобы использовать стандартный стиль
 $useStandardHeader = true;
 
-// Подключение хедера
+// Подключение хедераа
 include_once 'includes/header/header.php';
 ?>
 

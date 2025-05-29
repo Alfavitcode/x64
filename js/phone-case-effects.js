@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Добавляем класс для включения 3D-эффектов
         card.classList.add('product-3d-effect');
         
-        // Добавляем обработчик для эффекта наклона
+        // Добавляем обработчик для эффекта наклонаа
         card.addEventListener('mousemove', function(e) {
             const cardRect = card.getBoundingClientRect();
             const cardWidth = cardRect.width;
