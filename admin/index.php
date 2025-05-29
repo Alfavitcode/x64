@@ -1325,9 +1325,13 @@ include_once '../includes/header/header.php';
                                                             $statusText = '';
                                                             
                                                             switch($order['status'] ?? 'unknown') {
+                                                                case 'pending_confirmation':
+                                                                    $statusClass = 'bg-secondary';
+                                                                    $statusText = 'Ожидает подтверждения';
+                                                                    break;
                                                                 case 'pending':
                                                                     $statusClass = 'bg-warning';
-                                                                    $statusText = 'Ожидает';
+                                                                    $statusText = 'Ожидает обработки';
                                                                     break;
                                                                 case 'processing':
                                                                     $statusClass = 'bg-info';
@@ -1341,18 +1345,13 @@ include_once '../includes/header/header.php';
                                                                     $statusClass = 'bg-danger';
                                                                     $statusText = 'Отменен';
                                                                     break;
-                                                                case 'closed':
-                                                                    $statusClass = 'bg-secondary';
-                                                                    $statusText = 'Закрыт';
-                                                                    break;
                                                                 default:
                                                                     $statusClass = 'bg-secondary';
-                                                                    $statusText = 'Неизвестно';
+                                                                    $statusText = 'Неизвестный статус';
+                                                                    break;
                                                             }
                                                             ?>
-                                                            <span class="badge <?php echo $statusClass; ?> rounded-pill">
-                                                                <?php echo $statusText; ?>
-                                                            </span>
+                                                            <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
                                                         </td>
                                                         <td><?php echo $order['created_at'] ? date('d.m.Y H:i', strtotime($order['created_at'])) : 'Нет даты'; ?></td>
                                                         <td>

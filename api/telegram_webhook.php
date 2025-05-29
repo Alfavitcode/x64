@@ -27,6 +27,117 @@ if (is_writable($log_dir)) {
     file_put_contents($log_file, date('Y-m-d H:i:s') . " - Декодированные данные: " . print_r($update, true) . "\n\n", FILE_APPEND);
 }
 
+// Обработка callback-запросов от встроенных кнопок
+if (isset($update['callback_query'])) {
+    $callback_query = $update['callback_query'];
+    $chat_id = $callback_query['from']['id'];
+    $callback_data = $callback_query['data'];
+    
+    // Обработка подтверждения заказа через кнопку
+    if (preg_match('/^confirm_order_(\d+)$/', $callback_data, $matches)) {
+        $order_id = $matches[1];
+        
+        // Проверяем, привязан ли Telegram аккаунт к пользователю
+        $user = getUserByTelegramId($chat_id);
+        
+        if (!$user) {
+            answerCallbackQuery($callback_query['id'], "Ваш Telegram не привязан к аккаунту на сайте.", true);
+            exit;
+        }
+        
+        // Проверяем, существует ли заказ и принадлежит ли он этому пользователю
+        $order = getOrderById($order_id, $user['id']);
+        
+        if (!$order) {
+            answerCallbackQuery($callback_query['id'], "Заказ #$order_id не найден или не принадлежит вам.", true);
+            exit;
+        }
+        
+        if ($order['status'] !== 'pending_confirmation') {
+            $status_text = '';
+            switch ($order['status']) {
+                case 'pending':
+                    $status_text = 'ожидает обработки';
+                    break;
+                case 'processing':
+                    $status_text = 'в обработке';
+                    break;
+                case 'completed':
+                    $status_text = 'выполнен';
+                    break;
+                case 'cancelled':
+                    $status_text = 'отменен';
+                    break;
+                default:
+                    $status_text = $order['status'];
+                    break;
+            }
+            
+            answerCallbackQuery($callback_query['id'], "Заказ #$order_id уже подтвержден и $status_text.", true);
+            exit;
+        }
+        
+        // Обновляем статус заказа на "pending" (ожидает обработки)
+        $sql = "UPDATE orders SET status = 'pending' WHERE id = " . (int)$order_id;
+        
+        if (mysqli_query($conn, $sql)) {
+            // Получаем элементы заказа для отображения
+            $order_items = getOrderItems($order_id);
+            $items_text = "";
+            $total = 0;
+            
+            foreach ($order_items as $item) {
+                $items_text .= "• " . $item['name'] . " x" . $item['quantity'] . " - " . number_format($item['subtotal'], 0, '.', ' ') . " ₽\n";
+                $total += $item['subtotal'];
+            }
+            
+            // Добавляем стоимость доставки
+            $total += $order['delivery_cost'];
+            
+            $response = "✅ Заказ #$order_id успешно подтвержден!\n\n";
+            $response .= "📋 <b>Детали заказа:</b>\n";
+            $response .= "Имя: " . $order['fullname'] . "\n";
+            $response .= "Адрес: " . $order['city'] . ", " . $order['address'] . "\n";
+            $response .= "Доставка: " . getDeliveryMethodText($order['delivery_method']) . " (" . number_format($order['delivery_cost'], 0, '.', ' ') . " ₽)\n\n";
+            
+            $response .= "🛒 <b>Товары:</b>\n";
+            $response .= $items_text . "\n";
+            $response .= "💰 <b>Итого:</b> " . number_format($total, 0, '.', ' ') . " ₽\n\n";
+            
+            $response .= "Ваш заказ передан в обработку. Скоро с вами свяжется наш менеджер для подтверждения деталей.";
+            
+            // Обновляем оригинальное сообщение
+            $data = [
+                'chat_id' => $chat_id,
+                'message_id' => $callback_query['message']['message_id'],
+                'text' => $response,
+                'parse_mode' => 'HTML'
+            ];
+            
+            $ch = curl_init('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/editMessageText');
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($ch);
+            curl_close($ch);
+            
+            // Показываем уведомление
+            answerCallbackQuery($callback_query['id'], "Заказ #$order_id успешно подтвержден!");
+            
+            // Отправляем уведомление администраторам о новом подтвержденном заказе
+            sendOrderNotificationToAdmin($order_id);
+        } else {
+            answerCallbackQuery($callback_query['id'], "Произошла ошибка при подтверждении заказа. Пожалуйста, попробуйте позже.", true);
+        }
+        
+        exit;
+    }
+    
+    // Если callback-запрос не распознан
+    answerCallbackQuery($callback_query['id'], "Неизвестная команда.");
+    exit;
+}
+
 // Проверяем, что это сообщение
 if (isset($update['message'])) {
     $message = $update['message'];
@@ -144,7 +255,8 @@ if (isset($update['message'])) {
         $response .= "/start - Начать работу с ботом\n";
         $response .= "/code - Получить код для привязки аккаунта\n";
         $response .= "/help - Показать эту справку\n";
-        $response .= "/status - Проверить статус привязки аккаунта\n\n";
+        $response .= "/status - Проверить статус привязки аккаунта\n";
+        $response .= "/accept ID - Подтвердить заказ с указанным ID\n\n";
         $response .= "Для привязки аккаунта получите код с помощью команды /code и введите его на странице привязки Telegram в личном кабинете на сайте.";
         
         sendTelegramMessage($chat_id, $response);
@@ -172,6 +284,97 @@ if (isset($update['message'])) {
         }
         
         sendTelegramMessage($chat_id, $response);
+        exit;
+    }
+    
+    // Обработка команды /accept для подтверждения заказа
+    if (preg_match('/^\/accept\s+(\d+)$/', $text, $matches)) {
+        $order_id = $matches[1];
+        
+        // Проверяем, привязан ли Telegram аккаунт к пользователю
+        $user = getUserByTelegramId($chat_id);
+        
+        if (!$user) {
+            $response = "Ваш Telegram не привязан к аккаунту на сайте.\n\n";
+            $response .= "Для привязки аккаунта выполните следующие шаги:\n";
+            $response .= "1. Получите код с помощью команды /code\n";
+            $response .= "2. Войдите в свой аккаунт на сайте\n";
+            $response .= "3. Перейдите в раздел \"Привязка Telegram\"\n";
+            $response .= "4. Введите полученный код в соответствующее поле";
+            
+            sendTelegramMessage($chat_id, $response);
+            exit;
+        }
+        
+        // Проверяем, существует ли заказ и принадлежит ли он этому пользователю
+        $order = getOrderById($order_id, $user['id']);
+        
+        if (!$order) {
+            sendTelegramMessage($chat_id, "Заказ #$order_id не найден или не принадлежит вам.");
+            exit;
+        }
+        
+        if ($order['status'] !== 'pending_confirmation') {
+            $status_text = '';
+            switch ($order['status']) {
+                case 'pending':
+                    $status_text = 'ожидает обработки';
+                    break;
+                case 'processing':
+                    $status_text = 'в обработке';
+                    break;
+                case 'completed':
+                    $status_text = 'выполнен';
+                    break;
+                case 'cancelled':
+                    $status_text = 'отменен';
+                    break;
+                default:
+                    $status_text = $order['status'];
+                    break;
+            }
+            
+            sendTelegramMessage($chat_id, "Заказ #$order_id уже подтвержден и $status_text.");
+            exit;
+        }
+        
+        // Обновляем статус заказа на "pending" (ожидает обработки)
+        $sql = "UPDATE orders SET status = 'pending' WHERE id = " . (int)$order_id;
+        
+        if (mysqli_query($conn, $sql)) {
+            // Получаем элементы заказа для отображения
+            $order_items = getOrderItems($order_id);
+            $items_text = "";
+            $total = 0;
+            
+            foreach ($order_items as $item) {
+                $items_text .= "• " . $item['name'] . " x" . $item['quantity'] . " - " . number_format($item['subtotal'], 0, '.', ' ') . " ₽\n";
+                $total += $item['subtotal'];
+            }
+            
+            // Добавляем стоимость доставки
+            $total += $order['delivery_cost'];
+            
+            $response = "✅ Заказ #$order_id успешно подтвержден!\n\n";
+            $response .= "📋 <b>Детали заказа:</b>\n";
+            $response .= "Имя: " . $order['fullname'] . "\n";
+            $response .= "Адрес: " . $order['city'] . ", " . $order['address'] . "\n";
+            $response .= "Доставка: " . getDeliveryMethodText($order['delivery_method']) . " (" . number_format($order['delivery_cost'], 0, '.', ' ') . " ₽)\n\n";
+            
+            $response .= "🛒 <b>Товары:</b>\n";
+            $response .= $items_text . "\n";
+            $response .= "💰 <b>Итого:</b> " . number_format($total, 0, '.', ' ') . " ₽\n\n";
+            
+            $response .= "Ваш заказ передан в обработку. Скоро с вами свяжется наш менеджер для подтверждения деталей.";
+            
+            sendTelegramMessage($chat_id, $response);
+            
+            // Отправляем уведомление администраторам о новом подтвержденном заказе
+            sendOrderNotificationToAdmin($order_id);
+        } else {
+            sendTelegramMessage($chat_id, "Произошла ошибка при подтверждении заказа. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.");
+        }
+        
         exit;
     }
     
@@ -248,25 +451,102 @@ if (isset($update['message'])) {
  * 
  * @param int $chat_id ID чата
  * @param string $text Текст сообщения
+ * @param array $keyboard Клавиатура (опционально)
  * @return bool Результат отправки
  */
-function sendTelegramMessage($chat_id, $text) {
-    // Используем токен из конфигурации
-    $bot_token = TELEGRAM_BOT_TOKEN;
-    
-    // Формируем данные для отправки
+function sendTelegramMessage($chat_id, $text, $keyboard = null) {
     $data = [
         'chat_id' => $chat_id,
         'text' => $text,
         'parse_mode' => 'HTML'
     ];
     
-    // Отправляем запрос к API Telegram
-    $ch = curl_init("https://api.telegram.org/bot$bot_token/sendMessage");
+    if ($keyboard !== null) {
+        $data['reply_markup'] = json_encode($keyboard);
+    }
+    
+    $ch = curl_init('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage');
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    
+    return $result !== false;
+}
+
+/**
+ * Получает текстовое описание метода доставки
+ * 
+ * @param string $delivery_method Код метода доставки
+ * @return string Описание метода доставки
+ */
+function getDeliveryMethodText($delivery_method) {
+    switch ($delivery_method) {
+        case 'courier':
+            return 'Курьерская доставка';
+        case 'pickup':
+            return 'Самовывоз из магазина';
+        case 'post':
+            return 'Почта России';
+        default:
+            return $delivery_method;
+    }
+}
+
+/**
+ * Отправляет уведомление администраторам о новом подтвержденном заказе
+ * 
+ * @param int $order_id ID заказа
+ * @return void
+ */
+function sendOrderNotificationToAdmin($order_id) {
+    global $conn;
+    
+    // Получаем данные заказа
+    $order = getOrderById($order_id);
+    if (!$order) return;
+    
+    // Получаем список администраторов
+    $sql = "SELECT id, telegram_id FROM users WHERE role = 'Администратор' AND telegram_id IS NOT NULL";
+    $result = mysqli_query($conn, $sql);
+    
+    if (mysqli_num_rows($result) > 0) {
+        // Формируем текст уведомления
+        $message = "🔔 <b>Новый подтвержденный заказ #$order_id</b>\n\n";
+        $message .= "Клиент: " . $order['fullname'] . "\n";
+        $message .= "Телефон: " . $order['phone'] . "\n";
+        $message .= "Email: " . $order['email'] . "\n";
+        $message .= "Адрес: " . $order['city'] . ", " . $order['address'] . "\n";
+        $message .= "Сумма: " . number_format($order['total_amount'], 0, '.', ' ') . " ₽\n\n";
+        $message .= "<a href='https://x64shop.ru/admin/view_order.php?id=$order_id'>Посмотреть заказ в панели администратора</a>";
+        
+        // Отправляем уведомление каждому администратору
+        while ($admin = mysqli_fetch_assoc($result)) {
+            sendTelegramMessage($admin['telegram_id'], $message);
+        }
+    }
+}
+
+/**
+ * Отправляет ответ на callback-запрос
+ * 
+ * @param string $callback_query_id ID callback-запроса
+ * @param string $text Текст уведомления
+ * @param bool $show_alert Показывать как alert (true) или как всплывающее уведомление (false)
+ * @return bool Результат отправки
+ */
+function answerCallbackQuery($callback_query_id, $text = '', $show_alert = false) {
+    $data = [
+        'callback_query_id' => $callback_query_id,
+        'text' => $text,
+        'show_alert' => $show_alert
+    ];
+    
+    $ch = curl_init('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/answerCallbackQuery');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     curl_close($ch);
     

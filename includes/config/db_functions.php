@@ -304,18 +304,19 @@ function getPaginatedOrders($page = 1, $per_page = 10) {
     // Вычисляем смещение
     $offset = ($page - 1) * $per_page;
     
-    // Получаем общее количество заказов
-    $count_sql = "SELECT COUNT(*) as total FROM orders";
+    // Получаем общее количество заказов (только подтвержденные)
+    $count_sql = "SELECT COUNT(*) as total FROM orders WHERE status != 'pending_confirmation'";
     $count_result = mysqli_query($conn, $count_sql);
     $total_orders = mysqli_fetch_assoc($count_result)['total'];
     
     // Вычисляем общее количество страниц
     $total_pages = ceil($total_orders / $per_page);
     
-    // Получаем заказы для текущей страницы с информацией о пользователе
+    // Получаем заказы для текущей страницы с информацией о пользователе (только подтвержденные)
     $sql = "SELECT o.*, u.fullname, u.email, u.phone 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
+            WHERE o.status != 'pending_confirmation'
             ORDER BY o.created_at DESC 
             LIMIT $offset, $per_page";
     $result = mysqli_query($conn, $sql);
@@ -1277,22 +1278,36 @@ function createOrdersTablesIfNotExists() {
 function createOrder($order_data) {
     global $conn;
     
-    // Создаем таблицы, если они не существуют
-    createOrdersTablesIfNotExists();
-    
     // Начинаем транзакцию
     mysqli_begin_transaction($conn);
     
     try {
-        // Определяем стоимость доставки
-        $delivery_cost = 0;
-        if ($order_data['delivery_method'] === 'courier') {
-            $delivery_cost = 300;
-        } elseif ($order_data['delivery_method'] === 'post') {
-            $delivery_cost = 250;
+        // Рассчитываем общую стоимость товаров в корзине
+        $total_amount = 0;
+        foreach ($order_data['items'] as $item) {
+            $total_amount += $item['subtotal'];
         }
         
-        // Добавляем запись в таблицу заказов
+        // Добавляем общую стоимость в данные заказа
+        $order_data['total_amount'] = $total_amount;
+        
+        // Определяем стоимость доставки
+        $delivery_cost = 0;
+        switch ($order_data['delivery_method']) {
+            case 'courier':
+                $delivery_cost = 300;
+                break;
+            case 'post':
+                $delivery_cost = 250;
+                break;
+            case 'pickup':
+                $delivery_cost = 0;
+                break;
+            default:
+                $delivery_cost = 0;
+        }
+        
+        // Создаем заказ в базе данных
         $order_sql = "INSERT INTO `orders` (
             `user_id`, 
             `session_id`, 
@@ -1323,7 +1338,7 @@ function createOrder($order_data) {
             '" . mysqli_real_escape_string($conn, $order_data['delivery_method']) . "',
             " . (float)$delivery_cost . ",
             " . (float)($order_data['total_amount'] + $delivery_cost) . ",
-            'pending',
+            'pending_confirmation',
             '" . mysqli_real_escape_string($conn, $order_data['comment']) . "'
         )";
         
@@ -1367,7 +1382,10 @@ function createOrder($order_data) {
         // Фиксируем транзакцию
         mysqli_commit($conn);
         
-        // Уведомления отправляются в файле checkout.php после создания заказа
+        // Отправляем уведомление в Telegram, если пользователь авторизован и имеет привязанный Telegram
+        if ($order_data['user_id']) {
+            sendOrderConfirmationToTelegram($order_id, $order_data['user_id']);
+        }
         
         return [
             'success' => true,
@@ -1383,6 +1401,110 @@ function createOrder($order_data) {
             'success' => false,
             'message' => $e->getMessage()
         ];
+    }
+}
+
+/**
+ * Отправляет уведомление о заказе в Telegram для подтверждения пользователем
+ * 
+ * @param int $order_id ID заказа
+ * @param int $user_id ID пользователя
+ * @return bool Результат отправки
+ */
+function sendOrderConfirmationToTelegram($order_id, $user_id) {
+    global $conn;
+    
+    // Проверяем, есть ли у пользователя привязанный Telegram
+    $sql = "SELECT telegram_id FROM users WHERE id = " . (int)$user_id . " AND telegram_id IS NOT NULL";
+    $result = mysqli_query($conn, $sql);
+    
+    if (!$result || mysqli_num_rows($result) == 0) {
+        return false; // У пользователя нет привязанного Telegram
+    }
+    
+    $user = mysqli_fetch_assoc($result);
+    $telegram_id = $user['telegram_id'];
+    
+    // Получаем информацию о заказе
+    $order = getOrderById($order_id);
+    if (!$order) {
+        return false;
+    }
+    
+    // Получаем товары заказа
+    $order_items = getOrderItems($order_id);
+    $items_text = "";
+    $total = 0;
+    
+    foreach ($order_items as $item) {
+        $items_text .= "• " . $item['name'] . " x" . $item['quantity'] . " - " . number_format($item['subtotal'], 0, '.', ' ') . " ₽\n";
+        $total += $item['subtotal'];
+    }
+    
+    // Добавляем стоимость доставки
+    $total += $order['delivery_cost'];
+    
+    // Формируем сообщение
+    $message = "🛍️ <b>Новый заказ #$order_id</b>\n\n";
+    $message .= "📋 <b>Детали заказа:</b>\n";
+    $message .= "Имя: " . $order['fullname'] . "\n";
+    $message .= "Адрес: " . $order['city'] . ", " . $order['address'] . "\n";
+    $message .= "Доставка: " . getDeliveryMethodText($order['delivery_method']) . " (" . number_format($order['delivery_cost'], 0, '.', ' ') . " ₽)\n\n";
+    
+    $message .= "🛒 <b>Товары:</b>\n";
+    $message .= $items_text . "\n";
+    $message .= "💰 <b>Итого:</b> " . number_format($total, 0, '.', ' ') . " ₽\n\n";
+    
+    $message .= "Для подтверждения заказа отправьте команду:\n<code>/accept $order_id</code>";
+    
+    // Создаем клавиатуру с кнопкой подтверждения
+    $keyboard = [
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => '✅ Подтвердить заказ',
+                    'callback_data' => "confirm_order_$order_id"
+                ]
+            ]
+        ]
+    ];
+    
+    // Отправляем сообщение
+    require_once __DIR__ . '/telegram_config.php';
+    
+    $data = [
+        'chat_id' => $telegram_id,
+        'text' => $message,
+        'parse_mode' => 'HTML',
+        'reply_markup' => json_encode($keyboard)
+    ];
+    
+    $ch = curl_init('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    
+    return $result !== false;
+}
+
+/**
+ * Получает текстовое описание метода доставки
+ * 
+ * @param string $delivery_method Код метода доставки
+ * @return string Описание метода доставки
+ */
+function getDeliveryMethodText($delivery_method) {
+    switch ($delivery_method) {
+        case 'courier':
+            return 'Курьерская доставка';
+        case 'pickup':
+            return 'Самовывоз из магазина';
+        case 'post':
+            return 'Почта России';
+        default:
+            return $delivery_method;
     }
 }
 

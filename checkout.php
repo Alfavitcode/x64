@@ -6,20 +6,6 @@ require_once 'includes/config/session.php';
 require_once 'includes/config/db_config.php';
 require_once 'includes/config/db_functions.php';
 
-// Всегда подключаем простую версию отправки как запасной вариант
-require_once 'includes/mail/SimpleMailer.php';
-
-// Подключаем класс для отправки писем
-try {
-    require_once 'includes/mail/Mailer.php';
-    $use_simple_mailer = false;
-} catch (Exception $e) {
-    // В случае ошибки используем простую версию отправки
-    $use_simple_mailer = true;
-    // Логируем ошибку
-    error_log('PHPMailer initialization error: ' . $e->getMessage());
-}
-
 // Создаем таблицы заказов, если они не существуют или не содержат необходимые поля
 createOrdersTablesIfNotExists();
 
@@ -55,7 +41,6 @@ if ($user_id) {
 $order_success = false;
 $order_error = '';
 $order_id = 0;
-$mail_sent = false; // Флаг успешной отправки письма
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     // Получаем данные из формы
@@ -98,52 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             $order_success = true;
             $order_id = $result['order_id'];
             
-            // Получаем данные созданного заказа
-            $order = getOrderById($order_id);
-            
-            // Отправляем электронное письмо покупателю
-            if ($order) {
-                try {
-                    // Создаем экземпляр нужного класса для отправки писем
-                    if ($use_simple_mailer) {
-                        $mailer = new SimpleMailer();
-                    } else {
-                        try {
-                            $mailer = new Mailer();
-                        } catch (Exception $e) {
-                            // Если произошла ошибка с Mailer, используем SimpleMailer
-                            error_log('Error creating Mailer, falling back to SimpleMailer: ' . $e->getMessage());
-                            $mailer = new SimpleMailer();
-                        }
-                    }
-                    
-                    // Получаем товары заказа для отображения в письме
-                    $order_items = getOrderItems($order_id);
-                    
-                    // Отправляем уведомление покупателю
-                    $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
-                    
-                    // Отправляем уведомление администратору
-                    $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
-                    
-                    // Проверяем успешность отправки писем
-                    $mail_sent = $customer_notification['success'];
-                    
-                    if (!$mail_sent && !$use_simple_mailer && !($mailer instanceof SimpleMailer)) {
-                        // Если PHPMailer не сработал, пробуем SimpleMailer как запасной вариант
-                        error_log('Falling back to SimpleMailer due to PHPMailer failure');
-                        $mailer = new SimpleMailer();
-                        $customer_notification = $mailer->sendOrderConfirmation($order, $order_items);
-                        $admin_notification = $mailer->sendOrderNotificationToAdmin($order, $order_items);
-                        $mail_sent = $customer_notification['success'];
-                    }
-                } catch (Exception $e) {
-                    error_log('Email sending error in checkout: ' . $e->getMessage());
-                    // Даже если отправка писем не удалась, заказ все равно оформлен
-                    $mail_sent = false;
-                }
-            }
-            
             // Очищаем корзину после успешного оформления заказа
             clearCart($user_id, $session_id);
         } else {
@@ -177,23 +116,30 @@ include_once 'includes/header/header.php';
                     <i class="fas fa-check-circle text-success"></i>
                 </div>
                 <h2 class="mb-3 text-success fw-bold">Заказ успешно оформлен!</h2>
-                <p class="mb-3 fs-5">Ваш заказ №<?php echo $order_id; ?> успешно оформлен.</p>
-                <div class="success-details p-3 mb-4 mx-auto" style="max-width: 450px;">
-                    <div class="d-flex align-items-center mb-3 success-detail-item">
-                        <i class="fas fa-envelope text-primary me-3"></i>
-                        <p class="mb-0">
-                            <?php if ($mail_sent): ?>
-                                Мы отправили подтверждение на указанный email
-                            <?php else: ?>
-                                Подробная информация о заказе отправлена на указанный email
-                            <?php endif; ?>
-                        </p>
+                <p class="mb-3 fs-5">Ваш заказ №<?php echo $order_id; ?> ожидает подтверждения.</p>
+                
+                <?php if ($user_id): ?>
+                <div class="alert alert-info mb-4 mx-auto" style="max-width: 550px;">
+                    <h5 class="alert-heading"><i class="fab fa-telegram-plane me-2"></i>Подтверждение через Telegram</h5>
+                    <p>Если у вас привязан аккаунт Telegram, мы отправили вам сообщение с деталями заказа.</p>
+                    <p>Для подтверждения заказа, пожалуйста, отправьте боту команду:</p>
+                    <div class="bg-light p-2 rounded mb-2">
+                        <code>/accept <?php echo $order_id; ?></code>
                     </div>
+                    <p class="mb-0">Также вы можете нажать кнопку "Подтвердить заказ" в сообщении от бота.</p>
+                </div>
+                
+                <div class="alert alert-warning mb-4 mx-auto" style="max-width: 550px;">
+                    <p class="mb-0"><strong>Важно!</strong> Заказ будет передан в обработку только после вашего подтверждения через Telegram.</p>
+                </div>
+                <?php else: ?>
+                <div class="success-details p-3 mb-4 mx-auto" style="max-width: 450px;">
                     <div class="d-flex align-items-center success-detail-item">
                         <i class="fas fa-truck text-primary me-3"></i>
                         <p class="mb-0">Статус заказа можно отслеживать в личном кабинете</p>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <div class="d-flex justify-content-center">
                     <a href="/catalog.php" class="btn btn-primary me-3">
