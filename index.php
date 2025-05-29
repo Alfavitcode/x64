@@ -147,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ' . (isset($product['stock']) && $product['stock'] <= 0 ? '<div class="out-of-stock-overlay"><span class="out-of-stock-label">Нет в наличии</span></div>' : '') . '
                             </div>
                             <div class="product-info">
-                                <div class="product-category">' . htmlspecialchars(isset($product['category']) ? $product['category'] : '') . '</div>
                                 <h3 class="product-title"><a href="/product.php?id=' . (isset($product['id']) ? $product['id'] : 0) . '">' . htmlspecialchars(isset($product['name']) ? $product['name'] : '') . '</a></h3>
                                 <div class="product-price">
                                     <span class="current-price">' . number_format(isset($product['price']) ? $product['price'] : 0, 0, '.', ' ') . ' ₽</span>
@@ -176,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <img src="/img/products/8 красный.PNG" alt="Смартфон XYZ Pro">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/123">Смартфон XYZ Pro</a></h3>
                             <div class="product-price">
                                 <span class="current-price">29 990 ₽</span>
@@ -200,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <img src="/img/products/8 белый.PNG" alt="Умные часы SmartLife">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/124">Умные часы SmartLife</a></h3>
                             <div class="product-price">
                                 <span class="current-price">7 990 ₽</span>
@@ -225,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <img src="/img/products/8 розовое золото.PNG" alt="Беспроводные наушники SoundPro">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/125">Беспроводные наушники SoundPro</a></h3>
                             <div class="product-price">
                                 <span class="current-price">5 490 ₽</span>
@@ -250,7 +246,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <img src="/img/products/14 red.jpg" alt="Фотокамера ProShot">
                         </div>
                         <div class="product-info">
-                            <div class="product-category">Электроника</div>
                             <h3 class="product-title"><a href="/product/126">Фотокамера ProShot</a></h3>
                             <div class="product-price">
                                 <span class="current-price">42 490 ₽</span>

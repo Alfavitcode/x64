@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .product-card:hover .product-image img {
-            transform: scale(1.08) translateZ(30px);
+            /* transform: scale(1.08) translateZ(30px); */
         }
         
         /* Добавление специальных теней для создания эффекта глубины */

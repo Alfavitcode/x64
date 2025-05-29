@@ -74,7 +74,6 @@ include_once 'includes/header/header.php';
                             </div>
                         </div>
                         <div class="product-info">
-                            <div class="product-category"><?php echo htmlspecialchars($product['category']); ?></div>
                             <h3 class="product-title"><a href="/product.php?id=<?php echo $product['id']; ?>"><?php echo htmlspecialchars($product['name']); ?></a></h3>
                             <div class="product-price">
                                 <span class="current-price"><?php echo number_format($product['price'], 0, '.', ' '); ?> ₽</span>
