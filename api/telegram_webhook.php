@@ -29,29 +29,41 @@ if (is_writable($log_dir)) {
 
 // Обработка callback-запросов от встроенных кнопок
 if (isset($update['callback_query'])) {
+    // Добавляем специальное логирование для callback-запросов
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Обработка callback-запроса\n", FILE_APPEND);
+    
     $callback_query = $update['callback_query'];
     $chat_id = $callback_query['from']['id'];
     $callback_data = $callback_query['data'];
     
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Callback data: " . $callback_data . "\n", FILE_APPEND);
+    
     // Обработка подтверждения заказа через кнопку
     if (preg_match('/^confirm_order_(\d+)$/', $callback_data, $matches)) {
         $order_id = $matches[1];
+        file_put_contents($log_file, date('Y-m-d H:i:s') . " - Попытка подтверждения заказа #" . $order_id . "\n", FILE_APPEND);
         
         // Проверяем, привязан ли Telegram аккаунт к пользователю
         $user = getUserByTelegramId($chat_id);
         
         if (!$user) {
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка: Telegram не привязан к аккаунту\n", FILE_APPEND);
             answerCallbackQuery($callback_query['id'], "Ваш Telegram не привязан к аккаунту на сайте.", true);
             exit;
         }
+        
+        file_put_contents($log_file, date('Y-m-d H:i:s') . " - Пользователь найден: ID=" . $user['id'] . ", имя=" . $user['fullname'] . "\n", FILE_APPEND);
         
         // Проверяем, существует ли заказ и принадлежит ли он этому пользователю
         $order = getOrderById($order_id, $user['id']);
         
         if (!$order) {
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка: Заказ #" . $order_id . " не найден или не принадлежит пользователю\n", FILE_APPEND);
             answerCallbackQuery($callback_query['id'], "Заказ #$order_id не найден или не принадлежит вам.", true);
             exit;
         }
+        
+        file_put_contents($log_file, date('Y-m-d H:i:s') . " - Заказ найден: ID=" . $order_id . ", статус=" . $order['status'] . "\n", FILE_APPEND);
         
         if ($order['status'] !== 'pending_confirmation') {
             $status_text = '';
@@ -73,6 +85,7 @@ if (isset($update['callback_query'])) {
                     break;
             }
             
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка: Заказ уже имеет статус '" . $order['status'] . "'\n", FILE_APPEND);
             answerCallbackQuery($callback_query['id'], "Заказ #$order_id уже подтвержден и $status_text.", true);
             exit;
         }
@@ -81,6 +94,8 @@ if (isset($update['callback_query'])) {
         $sql = "UPDATE orders SET status = 'pending' WHERE id = " . (int)$order_id;
         
         if (mysqli_query($conn, $sql)) {
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Успешно: Статус заказа #" . $order_id . " обновлен на 'pending'\n", FILE_APPEND);
+            
             // Получаем элементы заказа для отображения
             $order_items = getOrderItems($order_id);
             $items_text = "";
@@ -118,8 +133,10 @@ if (isset($update['callback_query'])) {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_exec($ch);
+            $curl_result = curl_exec($ch);
             curl_close($ch);
+            
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Результат обновления сообщения: " . $curl_result . "\n", FILE_APPEND);
             
             // Показываем уведомление
             answerCallbackQuery($callback_query['id'], "Заказ #$order_id успешно подтвержден!");
@@ -127,6 +144,7 @@ if (isset($update['callback_query'])) {
             // Отправляем уведомление администраторам о новом подтвержденном заказе
             sendOrderNotificationToAdmin($order_id);
         } else {
+            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка SQL: " . mysqli_error($conn) . "\n", FILE_APPEND);
             answerCallbackQuery($callback_query['id'], "Произошла ошибка при подтверждении заказа. Пожалуйста, попробуйте позже.", true);
         }
         
@@ -134,6 +152,7 @@ if (isset($update['callback_query'])) {
     }
     
     // Если callback-запрос не распознан
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Неизвестный callback-запрос: " . $callback_data . "\n", FILE_APPEND);
     answerCallbackQuery($callback_query['id'], "Неизвестная команда.");
     exit;
 }
@@ -455,6 +474,10 @@ if (isset($update['message'])) {
  * @return bool Результат отправки
  */
 function sendTelegramMessage($chat_id, $text, $keyboard = null) {
+    global $log_file;
+    
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Отправка сообщения в чат: " . $chat_id . "\n", FILE_APPEND);
+    
     $data = [
         'chat_id' => $chat_id,
         'text' => $text,
@@ -470,7 +493,17 @@ function sendTelegramMessage($chat_id, $text, $keyboard = null) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
+    
+    if ($result === false) {
+        $curl_error = curl_error($ch);
+        file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка CURL при отправке сообщения: " . $curl_error . "\n", FILE_APPEND);
+        curl_close($ch);
+        return false;
+    }
+    
     curl_close($ch);
+    
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Результат отправки сообщения: " . $result . "\n", FILE_APPEND);
     
     return $result !== false;
 }
@@ -537,6 +570,10 @@ function sendOrderNotificationToAdmin($order_id) {
  * @return bool Результат отправки
  */
 function answerCallbackQuery($callback_query_id, $text = '', $show_alert = false) {
+    global $log_file;
+    
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Отправка ответа на callback-запрос: " . $callback_query_id . "\n", FILE_APPEND);
+    
     $data = [
         'callback_query_id' => $callback_query_id,
         'text' => $text,
@@ -548,7 +585,17 @@ function answerCallbackQuery($callback_query_id, $text = '', $show_alert = false
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
+    
+    if ($result === false) {
+        $curl_error = curl_error($ch);
+        file_put_contents($log_file, date('Y-m-d H:i:s') . " - Ошибка CURL при ответе на callback: " . $curl_error . "\n", FILE_APPEND);
+        curl_close($ch);
+        return false;
+    }
+    
     curl_close($ch);
+    
+    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Результат ответа на callback: " . $result . "\n", FILE_APPEND);
     
     return $result !== false;
 } 

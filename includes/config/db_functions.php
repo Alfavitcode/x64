@@ -1560,6 +1560,12 @@ function getOrderById($order_id, $user_id = null) {
     
     $result = mysqli_query($conn, $sql);
     
+    if (!$result) {
+        // Логирование ошибки, если запрос не удался
+        error_log("SQL Error in getOrderById: " . mysqli_error($conn) . " - Query: $sql");
+        return null;
+    }
+    
     if (mysqli_num_rows($result) > 0) {
         return mysqli_fetch_assoc($result);
     }
