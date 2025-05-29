@@ -22,11 +22,11 @@
                 <div class="col-lg-3 col-md-6">
                     <h3 class="footer__title h5 mb-3 position-relative">Покупателям</h3>
                     <ul class="footer__menu list-unstyled">
-                        <li class="mb-2"><a href="/how-to-order" class="text-decoration-none text-secondary">Как сделать заказ</a></li>
-                        <li class="mb-2"><a href="/delivery" class="text-decoration-none text-secondary">Доставка</a></li>
-                        <li class="mb-2"><a href="/payment" class="text-decoration-none text-secondary">Оплата</a></li>
-                        <li class="mb-2"><a href="/return" class="text-decoration-none text-secondary">Возврат</a></li>
-                        <li class="mb-2"><a href="/faq" class="text-decoration-none text-secondary">Вопросы и ответы</a></li>
+                        <li class="mb-2"><a href="/faq/how-to-order.php" class="text-decoration-none text-secondary">Как сделать заказ</a></li>
+                        <li class="mb-2"><a href="/faq/delivery.php" class="text-decoration-none text-secondary">Доставка</a></li>
+                        <li class="mb-2"><a href="/faq/payment.php" class="text-decoration-none text-secondary">Оплата</a></li>
+                        <li class="mb-2"><a href="/faq/return.php" class="text-decoration-none text-secondary">Возврат</a></li>
+                        <li class="mb-2"><a href="/faq/questions.php" class="text-decoration-none text-secondary">Вопросы и ответы</a></li>
                     </ul>
                 </div>
                 
