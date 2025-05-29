@@ -216,7 +216,38 @@ if (file_exists($sessions_dir) && is_dir($sessions_dir)) {
             </div>
             <div class="card-body p-0">
                 <div class="log-container">
-                    <?php echo $logs; ?>
+                    <?php 
+                    $logs = "";
+                    if (file_exists($log_file)) {
+                        $log_content = file_get_contents($log_file);
+                        if (!empty($log_content)) {
+                            // Обработка и форматирование логов
+                            $lines = explode("\n", $log_content);
+                            
+                            foreach ($lines as $line) {
+                                if (empty($line)) continue;
+                                
+                                // Подсветка ошибок
+                                if (strpos($line, 'Ошибка') !== false || strpos($line, 'ошибка') !== false) {
+                                    $logs .= "<span style='color: red;'>" . htmlspecialchars($line) . "</span><br>";
+                                }
+                                // Подсветка успешных действий
+                                else if (strpos($line, 'успешно') !== false || strpos($line, 'Успешно') !== false) {
+                                    $logs .= "<span style='color: green;'>" . htmlspecialchars($line) . "</span><br>";
+                                }
+                                else {
+                                    $logs .= htmlspecialchars($line) . "<br>";
+                                }
+                            }
+                        } else {
+                            $logs = "<div style='color: orange; padding: 20px;'>Лог-файл пуст!</div>";
+                        }
+                    } else {
+                        $logs = "<div style='color: red; padding: 20px;'>Лог-файл не существует!</div>";
+                    }
+                    
+                    echo $logs;
+                    ?>
                 </div>
             </div>
         </div>

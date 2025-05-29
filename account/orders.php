@@ -141,7 +141,7 @@ function getOrderStatusInfo($status) {
                         <p>Начните делать покупки, чтобы ваши заказы отображались здесь</p>
                         <a href="/" class="btn-primary">Перейти в каталог</a>
                     </div>
-                    <?php else: ?>
+                <?php else: ?>
                     <div class="orders-table-container">
                         <table class="orders-table">
                             <thead>
@@ -170,7 +170,7 @@ function getOrderStatusInfo($status) {
                                         </a>
                                     </td>
                                 </tr>
-                                <?php endforeach; ?>
+                            <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
@@ -380,9 +380,9 @@ function getOrderStatusInfo($status) {
 }
 
 .order-actions {
-    text-align: center;
-}
-
+        text-align: center;
+    }
+    
 .view-order-btn {
     display: inline-flex;
     align-items: center;

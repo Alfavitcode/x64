@@ -22,9 +22,9 @@ if (is_writable($log_dir)) {
     }
     
     // Логируем запрос
-    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Получен запрос\n", FILE_APPEND);
-    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Входящие данные: " . file_get_contents('php://input') . "\n", FILE_APPEND);
-    file_put_contents($log_file, date('Y-m-d H:i:s') . " - Декодированные данные: " . print_r($update, true) . "\n\n", FILE_APPEND);
+file_put_contents($log_file, date('Y-m-d H:i:s') . " - Получен запрос\n", FILE_APPEND);
+file_put_contents($log_file, date('Y-m-d H:i:s') . " - Входящие данные: " . file_get_contents('php://input') . "\n", FILE_APPEND);
+file_put_contents($log_file, date('Y-m-d H:i:s') . " - Декодированные данные: " . print_r($update, true) . "\n\n", FILE_APPEND);
 }
 
 // Обработка callback-запросов от встроенных кнопок
