@@ -1,5 +1,6 @@
 name: FTP Deploy
 
+# Configuration for x64 branch deployment
 on:
   push:
     branches: [ x64 ]
