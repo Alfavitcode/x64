@@ -3,8 +3,7 @@ name: FTP Deploy
 on:
   push:
     branches:
-      
-main,
+      - main
 
 jobs:
   deploy:
@@ -12,26 +11,24 @@ jobs:
     timeout-minutes: 10  # Добавляем общий таймаут для задачи
 
     steps:
-      
-name: Checkout code
-      uses: actions/checkout@v4,
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      
-name: 📂 Deploy files via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps  # Меняем на FTPS для большей надежности
-        port: 21
-        local-dir: ./
-        server-dir: /    # Удаленная директория на сервере
-        dangerous-clean-slate: false
-        timeout: 120000  # Увеличиваем таймаут до 2 минут
-        passive: true    # Добавляем пассивный режим
-        security: loose  # Добавляем менее строгие проверки безопасности
-       exclude: |
+      - name: 📂 Deploy files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps  # Меняем на FTPS для большей надежности
+          port: 21
+          local-dir: ./
+          server-dir: /    # Удаленная директория на сервере
+          dangerous-clean-slate: false
+          timeout: 120000  # Увеличиваем таймаут до 2 минут
+          passive: true    # Добавляем пассивный режим
+          security: loose  # Добавляем менее строгие проверки безопасности
+          exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
