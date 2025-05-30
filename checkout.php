@@ -13,36 +13,30 @@ createOrdersTablesIfNotExists();
 $session_id = session_id();
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-// Получаем содержимое корзины
+// Получаем содержимое корзины перед обработкой формы
 $cart_items = getCartItems($user_id, $session_id);
 $cart_total = 0;
 $total_items = 0;
 
-// Проверяем, есть ли товары в корзине
-if (empty($cart_items)) {
-    // Если корзина пуста, перенаправляем на страницу корзины
-    header("Location: /cart.php");
-    exit;
-}
-
 // Рассчитываем итоги корзины
+if (!empty($cart_items)) {
 foreach ($cart_items as $item) {
     $cart_total += $item['subtotal'];
     $total_items += $item['quantity'];
 }
-
-// Если пользователь авторизован, получаем его данные
-$user = null;
-if ($user_id) {
-    $user = getUserById($user_id);
 }
 
-// Обработка отправки формы
+// Инициализируем переменные для уведомления об успешном заказе
 $order_success = false;
 $order_error = '';
 $order_id = 0;
 
+// Обработка отправки формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
+    // Проверяем, есть ли товары в корзине
+    if (empty($cart_items)) {
+        $order_error = 'Ваша корзина пуста. Добавьте товары перед оформлением заказа.';
+    } else {
     // Получаем данные из формы
     $fullname = isset($_POST['fullname']) ? trim($_POST['fullname']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -85,10 +79,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             
             // Очищаем корзину после успешного оформления заказа
             clearCart($user_id, $session_id);
+                
+                // Получаем содержимое корзины заново (она должна быть пустой)
+                $cart_items = getCartItems($user_id, $session_id);
+                $cart_total = 0;
+                $total_items = 0;
         } else {
             $order_error = $result['message'];
         }
     }
+    }
+} else {
+    // Проверяем, есть ли товары в корзине
+    if (empty($cart_items)) {
+        // Если корзина пуста, перенаправляем на страницу корзины
+        header("Location: /cart.php");
+        exit;
+    }
+}
+
+// Если пользователь авторизован, получаем его данные
+$user = null;
+if ($user_id) {
+    $user = getUserById($user_id);
 }
 
 // Задаем заголовок страницы
@@ -106,43 +119,20 @@ include_once 'includes/header/header.php';
         <h1 class="mb-4">Оформление заказа</h1>
         
         <?php if ($order_success): ?>
-        <!-- Успешное оформление заказа -->
-        <div class="card mb-4 order-success-card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Заказ успешно оформлен</h5>
-            </div>
-            <div class="card-body text-center py-5">
-                <div class="order-success-icon mb-4">
-                    <i class="fas fa-check-circle text-success"></i>
+        <!-- Уведомление об успешном оформлении заказа -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas fa-check-circle fa-3x"></i>
                 </div>
-                <h2 class="mb-3 text-success fw-bold">Заказ успешно оформлен!</h2>
-                <p class="mb-3 fs-5">Ваш заказ №<?php echo $order_id; ?> ожидает подтверждения.</p>
-                
-                <?php if ($user_id): ?>
-                <div class="alert alert-info mb-4 mx-auto" style="max-width: 550px;">
-                    <h5 class="alert-heading"><i class="fab fa-telegram-plane me-2"></i>Подтверждение через Telegram</h5>
-                    <p>Если у вас привязан аккаунт Telegram, мы отправили вам сообщение с деталями заказа.</p>
-                    <p>Для подтверждения заказа, пожалуйста, отправьте боту команду:</p>
-                    <div class="bg-light p-2 rounded mb-2">
-                        <code>/accept <?php echo $order_id; ?></code>
-                    </div>
-                    <p class="mb-0">Также вы можете нажать кнопку "Подтвердить заказ" в сообщении от бота.</p>
+                <div>
+                    <h4 class="alert-heading">Спасибо за покупку!</h4>
+                    <p>Ваш заказ №<?php echo $order_id; ?> успешно оформлен.</p>
+                    <p class="mb-0">Данные о заказе отправлены вам на почту.</p>
                 </div>
-                
-                <div class="alert alert-warning mb-4 mx-auto" style="max-width: 550px;">
-                    <p class="mb-0"><strong>Важно!</strong> Заказ будет передан в обработку только после вашего подтверждения через Telegram.</p>
                 </div>
-                <?php else: ?>
-                <div class="success-details p-3 mb-4 mx-auto" style="max-width: 450px;">
-                    <div class="d-flex align-items-center success-detail-item">
-                        <i class="fas fa-truck text-primary me-3"></i>
-                        <p class="mb-0">Статус заказа можно отслеживать в личном кабинете</p>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <div class="d-flex justify-content-center">
-                    <a href="/catalog.php" class="btn btn-primary me-3">
+            <div class="d-flex justify-content-end mt-3">
+                <a href="/catalog.php" class="btn btn-primary me-2">
                         <i class="fas fa-shopping-bag me-2"></i>Продолжить покупки
                     </a>
                     <?php if ($user_id): ?>
@@ -155,7 +145,7 @@ include_once 'includes/header/header.php';
                     </a>
                     <?php endif; ?>
                 </div>
-            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <?php else: ?>
         
@@ -604,7 +594,48 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    <?php if ($order_success): ?>
+    // Автоматическая прокрутка к сообщению об успешном заказе
+    const successAlert = document.getElementById('successAlert');
+    if (successAlert) {
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Добавляем эффект пульсации для привлечения внимания
+        setTimeout(() => {
+            successAlert.classList.add('pulse-animation');
+        }, 300);
+    }
+    <?php endif; ?>
 });
 </script>
+
+<style>
+/* Анимация пульсации для уведомления */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+}
+
+.pulse-animation {
+    animation: pulse 1.5s infinite;
+}
+
+/* Стили для alert-success */
+.alert-success {
+    border-left: 5px solid #198754;
+}
+
+.alert-success .fa-check-circle {
+    color: #198754;
+}
+
+/* Предотвращаем скрытие уведомления при прокрутке */
+#successAlert {
+    position: relative;
+    z-index: 100;
+}
+</style>
 
 <?php include_once 'includes/footer/footer.php'; ?> 

@@ -192,30 +192,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     $name = $_POST['name'] ?? '';
     $description = $_POST['description'] ?? '';
     
-    // Проверяем и загружаем изображение
-    $image = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../img/categories/';
-        
-        // Создаем директорию, если она не существует
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        
-        $file_name = basename($_FILES['image']['name']);
-        $file_path = $upload_dir . $file_name;
-        
-        // Перемещаем загруженный файл
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
-            $image = '/img/categories/' . $file_name;
-        } else {
-            $category_error = 'Ошибка при загрузке изображения';
-        }
-    }
-    
     // Если нет ошибок, добавляем категорию в базу данных
     if (empty($category_error)) {
-        $result = addCategory($name, $description, $image);
+        // Передаем пустую строку вместо изображения
+        $result = addCategory($name, $description, '');
         
         if ($result['success']) {
             $category_added = true;
@@ -232,28 +212,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_category'])) {
     // Получаем данные из формы
     $data = [
         'name' => $_POST['name'] ?? '',
-        'description' => $_POST['description'] ?? ''
+        'description' => $_POST['description'] ?? '',
+        'image' => ''  // Всегда устанавливаем пустую строку для изображения
     ];
-    
-    // Проверяем и загружаем изображение, если оно было загружено
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../img/categories/';
-        
-        // Создаем директорию, если она не существует
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        
-        $file_name = basename($_FILES['image']['name']);
-        $file_path = $upload_dir . $file_name;
-        
-        // Перемещаем загруженный файл
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
-            $data['image'] = '/img/categories/' . $file_name;
-        } else {
-            $category_error = 'Ошибка при загрузке изображения';
-        }
-    }
     
     // Если нет ошибок, обновляем категорию в базе данных
     if (empty($category_error)) {
@@ -1027,7 +988,7 @@ include_once '../includes/header/header.php';
                                             </div>
                                         <?php endif; ?>
                                         
-                                        <form action="index.php?tab=categories&action=add" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                        <form action="index.php?tab=categories" method="post" class="needs-validation" novalidate>
                                             <div class="row">
                                                 <div class="col-md-8">
                                                     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -1049,22 +1010,6 @@ include_once '../includes/header/header.php';
                                                 </div>
                                                 
                                                 <div class="col-md-4">
-                                                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                                        <div class="card-body p-4">
-                                                            <h5 class="card-title mb-4">Изображение категории</h5>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="image" class="form-label">Загрузить изображение</label>
-                                                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                                                                <div class="form-text">Рекомендуемый размер: 800x600 пикселей</div>
-                                                            </div>
-                                                            
-                                                            <div class="image-preview mt-3 text-center">
-                                                                <img id="preview" src="../img/categories/placeholder.png" alt="Предпросмотр" class="img-fluid rounded-3 border" style="max-height: 200px;">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
                                                     <div class="d-grid gap-2">
                                                         <button type="submit" name="add_category" class="btn btn-primary btn-lg rounded-pill">
                                                             <i class="fas fa-plus me-2"></i>Добавить категорию
@@ -1155,26 +1100,6 @@ include_once '../includes/header/header.php';
                                                 </div>
                                                 
                                                 <div class="col-md-4">
-                                                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                                        <div class="card-body p-4">
-                                                            <h5 class="card-title mb-4">Изображение категории</h5>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="image" class="form-label">Загрузить новое изображение</label>
-                                                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                                                                <div class="form-text">Оставьте пустым, чтобы сохранить текущее изображение</div>
-                                                            </div>
-                                                            
-                                                            <div class="image-preview mt-3 text-center">
-                                                                <?php if (!empty($category['image'])): ?>
-                                                                    <img id="preview" src="<?php echo htmlspecialchars($category['image']); ?>" alt="Изображение категории" class="img-fluid rounded-3 border" style="max-height: 200px;">
-                                                                <?php else: ?>
-                                                                    <img id="preview" src="../img/categories/placeholder.png" alt="Нет изображения" class="img-fluid rounded-3 border" style="max-height: 200px;">
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
                                                     <div class="d-grid gap-2">
                                                         <button type="submit" name="edit_category" class="btn btn-primary btn-lg rounded-pill">
                                                             <i class="fas fa-save me-2"></i>Сохранить изменения
@@ -1219,7 +1144,6 @@ include_once '../includes/header/header.php';
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>ID</th>
-                                                    <th>Изображение</th>
                                                     <th>Название</th>
                                                     <th>Описание</th>
                                                     <th>Товаров</th>
@@ -1230,15 +1154,6 @@ include_once '../includes/header/header.php';
                                                 <?php foreach ($categories as $category): ?>
                                                 <tr>
                                                     <td><?php echo $category['id']; ?></td>
-                                                    <td>
-                                                        <?php if (!empty($category['image'])): ?>
-                                                            <img src="<?php echo htmlspecialchars($category['image']); ?>" alt="<?php echo htmlspecialchars($category['name']); ?>" class="img-thumbnail" style="max-width: 50px;">
-                                                        <?php else: ?>
-                                                            <div class="bg-light text-center p-2 rounded" style="width: 50px; height: 50px;">
-                                                                <i class="fas fa-folder text-muted"></i>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </td>
                                                     <td><?php echo htmlspecialchars($category['name']); ?></td>
                                                     <td><?php echo htmlspecialchars(mb_substr($category['description'] ?? '', 0, 50)) . (mb_strlen($category['description'] ?? '') > 50 ? '...' : ''); ?></td>
                                                     <td>

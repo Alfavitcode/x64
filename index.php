@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Выводим карточку товара
                     echo '
-                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
                         <div class="product-card h-100" data-category="' . $dataCategoryAttr . '">
                             <div class="product-badges">
                                 ' . $badges . '
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Если товары не найдены, выводим стандартные карточки
             ?>
                 <!-- Товар 1 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
                     <div class="product-card h-100" data-category="new bestsellers">
                         <div class="product-badges">
                             <span class="badge badge-new">Новинка</span>
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 2 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
                     <div class="product-card h-100" data-category="sale">
                         <div class="product-badges">
                             <span class="badge badge-sale">-20%</span>
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 3 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
                     <div class="product-card h-100" data-category="bestsellers">
                         <div class="product-badges">
                             <span class="badge badge-bestseller">Хит</span>
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 4 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
                     <div class="product-card h-100" data-category="new sale">
                         <div class="product-badges">
                             <span class="badge badge-new">Новинка</span>

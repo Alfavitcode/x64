@@ -42,11 +42,48 @@ function getProducts($limit = null, $category = null) {
  * @return array Массив категорий
  */
 function getCategories() {
-    // Вместо загрузки из базы данных, возвращаем фиксированные категории iPhone и Android
-    return [
-        ['id' => 1, 'name' => 'iPhone', 'description' => 'Смартфоны iPhone', 'image' => '/img/categories/iphone.jpg', 'parent_id' => null],
-        ['id' => 2, 'name' => 'Android', 'description' => 'Смартфоны на Android', 'image' => '/img/categories/android.jpg', 'parent_id' => null]
-    ];
+    global $conn;
+    
+    // Создаем таблицу категорий, если она не существует
+    $sql = "CREATE TABLE IF NOT EXISTS categories (
+        id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        image VARCHAR(255),
+        parent_id INT(11) NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    
+    mysqli_query($conn, $sql);
+    
+    // Получаем категории из базы данных
+    $sql = "SELECT * FROM categories ORDER BY name";
+    $result = mysqli_query($conn, $sql);
+    $categories = [];
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $categories[] = $row;
+        }
+    }
+    
+    // Если категорий нет, добавляем две стандартные
+    if (empty($categories)) {
+        addCategory('iPhone', 'Смартфоны iPhone', '');
+        addCategory('Android', 'Смартфоны на Android', '');
+        
+        // Получаем категории снова
+        $sql = "SELECT * FROM categories ORDER BY name";
+        $result = mysqli_query($conn, $sql);
+        
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $categories[] = $row;
+            }
+        }
+    }
+    
+    return $categories;
 }
 
 /**
@@ -55,8 +92,25 @@ function getCategories() {
  * @return array Массив категорий
  */
 function getProductCategories() {
-    // Вместо загрузки из базы данных, возвращаем фиксированные категории iPhone и Android
-    return ['iPhone', 'Android'];
+    global $conn;
+    
+    // Получаем уникальные категории из таблицы product
+    $sql = "SELECT DISTINCT category FROM product WHERE category IS NOT NULL AND category != '' ORDER BY category";
+    $result = mysqli_query($conn, $sql);
+    $categories = [];
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $categories[] = $row['category'];
+        }
+    }
+    
+    // Если категорий нет, добавляем стандартные
+    if (empty($categories)) {
+        $categories = ['iPhone', 'Android'];
+    }
+    
+    return $categories;
 }
 
 /**
@@ -652,7 +706,7 @@ function getCategoryById($id) {
     $sql = "SELECT * FROM categories WHERE id = " . (int)$id;
     $result = mysqli_query($conn, $sql);
     
-    if (mysqli_num_rows($result) > 0) {
+    if ($result && mysqli_num_rows($result) > 0) {
         return mysqli_fetch_assoc($result);
     }
     

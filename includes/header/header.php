@@ -127,7 +127,7 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
             <!-- Поисковая строка для десктопа -->
             <div class="header__search desktop-search">
                 <div class="search-wrapper">
-                    <form action="/search" method="GET" class="search-form">
+                    <form action="/search.php" method="GET" class="search-form">
                         <input type="text" name="query" id="live-search" autocomplete="off" placeholder="Поиск товаров..." class="search-input">
                         <button type="submit" class="search-button">
                             <i class="fas fa-search"></i>
@@ -189,7 +189,7 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
             <i class="fas fa-times"></i>
         </button>
         <div class="fullscreen-search-container">
-            <form action="/search" method="GET" class="fullscreen-search-form">
+            <form action="/search.php" method="GET" class="fullscreen-search-form">
                 <input type="text" name="query" id="fullscreen-live-search" autocomplete="off" placeholder="Введите запрос для поиска..." class="fullscreen-search-input">
                 <button type="submit" class="fullscreen-search-button">
                     <i class="fas fa-search"></i>
@@ -362,7 +362,7 @@ $(document).ready(function() {
                     
                     // Добавляем ссылку на все результаты поиска
                     html += `
-                        <a href="/search?query=${encodeURIComponent(query)}" class="search-all-results">
+                        <a href="/search.php?query=${encodeURIComponent(query)}" class="search-all-results">
                             Показать все результаты <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>`;
@@ -428,7 +428,7 @@ $(document).ready(function() {
                     
                     // Добавляем ссылку на все результаты поиска
                     html += `
-                        <a href="/search?query=${encodeURIComponent(query)}" class="fullscreen-search-all-results">
+                        <a href="/search.php?query=${encodeURIComponent(query)}" class="fullscreen-search-all-results">
                             Показать все результаты <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>`;

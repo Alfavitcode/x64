@@ -1,5 +1,6 @@
 <?php
-// Подключаем файлы конфигурации
+ require_once '../includes/header/header.php'; 
+
 require_once '../includes/config/db_config.php';
 require_once '../includes/config/db_functions.php';
 
@@ -166,86 +167,238 @@ function getStatusClass($status) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактирование заказа #<?php echo $order_id; ?> | Админ-панель</title>
+    <title>Редактирование заказа #<?php echo $order_id; ?> | Админ-панель X64</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Стили для админки в стиле сайта */
         .admin-header {
-            background-color: #343a40;
+            background-color: var(--primary-color);
             color: white;
             padding: 1rem 0;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
         }
-        .profile-info-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
+
+        .admin-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .profile-info-header {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            border-radius: 10px 10px 0 0;
+
+        .admin-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
         }
-        .profile-info-body {
-            padding: 1.5rem;
+
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .status-badge {
-            font-size: 1rem;
+
+        .admin-header .btn-logout {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
             padding: 0.5rem 1rem;
+            border-radius: var(--btn-border-radius);
+            transition: var(--transition);
         }
-        .profile-section-title {
-            color: #4a5568;
+
+        .admin-header .btn-logout:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .order-header {
+            background-color: var(--light-color);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-header h4 {
+            margin: 0;
             font-weight: 600;
+            color: var(--text-color);
         }
-        .order-detail-item {
-            margin-bottom: 1rem;
+
+        .order-body {
+            padding: 2rem;
         }
-        .order-detail-label {
+
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(77, 97, 252, 0.25);
+        }
+
+        .btn-back {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--btn-border-radius);
+            transition: var(--transition);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: var(--btn-border-radius);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-color-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(77, 97, 252, 0.3);
+        }
+
+        .btn-view {
+            color: var(--secondary-color);
+            background-color: transparent;
+            border: 1px solid var(--secondary-color);
+            border-radius: var(--btn-border-radius);
+            transition: var(--transition);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-view:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+        }
+
+        .section-title {
             font-weight: 600;
-            color: #4a5568;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .table {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
         }
     </style>
 </head>
 <body>
-    <!-- Шапка админ-панели -->
-    <header class="admin-header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h4 mb-0">Админ-панель X64</h1>
-                <div class="d-flex align-items-center">
-                    <span class="me-3"><?php echo htmlspecialchars($user_data['fullname']); ?></span>
-                    <a href="../logout.php" class="btn btn-sm btn-outline-light">Выйти</a>
-                </div>
-            </div>
-        </div>
-    </header>
+   
 
     <!-- Основной контент -->
     <main class="container py-4">
         <div class="mb-4">
-            <a href="index.php?tab=orders" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left me-2"></i>Вернуться к списку заказов
+            <a href="index.php?tab=orders" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Вернуться к списку заказов
             </a>
         </div>
 
         <?php if (!empty($message)): ?>
-            <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show rounded-4 mb-4" role="alert">
+            <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show mb-4" role="alert">
                 <?php echo $message; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
 
         <!-- Форма редактирования заказа -->
-        <div class="profile-info-card">
-            <div class="profile-info-header d-flex justify-content-between align-items-center">
-                <h4 class="profile-section-title mb-0">Редактирование заказа #<?php echo $order_id; ?></h4>
+        <div class="order-card">
+            <div class="order-header">
+                <h4>Редактирование заказа #<?php echo $order_id; ?></h4>
                 <span class="badge status-badge <?php echo getStatusClass($order['status']); ?>">
                     <?php echo getStatusText($order['status']); ?>
                 </span>
             </div>
-            <div class="profile-info-body">
+            <div class="order-body">
                 <?php if ($order['status'] === 'closed'): ?>
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
@@ -255,7 +408,7 @@ function getStatusClass($status) {
                     <form method="post" action="">
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h5 class="mb-3">Информация о клиенте</h5>
+                                <h5 class="section-title">Информация о клиенте</h5>
                                 <div class="mb-3">
                                     <label for="fullname" class="form-label">ФИО</label>
                                     <input type="text" class="form-control" id="fullname" name="fullname" value="<?php echo htmlspecialchars($order['fullname']); ?>" required>
@@ -270,7 +423,7 @@ function getStatusClass($status) {
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <h5 class="mb-3">Адрес доставки</h5>
+                                <h5 class="section-title">Адрес доставки</h5>
                                 <div class="mb-3">
                                     <label for="region" class="form-label">Регион</label>
                                     <input type="text" class="form-control" id="region" name="region" value="<?php echo htmlspecialchars($order['region'] ?? ''); ?>">
@@ -292,7 +445,7 @@ function getStatusClass($status) {
                         
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h5 class="mb-3">Информация о доставке и оплате</h5>
+                                <h5 class="section-title">Информация о доставке и оплате</h5>
                                 <div class="mb-3">
                                     <label for="delivery_method" class="form-label">Способ доставки</label>
                                     <select class="form-select" id="delivery_method" name="delivery_method">
@@ -309,7 +462,7 @@ function getStatusClass($status) {
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <h5 class="mb-3">Статус и комментарий</h5>
+                                <h5 class="section-title">Статус и комментарий</h5>
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Статус заказа</label>
                                     <select class="form-select" id="status" name="status">
@@ -342,10 +495,11 @@ function getStatusClass($status) {
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <a href="view_order.php?id=<?php echo $order_id; ?>" class="btn btn-outline-secondary">
-                                <i class="fas fa-eye me-2"></i>Просмотр заказа
+                            <a href="view_order.php?id=<?php echo $order_id; ?>" class="btn-view">
+                                <i class="fas fa-eye"></i>
+                                Просмотр заказа
                             </a>
-                            <button type="submit" name="update_order" class="btn btn-primary">
+                            <button type="submit" name="update_order" class="btn-primary">
                                 <i class="fas fa-save me-2"></i>Сохранить изменения
                             </button>
                         </div>
@@ -354,14 +508,14 @@ function getStatusClass($status) {
             </div>
         </div>
         
-        <!-- Товары заказа (только для информации) -->
-        <div class="profile-info-card">
-            <div class="profile-info-header">
-                <h4 class="profile-section-title mb-0">Товары заказа</h4>
+        <!-- Товары заказа -->
+        <div class="order-card">
+            <div class="order-header">
+                <h4>Товары заказа</h4>
             </div>
-            <div class="profile-info-body">
+            <div class="order-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Наименование</th>
@@ -393,3 +547,49 @@ function getStatusClass($status) {
                     </table>
                 </div>
                 <div class="text-muted">
+                    <p class="small mb-0">Дата заказа: <?php echo date('d.m.Y H:i', strtotime($order['created_at'])); ?></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Скрипт для показа/скрытия поля причины отмены
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('status');
+            const cancelReasonDiv = document.getElementById('cancelReasonDiv');
+            const cancelReasonInput = document.getElementById('cancel_reason');
+            const cancelReasonError = document.getElementById('cancelReasonError');
+            const orderForm = document.querySelector('form');
+
+            // Функция для проверки статуса и отображения поля причины отмены
+            function checkStatus() {
+                if (statusSelect.value === 'cancelled') {
+                    cancelReasonDiv.style.display = 'block';
+                    cancelReasonInput.setAttribute('required', 'required');
+                } else {
+                    cancelReasonDiv.style.display = 'none';
+                    cancelReasonInput.removeAttribute('required');
+                    cancelReasonError.style.display = 'none';
+                }
+            }
+
+            // Вызываем функцию при загрузке страницы
+            checkStatus();
+
+            // Добавляем слушатель события изменения статуса
+            statusSelect.addEventListener('change', checkStatus);
+
+            // Проверка формы перед отправкой
+            orderForm.addEventListener('submit', function(event) {
+                if (statusSelect.value === 'cancelled' && !cancelReasonInput.value.trim()) {
+                    event.preventDefault();
+                    cancelReasonError.style.display = 'block';
+                    cancelReasonInput.focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
