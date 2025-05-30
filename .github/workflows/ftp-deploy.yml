@@ -23,7 +23,7 @@ jobs:
           protocol: ftps  # Меняем на FTPS для большей надежности
           port: 21
           local-dir: ./
-          server-dir: /    # Удаленная директория на сервере
+          server-dir: /www/x64shop.ru/
           dangerous-clean-slate: false
           timeout: 120000  # Увеличиваем таймаут до 2 минут
           passive: true    # Добавляем пассивный режим
