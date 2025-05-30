@@ -2,7 +2,7 @@ name: FTP Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ x64 ]
   workflow_dispatch:
     inputs:
       environment:
