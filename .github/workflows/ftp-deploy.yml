@@ -1,46 +1,33 @@
-name: 🚀 FTP Deploy
+name: FTP Deploy
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:  # Позволяет запускать деплой вручную
+    branches:
+      - main
 
 jobs:
   deploy:
-    name: 📂 Deploy Website
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Увеличиваем общий таймаут задачи до 30 минут
-    
+    timeout-minutes: 10  # Добавляем общий таймаут для задачи
+
     steps:
-      - name: 🛒 Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1  # Клонируем только последний коммит для уменьшения объема
-      
-      # === Оптимизация репозитория перед отправкой ===
-      - name: 🧹 Cleanup before deploy
-        run: |
-          # Удаляем ненужные файлы для уменьшения объема передачи
-          if [ -d "node_modules" ]; then rm -rf node_modules; fi
-          if [ -d ".git" ]; then rm -rf .git; fi
-          if [ -d ".github" ]; then rm -rf .github; fi
-          find . -name "*.log" -type f -delete
-          find . -name "*.tmp" -type f -delete
-          find . -name ".DS_Store" -type f -delete
-      
-      # === FTP метод с увеличенными таймаутами и повторными попытками ===
-      - name: 📤 Deploy using FTP
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📂 Deploy files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps  # Меняем на FTPS для большей надежности
           port: 21
-          timeout: 600000  # Увеличиваем таймаут до 10 минут
-          local-dir: ./    # Локальная директория для деплоя
-          server-dir: /    # Удаленная директория на сервере
-          dangerous-clean-slate: false  # Не удалять существующие файлы на сервере
+          local-dir: ./
+          server-dir: /www/x64shop.ru/
+          dangerous-clean-slate: false
+          timeout: 120000  # Увеличиваем таймаут до 2 минут
+          passive: true    # Добавляем пассивный режим
+          security: loose  # Добавляем менее строгие проверки безопасности
           exclude: |
             **/.git*
             **/.git*/**
@@ -60,154 +47,3 @@ jobs:
             **/*.tmp
             **/.DS_Store
           log-level: verbose  # Подробный лог для отладки
-
-      # === Если основной FTP деплой не сработал, попробуем другой способ FTP-деплоя ===
-      - name: 📤 Retry with alternative method
-        if: failure()  # Выполнять только если предыдущий шаг не удался
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: /
-
-      # === Генерация отчета о деплое (по желанию) ===
-      - name: 📝 Create Deployment Summary
-        if: success()
-        run: |
-          echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployed:** $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" >> $GITHUB_STEP_SUMMARY
-
-# === Многофайловый деплой (раскомментируйте для больших репозиториев) ===
-# name: 🚀 Chunked FTP Deploy
-# 
-# on:
-#   push:
-#     branches: [ main ]
-#   workflow_dispatch:
-# 
-# jobs:
-#   deploy:
-#     name: 📂 Deploy Website in Chunks
-#     runs-on: ubuntu-latest
-#     timeout-minutes: 30  # Увеличиваем таймаут до 30 минут
-#     
-#     steps:
-#       - name: 🛒 Checkout code
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 1  # Только последний коммит
-#       
-#       # Оптимизация репозитория перед отправкой
-#       - name: 🧹 Cleanup before deploy
-#         run: |
-#           # Удаляем ненужные файлы
-#           if [ -d "node_modules" ]; then rm -rf node_modules; fi
-#           if [ -d ".git" ]; then rm -rf .git; fi
-#           if [ -d ".github" ]; then rm -rf .github; fi
-#           find . -name "*.log" -type f -delete
-#           find . -name "*.tmp" -type f -delete
-#           find . -name ".DS_Store" -type f -delete
-#       
-#       # Разделяем файлы на пакеты для загрузки
-#       - name: 📦 Split files into chunks
-#         run: |
-#           mkdir -p chunks
-#           # Подсчитываем общее количество файлов
-#           total_files=$(find . -type f | wc -l)
-#           # Определяем размер пакета (примерно 100 файлов в пакете)
-#           chunk_size=100
-#           # Создаем пакеты файлов
-#           find . -type f | split -l $chunk_size - chunks/filelist_
-#           # Выводим информацию о созданных пакетах
-#           echo "Created $(ls chunks/ | wc -l) file chunks with max $chunk_size files each from total $total_files files"
-#       
-#       # Последовательно загружаем каждый пакет файлов
-#       - name: 📤 Upload files in chunks
-#         run: |
-#           # Для каждого списка файлов
-#           for chunk in chunks/filelist_*; do
-#             echo "Processing chunk $chunk..."
-#             # Создаем временную директорию для этого пакета
-#             mkdir -p current_chunk
-#             # Копируем файлы из списка во временную директорию с сохранением структуры
-#             while IFS= read -r file; do
-#               # Создаем нужные директории
-#               mkdir -p "current_chunk/$(dirname "$file")"
-#               # Копируем файл
-#               cp "$file" "current_chunk/$file"
-#             done < "$chunk"
-#             
-#             # Загружаем этот пакет файлов через FTP
-#             echo "Uploading chunk..."
-#             curl --connect-timeout 60 --retry 5 --retry-delay 10 \
-#               --ftp-create-dirs \
-#               -T "current_chunk/." \
-#               -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-#               ftp://${{ secrets.FTP_SERVER }}/
-#               
-#             # Очищаем временную директорию
-#             rm -rf current_chunk
-#             echo "Chunk $chunk uploaded."
-#           done
-#       
-#       - name: 📝 Create Deployment Summary
-#         if: success()
-#         run: |
-#           echo "## 🚀 Chunked Deployment Successful!" >> $GITHUB_STEP_SUMMARY
-#           echo "**Deployed:** $(date)" >> $GITHUB_STEP_SUMMARY
-
-# === SFTP метод (если ваш хостинг поддерживает SFTP) ===
-# name: 🚀 SFTP Deploy
-# 
-# on:
-#   push:
-#     branches: [ main ]
-#   workflow_dispatch:
-# 
-# jobs:
-#   deploy:
-#     name: 📂 Deploy Website via SFTP
-#     runs-on: ubuntu-latest
-#     timeout-minutes: 30  # Увеличиваем таймаут до 30 минут
-#     
-#     steps:
-#       - name: 🛒 Checkout code
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 1  # Только последний коммит
-#       
-#       # Оптимизация репозитория перед отправкой
-#       - name: 🧹 Cleanup before deploy
-#         run: |
-#           # Удаляем ненужные файлы
-#           if [ -d "node_modules" ]; then rm -rf node_modules; fi
-#           if [ -d ".git" ]; then rm -rf .git; fi
-#           if [ -d ".github" ]; then rm -rf .github; fi
-#           find . -name "*.log" -type f -delete
-#           find . -name "*.tmp" -type f -delete
-#           find . -name ".DS_Store" -type f -delete
-#       
-#       - name: 📤 Deploy using SFTP
-#         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-#         with:
-#           username: ${{ secrets.FTP_USERNAME }}
-#           server: ${{ secrets.FTP_SERVER }}
-#           port: 22
-#           password: ${{ secrets.FTP_PASSWORD }}  # Если используете пароль
-#           # ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}  # Если используете SSH-ключ (более безопасный вариант)
-#           local_path: ./
-#           remote_path: /
-#           delete_remote_files: false
-#           exclude: ".git*,.github*,node_modules,vendor,composer.json,composer.lock,README.md,.gitignore,deployment-report.md,testcode,includes/config/db_config.php,test-ftp-connection.php,test-sftp-connection.php,*.log,*.tmp,.DS_Store"
-# 
-#       - name: 📝 Create Deployment Summary
-#         if: success()
-#         run: |
-#           echo "## 🚀 SFTP Deployment Successful!" >> $GITHUB_STEP_SUMMARY
-#           echo "**Branch:** $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')" >> $GITHUB_STEP_SUMMARY
-#           echo "**Deployed:** $(date)" >> $GITHUB_STEP_SUMMARY
-#           echo "**Commit:** $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" >> $GITHUB_STEP_SUMMARY 
