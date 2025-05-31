@@ -86,6 +86,8 @@
     <script src="/js/phone-case-effects.js"></script>
     <!-- Скрипт для работы с корзиной -->
     <script src="/js/cart.js"></script>
+    <!-- Скрипт для скрытия/показа хедера при скролле -->
+    <script src="/js/header-scroll.js"></script>
     
     <!-- Отладочный скрипт для проверки элементов корзины -->
     <script>

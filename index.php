@@ -15,6 +15,9 @@ $useStandardHeader = true;
 include_once 'includes/header/header.php';
 ?>
 
+<!-- Подключение общих стилей для карточек товаров -->
+<link rel="stylesheet" href="/css/components/product-card.css">
+
 <!-- Главный баннер с слайдером -->
 <section class="hero-slider">
         <div class="slider-container">
@@ -137,16 +140,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Выводим карточку товара
                     echo '
-                    <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
-                        <div class="product-card h-100" data-category="' . $dataCategoryAttr . '">
-                            <div class="product-badges">
-                                ' . $badges . '
-                            </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
+                        <div class="product-card">
                             <div class="product-image">
                                 <img src="' . $imageUrl . '" alt="' . htmlspecialchars(isset($product['name']) ? $product['name'] : '') . '">
+                                <div class="product-badges">
+                                    ' . $badges . '
+                                </div>
                                 ' . (isset($product['stock']) && $product['stock'] <= 0 ? '<div class="out-of-stock-overlay"><span class="out-of-stock-label">Нет в наличии</span></div>' : '') . '
                             </div>
                             <div class="product-info">
+                                <div class="product-category">' . htmlspecialchars(isset($product['category']) ? $product['category'] : '') . '</div>
                                 <h3 class="product-title"><a href="/product.php?id=' . (isset($product['id']) ? $product['id'] : 0) . '">' . htmlspecialchars(isset($product['name']) ? $product['name'] : '') . '</a></h3>
                                 <div class="product-price">
                                     <span class="current-price">' . number_format(isset($product['price']) ? $product['price'] : 0, 0, '.', ' ') . ' ₽</span>
@@ -165,16 +169,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Если товары не найдены, выводим стандартные карточки
             ?>
                 <!-- Товар 1 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
-                    <div class="product-card h-100" data-category="new bestsellers">
-                        <div class="product-badges">
-                            <span class="badge badge-new">Новинка</span>
-                            <span class="badge badge-bestseller">Хит</span>
-                        </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
+                    <div class="product-card" data-category="new bestsellers">
                         <div class="product-image">
                             <img src="/img/products/8 красный.PNG" alt="Смартфон XYZ Pro">
+                            <div class="product-badges">
+                                <span class="badge badge-new">Новинка</span>
+                                <span class="badge badge-bestseller">Хит</span>
+                            </div>
                         </div>
                         <div class="product-info">
+                            <div class="product-category">Смартфоны</div>
                             <h3 class="product-title"><a href="/product/123">Смартфон XYZ Pro</a></h3>
                             <div class="product-price">
                                 <span class="current-price">29 990 ₽</span>
@@ -189,15 +194,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 2 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
-                    <div class="product-card h-100" data-category="sale">
-                        <div class="product-badges">
-                            <span class="badge badge-sale">-20%</span>
-                        </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
+                    <div class="product-card" data-category="sale">
                         <div class="product-image">
                             <img src="/img/products/8 белый.PNG" alt="Умные часы SmartLife">
+                            <div class="product-badges">
+                                <span class="badge badge-sale">-20%</span>
+                            </div>
                         </div>
                         <div class="product-info">
+                            <div class="product-category">Аксессуары</div>
                             <h3 class="product-title"><a href="/product/124">Умные часы SmartLife</a></h3>
                             <div class="product-price">
                                 <span class="current-price">7 990 ₽</span>
@@ -213,15 +219,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 3 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
-                    <div class="product-card h-100" data-category="bestsellers">
-                        <div class="product-badges">
-                            <span class="badge badge-bestseller">Хит</span>
-                        </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
+                    <div class="product-card" data-category="bestsellers">
                         <div class="product-image">
                             <img src="/img/products/8 розовое золото.PNG" alt="Беспроводные наушники SoundPro">
+                            <div class="product-badges">
+                                <span class="badge badge-bestseller">Хит</span>
+                            </div>
                         </div>
                         <div class="product-info">
+                            <div class="product-category">Наушники</div>
                             <h3 class="product-title"><a href="/product/125">Беспроводные наушники SoundPro</a></h3>
                             <div class="product-price">
                                 <span class="current-price">5 490 ₽</span>
@@ -236,20 +243,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- Товар 4 -->
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-5">
-                    <div class="product-card h-100" data-category="new sale">
-                        <div class="product-badges">
-                            <span class="badge badge-new">Новинка</span>
-                            <span class="badge badge-sale">-15%</span>
-                        </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
+                    <div class="product-card" data-category="new sale">
                         <div class="product-image">
                             <img src="/img/products/14 red.jpg" alt="Фотокамера ProShot">
+                            <div class="product-badges">
+                                <span class="badge badge-new">Новинка</span>
+                                <span class="badge badge-sale">-15%</span>
+                            </div>
                         </div>
                         <div class="product-info">
+                            <div class="product-category">Фототехника</div>
                             <h3 class="product-title"><a href="/product/126">Фотокамера ProShot</a></h3>
                             <div class="product-price">
-                                <span class="current-price">42 490 ₽</span>
-                                <span class="old-price">49 990 ₽</span>
+                                <span class="current-price">25 490 ₽</span>
+                                <span class="old-price">29 990 ₽</span>
                             </div>
                             <div class="product-actions">
                                 <button class="btn btn-primary btn-add-to-cart" data-product-id="126">
@@ -259,531 +267,409 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
-            <?php
-            }
-            ?>
+            <?php } ?>
         </div>
         
-        <div class="text-center">
-            <a href="/catalog.php" class="btn btn-catalog"><i class="fas fa-store"></i> Все товары</a>
+        <div class="text-center mt-4">
+            <a href="/catalog.php" class="btn btn-outline-primary btn-lg btn-catalog">Перейти в каталог</a>
         </div>
     </div>
 </section>
 
-<!-- Баннеры с анимациями -->
-<section class="banners section">
-    <div class="container">
-        <div class="banners-grid">
-            <div class="banner banner-large animated-banner">
-                <div class="banner-image" style="background-image: url('/img/products/8 красный.PNG');"></div>
-                <div class="banner-content">
-                    <h3 class="banner-title">Эксклюзивные крышки</h3>
-                    <p class="banner-text">Скидки до 30% на премиум коллекцию</p>
-                    <div class="banner-button">
-                        <a href="/catalog.php?category=premium" class="btn btn-white pulse-button">Смотреть коллекцию</a>
-                    </div>
-                </div>
-                <div class="banner-badge">
-                    <span>-30%</span>
-                </div>
-            </div>
-            <div class="banner banner-small animated-banner">
-                <div class="banner-image" style="background-image: url('/img/products/8 белый.PNG');"></div>
-                <div class="banner-content">
-                    <h3 class="banner-title">Защитные кейсы</h3>
-                    <p class="banner-text">Максимальная защита вашего телефона</p>
-                    <div class="banner-button">
-                        <a href="/catalog.php?category=cases" class="btn btn-white slide-button">Выбрать кейс</a>
-                    </div>
-                </div>
-                <div class="banner-overlay"></div>
-            </div>
-            <div class="banner banner-small animated-banner">
-                <div class="banner-image" style="background-image: url('/img/products/8 розовое золото.PNG');"></div>
-                <div class="banner-content">
-                    <h3 class="banner-title">Новые поступления</h3>
-                    <p class="banner-text">Трендовые дизайны 2025 года</p>
-                    <div class="banner-button">
-                        <a href="/catalog.php?category=new" class="btn btn-white glow-button">Смотреть новинки</a>
-                    </div>
-                </div>
-                <div class="banner-badge new-badge">NEW</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Добавляем стили для анимаций баннеров -->
 <style>
-.animated-banner {
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 16px; /* Закругляем углы баннеров */
-    height: 100%;
-    display: flex;
-}
-
-.animated-banner:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-}
-
-.banner-image {
-    transition: transform 0.5s ease, filter 0.5s ease;
-    background-size: cover;
-    background-position: center;
-    border-radius: 16px; /* Закругляем углы изображений */
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: 1;
-}
-
-.animated-banner:hover .banner-image {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-.banner-content {
-    position: relative;
-    z-index: 2;
-    transition: transform 0.3s ease;
-    padding: 25px; /* Увеличиваем отступы для более современного вида */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 300px;
-}
-
-.banner-small .banner-content {
-    min-height: 250px;
-}
-
-.animated-banner:hover .banner-content {
-    transform: translateY(-5px);
-}
-
-.banner-title {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color: white;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.banner-text {
-    color: rgba(255,255,255,0.9);
-    margin-bottom: 20px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.banner-button {
-    margin-top: auto;
-}
-
-.banner-badge {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #ff3366;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
-    box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
-    transform: rotate(10deg);
-    transition: transform 0.3s ease;
-    z-index: 3;
-}
-
-.new-badge {
-    background-color: #33cc66;
-    width: auto;
-    height: auto;
-    padding: 8px 18px;
-    border-radius: 50px;
-    font-size: 16px;
-    box-shadow: 0 5px 15px rgba(51, 204, 102, 0.3);
-}
-
-.animated-banner:hover .banner-badge {
-    transform: rotate(0deg) scale(1.1);
-}
-
-.banner-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: 16px; /* Закругляем углы оверлея */
-    z-index: 2;
-}
-
-.animated-banner:hover .banner-overlay {
-    opacity: 1;
-}
-
-.banner-tag {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background-color: #33cc66;
-    color: white;
-    padding: 8px 18px; /* Увеличиваем отступы */
-    font-weight: bold;
-    border-radius: 50px; /* Делаем тег полностью закругленным */
-    transform: translateY(-5px);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    z-index: 3;
-}
-
-.animated-banner:hover .banner-tag {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-/* Добавим затемнение фона для лучшей читаемости текста */
-.banner::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
-    z-index: 2;
-    border-radius: 16px;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-}
-
-.animated-banner:hover::before {
-    opacity: 0.5;
-}
-
-/* Стиль для баннеров в сетке */
-.banners-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 20px;
-}
-
-.banner-large {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    .banners-grid {
-        grid-template-columns: 1fr;
+    /* Кнопки с анимациями */
+    .pulse-button, .slide-button, .glow-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-radius: 50px; /* Полностью закругляем кнопки */
+        padding: 12px 25px; /* Увеличиваем отступы */
+        border: none;
+        font-weight: 500;
     }
-    
-    .banner-large {
-        grid-column: 1;
-        grid-row: auto;
+
+    .pulse-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(255,255,255,0.5);
     }
-    
-    .banner-content {
-        min-height: 220px;
-    }
-}
 
-/* Кнопки с анимациями */
-.pulse-button, .slide-button, .glow-button {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    border-radius: 50px; /* Полностью закругляем кнопки */
-    padding: 12px 25px; /* Увеличиваем отступы */
-    border: none;
-    font-weight: 500;
-}
-
-.pulse-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255,255,255,0.5);
-}
-
-.pulse-button:before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-}
-
-.pulse-button:hover:before {
-    animation: pulse 0.8s ease-out;
-}
-
-@keyframes pulse {
-    0% {
+    .pulse-button:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
         width: 0;
         height: 0;
-        opacity: 0.5;
-    }
-    100% {
-        width: 200px;
-        height: 200px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
         opacity: 0;
     }
-}
 
-.slide-button {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
+    .pulse-button:hover:before {
+        animation: pulse 0.8s ease-out;
+    }
 
-.slide-button:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-    transition: all 0.3s ease;
-    border-radius: 50px; /* Закругляем также и эффект свечения */
-}
+    @keyframes pulse {
+        0% {
+            width: 0;
+            height: 0;
+            opacity: 0.5;
+        }
+        100% {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+    }
 
-.slide-button:hover:before {
-    left: 100%;
-}
+    .slide-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
 
-.glow-button {
-    transition: all 0.3s ease;
-}
+    .slide-button:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+        transition: all 0.3s ease;
+        border-radius: 50px; /* Закругляем также и эффект свечения */
+    }
 
-.glow-button:hover {
-    box-shadow: 0 0 20px rgba(255,255,255,0.7);
-}
+    .slide-button:hover:before {
+        left: 100%;
+    }
 
-/* Глобальные стили для закругления всех контейнеров */
-.section {
-    padding: 60px 0; /* Увеличиваем вертикальные отступы */
-}
+    .glow-button {
+        transition: all 0.3s ease;
+    }
 
-.container {
-    padding: 0 30px; /* Увеличиваем горизонтальные отступы */
-}
+    .glow-button:hover {
+        box-shadow: 0 0 20px rgba(255,255,255,0.7);
+    }
 
-.product-card {
-    border-radius: 16px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
+    /* Стили для кнопок фильтров */
+    .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
 
-.product-card:hover {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
+    .tab {
+        padding: 8px 20px;
+        background-color: #f5f5f5;
+        border: none;
+        border-radius: 30px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #555;
+        position: relative;
+        overflow: hidden;
+    }
 
-.product-image {
-    border-radius: 16px 16px 0 0;
-    overflow: hidden;
-}
+    .tab:hover {
+        background-color: #e0e0e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-/* Стили для кнопок в карточках товаров */
-.btn-add-to-cart {
-    border-radius: 50px;
-    width: 90%;
-    margin: 15px auto;
-    display: block;
-    padding: 12px;
-}
-
-.feature-card {
-    border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-}
-
-.feature-icon {
-    background-color: rgba(var(--primary-color-rgb), 0.1);
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: var(--primary-color);
-}
-
-.newsletter-container {
-    border-radius: 20px;
-    padding: 40px;
-}
-
-.newsletter-input {
-    border-radius: 50px;
-    padding: 15px 25px;
-    border: none;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-}
-
-.newsletter-form-group .btn {
-    border-radius: 50px;
-}
-
-.badge {
-    border-radius: 50px;
-    padding: 5px 12px;
-}
-
-/* Стили для модальных окон и диалогов */
-.product-quickview-content {
-    border-radius: 20px;
-}
-
-.angle-view {
-    border-radius: 50px !important;
-}
-
-.phone-model-select {
-    border-radius: 50px !important;
-}
-
-.color-option {
-    border-radius: 50% !important;
-}
-
-/* Стили для улучшения ощущения глубины и объема */
-.section-title {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 40px;
-}
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background-color: var(--primary-color);
-    border-radius: 50px;
-}
-
-/* Мягкие переходы цветов и теней */
-:root {
-    --transition-standard: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-* {
-    transition: var(--transition-standard);
-}
-
-/* Стили для слайдера */
-.hero-slider {
-    padding: 30px 0;
-    background-color: transparent;
-}
-
-.slider-container {
-    position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: none;
-    height: 500px;
-    max-height: 60vh;
-}
-
-.slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    display: flex;
-    align-items: center;
-}
-
-.slide.active {
-    opacity: 1;
-    z-index: 1;
-}
-
-.slide-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-color: transparent;
-    filter: none;
-    transition: none;
-}
-
-.slide:hover .slide-bg {
-    transform: none;
-    filter: none;
-}
-
-.slide-content {
-    position: relative;
-    z-index: 2;
-    padding: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    color: #212529;
-}
-
-/* Убираем градиент, который может мешать видеть изображение полностью */
-.slide::after {
-    display: none;
-}
-
-/* Адаптив для мобильных устройств */
-@media (max-width: 768px) {
-    .slider-container {
-        height: 400px;
+    .tab.active {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transform: translateY(-3px);
     }
     
-    .slide-content {
-        padding: 20px;
+    .tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: rgba(255, 255, 255, 0.5);
+        animation: pulse 1.5s infinite;
     }
-}
+    
+    @keyframes pulse {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
 
-@media (max-width: 576px) {
-    .slider-container {
-        height: 300px;
+    /* Глобальные стили для закругления всех контейнеров */
+    .section {
+        padding: 60px 0; /* Увеличиваем вертикальные отступы */
     }
-}
+
+    .container {
+        padding: 0 30px; /* Увеличиваем горизонтальные отступы */
+    }
+
+    /* Стили для карточек товаров */
+    /* Удалены дублирующиеся стили, теперь они перенесены в общий файл css/components/product-card.css */
+
+    .feature-card {
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .feature-icon {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: var(--primary-color);
+    }
+
+    /* Стили для секции О нас */
+    .about-us {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-us .section-title {
+        margin-bottom: 30px;
+    }
+
+    .about-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .about-list li {
+        margin-bottom: 15px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .about-list li i {
+        width: 25px;
+        font-size: 18px;
+    }
+
+    .about-image-container {
+        position: relative;
+        padding: 15px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .about-experience {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 16px;
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .experience-years {
+        font-size: 32px;
+        font-weight: 700;
+        margin-right: 10px;
+        line-height: 1;
+    }
+
+    .experience-text {
+        font-size: 16px;
+        line-height: 1.2;
+    }
+
+    @media (max-width: 991px) {
+        .about-image-container {
+            margin-top: 30px;
+        }
+    }
+
+    /* Стили для модальных окон и диалогов */
+    .product-quickview-content {
+        border-radius: 20px;
+    }
+
+    .angle-view {
+        border-radius: 50px !important;
+    }
+
+    .phone-model-select {
+        border-radius: 50px !important;
+    }
+
+    .color-option {
+        border-radius: 50% !important;
+    }
+
+    /* Стили для улучшения ощущения глубины и объема */
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 40px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--primary-color);
+        border-radius: 50px;
+    }
+
+    /* Мягкие переходы цветов и теней */
+    :root {
+        --transition-standard: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        transition: var(--transition-standard);
+    }
+
+    /* Стили для слайдера */
+    .hero-slider {
+        padding: 30px 0;
+        background-color: transparent;
+    }
+
+    .slider-container {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: none;
+        height: 500px;
+        max-height: 60vh;
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .slide.active {
+        opacity: 1;
+        z-index: 1;
+    }
+
+    .slide-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: transparent;
+        filter: none;
+        transition: none;
+    }
+
+    .slide:hover .slide-bg {
+        transform: none;
+        filter: none;
+    }
+
+    .slide-content {
+        position: relative;
+        z-index: 2;
+        padding: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #212529;
+    }
+
+    /* Убираем градиент, который может мешать видеть изображение полностью */
+    .slide::after {
+        display: none;
+    }
+
+    /* Адаптив для мобильных устройств */
+    @media (max-width: 768px) {
+        .slider-container {
+            height: 400px;
+        }
+        
+        .slide-content {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .slider-container {
+            height: 300px;
+        }
+    }
+
+    .product-item {
+        opacity: 0;
+        transform: translateY(10px); /* Уменьшаем высоту смещения */
+        animation: fadeInUp 0.4s forwards;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Задержка анимации для каждого элемента */
+    .product-item:nth-child(1) { animation-delay: 0.05s; }
+    .product-item:nth-child(2) { animation-delay: 0.1s; }
+    .product-item:nth-child(3) { animation-delay: 0.15s; }
+    .product-item:nth-child(4) { animation-delay: 0.2s; }
+    .product-item:nth-child(5) { animation-delay: 0.25s; }
+    .product-item:nth-child(6) { animation-delay: 0.3s; }
+    .product-item:nth-child(7) { animation-delay: 0.35s; }
+    .product-item:nth-child(8) { animation-delay: 0.4s; }
+
+    /* Стили для бейджей (меток) */
+    /* Удалены дублирующиеся стили бейджей, теперь они в общем файле css/components/product-card.css */
+
+    /* Адаптивность для карточек товаров */
+    /* Удалены дублирующиеся адаптивные стили, теперь они в общем файле css/components/product-card.css */
+
+    /* Удален дублирующийся стиль product-actions, теперь он в общем файле css/components/product-card.css */
+
+    /* Общие CSS-переменные вынесены в общий файл css/components/product-card.css */
+    
+    /* Дополнительные стили для точного соответствия изображениям */
+    .product-card {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
+        border: none !important;
+    }
 </style>
 
 <!-- Преимущества -->
@@ -830,32 +716,36 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<!-- Подписка на рассылку -->
-<section class="newsletter section">
+<!-- О нас -->
+<section class="about-us section">
     <div class="container">
-        <div class="newsletter-container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <div class="newsletter-content">
-                        <h2 class="newsletter-title">Подпишитесь на рассылку</h2>
-                        <p class="newsletter-description">
-                            Получайте уведомления о новых товарах, эксклюзивных предложениях и скидках
-                        </p>
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="section-title">О нас</h2>
+                <p class="mb-4">
+                    <strong>x64</strong> – это современный сервисный центр и магазин техники, специализирующийся на ремонте, обслуживании и продаже мобильных устройств и аксессуаров.
+                </p>
+                <p class="mb-4">
+                    Мы предлагаем широкий ассортимент продукции:
+                </p>
+                <ul class="about-list mb-4">
+                    <li><i class="fas fa-mobile-alt me-2 text-primary"></i> Новые и восстановленные смартфоны</li>
+                    <li><i class="fas fa-microchip me-2 text-primary"></i> Оригинальные запчасти для всех моделей телефонов</li>
+                    <li><i class="fas fa-headphones me-2 text-primary"></i> Аудиотехника и аксессуары</li>
+                    <li><i class="fas fa-tools me-2 text-primary"></i> Профессиональный ремонт любой сложности</li>
+                    <li><i class="fas fa-shield-alt me-2 text-primary"></i> Защитные чехлы, стекла и пленки</li>
+                </ul>
+                <p>
+                    Наши специалисты имеют многолетний опыт работы с мобильными устройствами и электроникой. Мы гарантируем качество наших товаров и услуг, а также обеспечиваем техническую поддержку на каждом этапе сотрудничества.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div class="about-image-container">
+                    <img src="/img/slider/xiaomi.JPEG" alt="Сервисный центр x64" class="img-fluid rounded shadow-lg">
+                    <div class="about-experience">
+                        <span class="experience-years">5+</span>
+                        <span class="experience-text">лет<br>опыта</span>
                     </div>
-                </div>
-                <div class="col-lg-6">
-                    <form class="newsletter-form">
-                        <div class="newsletter-form-group mb-3">
-                            <div class="input-group">
-                                <input type="email" class="form-control newsletter-input" placeholder="Ваш email">
-                                <button type="submit" class="btn btn-primary">Подписаться</button>
-                            </div>
-                        </div>
-                        <div class="newsletter-agreement form-check">
-                            <input type="checkbox" class="form-check-input" id="agreement">
-                            <label class="form-check-label" for="agreement">Я согласен с <a href="/privacy">Политикой конфиденциальности</a></label>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -867,5 +757,16 @@ document.addEventListener('DOMContentLoaded', function() {
 include_once 'includes/footer/footer.php';
 ?>
 
+<!-- Подключение jQuery, если он еще не подключен -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Подключение скриптов анимации -->
 <script src="js/banner-animations.js"></script>
+
+<!-- Скрипт для фильтрации товаров -->
+<script>
+// Функция для проверки загрузки jQuery с повторными попытками функционал перенесен в общий файл js/product-cards.js
+</script>
+
+<!-- Функция для инициализации карточек товаров -->
+<script src="/js/product-cards.js"></script>

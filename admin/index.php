@@ -263,6 +263,118 @@ $activeTab = isset($_GET['tab']) ? $_GET['tab'] : 'dashboard';
 include_once '../includes/header/header.php';
 ?>
 
+<!-- Критические стили для мобильных устройств -->
+<link rel="stylesheet" href="critical-mobile.css">
+
+<!-- Подключаем стили для мобильных устройств -->
+<link rel="stylesheet" href="mobile-styles.css">
+
+<!-- Мета-тег для корректного отображения на мобильных устройствах -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- Инлайн-стили для мобильных устройств -->
+<style>
+@media (max-width: 767px) {
+    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100% !important;
+    }
+    
+    .product-table, .order-table {
+        min-width: 800px !important;
+    }
+    
+    /* Принудительно отключаем стили, мешающие прокрутке */
+    #products .product-table-wrapper {
+        overflow-x: auto !important;
+    }
+    
+    #products .product-table {
+        min-width: 800px !important;
+    }
+}
+
+/* Стили для десктопа - принудительно отключаем горизонтальный скроллинг */
+@media (min-width: 768px) {
+    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
+        overflow-x: hidden !important;
+    }
+    
+    .product-table, .category-table, .order-table, .report-table, .user-table {
+        width: 100% !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+    
+    /* Оптимальные размеры колонок для десктопа */
+    #products .product-table th:nth-child(1) { width: 5% !important; }  /* ID */
+    #products .product-table th:nth-child(2) { width: 8% !important; }  /* Изображение */
+    #products .product-table th:nth-child(3) { width: 30% !important; } /* Название */
+    #products .product-table th:nth-child(4) { width: 15% !important; } /* Категория */
+    #products .product-table th:nth-child(5) { width: 15% !important; } /* Цена */
+    #products .product-table th:nth-child(6) { width: 12% !important; } /* Наличие */
+    #products .product-table th:nth-child(7) { width: 15% !important; } /* Действия */
+    
+    /* Убеждаемся, что текст не выходит за пределы ячеек */
+    #products .product-table td {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+</style>
+
+<!-- Инлайн-скрипт для мгновенного применения стилей -->
+<script>
+(function() {
+    // Проверяем, является ли устройство мобильным
+    if (window.innerWidth <= 767) {
+        // Функция для применения стилей к таблицам
+        function applyMobileStyles() {
+            // Находим все обертки таблиц
+            var wrappers = document.querySelectorAll('.product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper');
+            
+            // Применяем стили для горизонтальной прокрутки
+            for (var i = 0; i < wrappers.length; i++) {
+                wrappers[i].style.overflowX = 'auto';
+                wrappers[i].style.webkitOverflowScrolling = 'touch';
+                wrappers[i].style.maxWidth = '100%';
+            }
+            
+            // Находим все таблицы
+            var tables = document.querySelectorAll('.product-table, .order-table');
+            
+            // Устанавливаем минимальную ширину
+            for (var j = 0; j < tables.length; j++) {
+                tables[j].style.minWidth = '800px';
+            }
+            
+            // Особый случай для таблицы товаров
+            var productWrappers = document.querySelectorAll('#products .product-table-wrapper');
+            for (var k = 0; k < productWrappers.length; k++) {
+                productWrappers[k].style.overflowX = 'auto';
+            }
+            
+            var productTables = document.querySelectorAll('#products .product-table');
+            for (var l = 0; l < productTables.length; l++) {
+                productTables[l].style.minWidth = '800px';
+            }
+        }
+        
+        // Применяем стили сразу
+        applyMobileStyles();
+        
+        // Повторно применяем после полной загрузки DOM
+        document.addEventListener('DOMContentLoaded', applyMobileStyles);
+        
+        // И после полной загрузки страницы
+        window.addEventListener('load', applyMobileStyles);
+    }
+})();
+</script>
+
 <section class="admin-section">
     <div class="container">
         <div class="row">
@@ -820,6 +932,45 @@ include_once '../includes/header/header.php';
                                         </a>
                                     </div>
                                     
+                                    <!-- Поисковая строка для товаров -->
+                                    <div class="card mb-4 border-0 shadow-sm rounded-4">
+                                        <div class="card-body p-3">
+                                            <div class="row g-3">
+                                                <div class="col-md-8 col-lg-9">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light border-end-0 rounded-pill-start">
+                                                            <i class="fas fa-search text-muted"></i>
+                                                        </span>
+                                                        <input type="text" id="productSearchInput" class="form-control border-start-0 ps-0 rounded-pill-end" placeholder="Поиск по названию товара...">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-lg-3">
+                                                    <select id="productCategoryFilter" class="form-select rounded-pill">
+                                                        <option value="">Все категории</option>
+                                                        <?php 
+                                                        $categories = getCategories();
+                                                        foreach ($categories as $cat): 
+                                                        ?>
+                                                        <option value="<?php echo htmlspecialchars(strtolower($cat['name'])); ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Стили для поисковой строки -->
+                                    <style>
+                                        .rounded-pill-start {
+                                            border-top-left-radius: 50rem !important;
+                                            border-bottom-left-radius: 50rem !important;
+                                        }
+                                        .rounded-pill-end {
+                                            border-top-right-radius: 50rem !important;
+                                            border-bottom-right-radius: 50rem !important;
+                                        }
+                                    </style>
+                                    
                                     <?php if (isset($_GET['deleted']) && $_GET['deleted'] === 'true'): ?>
                                         <div class="alert alert-success rounded-4 mb-4">
                                             <div class="d-flex">
@@ -839,81 +990,122 @@ include_once '../includes/header/header.php';
                                     $products = getProducts();
                                     if (count($products) > 0): 
                                     ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
+                                    <!-- Стили специально для таблицы товаров -->
+                                    <style>
+                                        /* Специфичные стили только для таблицы товаров */
+                                        #products .product-table {
+                                            border-collapse: separate !important;
+                                            border-spacing: 0 !important;
+                                        }
+                                        
+                                        /* Явное выравнивание заголовков */
+                                        #products .product-table th {
+                                            padding: 10px 8px !important;
+                                            border-bottom: 2px solid #dee2e6 !important;
+                                            background-color: #f8f9fa !important;
+                                            position: relative !important;
+                                            overflow: visible !important;
+                                            text-overflow: ellipsis !important;
+                                        }
+                                        
+                                        /* Специфичные ширины колонок */
+                                        #products .product-table th:nth-child(1) { width: 50px !important; }
+                                        #products .product-table th:nth-child(2) { width: 100px !important; }
+                                        #products .product-table th:nth-child(3) { width: 25% !important; min-width: 180px !important; }
+                                        #products .product-table th:nth-child(4) { width: 20% !important; min-width: 120px !important; }
+                                        #products .product-table th:nth-child(5) { width: 15% !important; min-width: 100px !important; }
+                                        #products .product-table th:nth-child(6) { width: 15% !important; min-width: 100px !important; }
+                                        #products .product-table th:nth-child(7) { width: 100px !important; }
+                                        
+                                        /* Отступы для ячеек */
+                                        #products .product-table td {
+                                            padding: 8px !important;
+                                            vertical-align: middle !important;
+                                        }
+                                        
+                                        /* Мобильные стили */
+                                        @media (max-width: 767px) {
+                                            #products .product-table {
+                                                min-width: 900px !important;
+                                            }
+                                            
+                                            #products .product-table th,
+                                            #products .product-table td {
+                                                white-space: nowrap !important;
+                                            }
+                                            
+                                            #products .product-table-wrapper {
+                                                overflow-x: auto !important;
+                                                -webkit-overflow-scrolling: touch !important;
+                                            }
+                                        }
+                                    </style>
+                                    
+                                    <div class="table-responsive product-table-wrapper" style="overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; max-width: 100% !important;">
+                                        <table class="table table-hover product-table" style="min-width: 900px !important; width: 100% !important; table-layout: fixed !important;">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Изображение</th>
-                                                    <th>Название</th>
-                                                    <th>Категория</th>
-                                                    <th>Цвет</th>
-                                                    <th>Цена</th>
-                                                    <th>Наличие</th>
-                                                    <th>Действия</th>
+                                                    <th class="text-center" style="width: 40px !important; min-width: 40px !important; max-width: 40px !important;">ID</th>
+                                                    <th class="text-center" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important;">IMG</th>
+                                                    <th style="width: 180px !important; min-width: 180px !important; max-width: 180px !important; padding-left: 10px !important;">Название</th>
+                                                    <th style="width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding-left: 5px !important; padding-right: 5px !important;">Категория</th>
+                                                    <th style="width: 80px !important; min-width: 80px !important; max-width: 80px !important; padding-left: 5px !important; padding-right: 5px !important;">Цена</th>
+                                                    <th class="text-center" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important; padding-left: 5px !important; padding-right: 5px !important;">Наличие</th>
+                                                    <th class="text-center" style="width: 70px !important; min-width: 70px !important; max-width: 70px !important; text-align: center !important;">Действия</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($products as $product): ?>
-                                                <tr>
-                                                    <td><?php echo $product['id']; ?></td>
-                                                    <td>
+                                                <tr data-name="<?php echo htmlspecialchars(strtolower($product['name'])); ?>" data-category="<?php echo htmlspecialchars(strtolower($product['category'])); ?>">
+                                                    <td class="text-center"><?php echo $product['id']; ?></td>
+                                                    <td class="text-center">
                                                         <?php if (!empty($product['image'])): ?>
-                                                            <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-thumbnail" style="max-width: 50px;">
+                                                            <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-thumbnail" style="max-width: 60px; max-height: 60px; object-fit: contain;">
                                                         <?php else: ?>
-                                                            <div class="bg-light text-center p-2 rounded" style="width: 50px; height: 50px;">
+                                                            <div class="bg-light text-center p-2 rounded mx-auto" style="width: 50px; height: 50px;">
                                                                 <i class="fas fa-image text-muted"></i>
                                                             </div>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td>
-                                                        <?php echo htmlspecialchars($product['name']); ?>
-                                                        <?php if ($product['is_new']): ?>
-                                                            <span class="badge bg-info ms-1">Новинка</span>
-                                                        <?php endif; ?>
-                                                        <?php if ($product['is_bestseller']): ?>
-                                                            <span class="badge bg-warning ms-1">Хит</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?php echo htmlspecialchars($product['category']); ?></td>
-                                                    <td>
-                                                        <?php 
-                                                        $colors = getColors();
-                                                        $colorCodes = getColorCodes();
-                                                        $color = isset($product['color']) && $product['color'] ? $product['color'] : 'black'; // Значение по умолчанию
-                                                        $colorName = isset($colors[$color]) ? $colors[$color] : $color;
-                                                        $colorCode = isset($colorCodes[$color]) ? $colorCodes[$color] : '#cccccc';
-                                                        ?>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="color-dot me-2" style="background-color: <?php echo $colorCode; ?>"></div>
-                                                            <?php echo htmlspecialchars($colorName); ?>
+                                                    <td class="product-name">
+                                                        <span class="d-inline-block text-truncate" style="max-width: 100%;"><?php echo htmlspecialchars($product['name']); ?></span>
+                                                        <div class="mt-1">
+                                                            <?php if ($product['is_new']): ?>
+                                                                <span class="badge bg-info me-1">Новинка</span>
+                                                            <?php endif; ?>
+                                                            <?php if ($product['is_bestseller']): ?>
+                                                                <span class="badge bg-warning">Хит</span>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </td>
+                                                    <td class="text-truncate"><?php echo htmlspecialchars($product['category']); ?></td>
                                                     <td>
                                                         <?php if ($product['discount'] > 0): ?>
-                                                            <span class="text-decoration-line-through text-muted me-1">
-                                                                <?php echo number_format($product['price'], 0, ',', ' '); ?> ₽
-                                                            </span>
-                                                            <span class="text-danger">
-                                                                <?php echo number_format($product['price'] * (1 - $product['discount'] / 100), 0, ',', ' '); ?> ₽
-                                                            </span>
+                                                            <div>
+                                                                <span class="text-decoration-line-through text-muted d-block">
+                                                                    <?php echo number_format($product['price'], 0, ',', ' '); ?> ₽
+                                                                </span>
+                                                                <span class="text-danger fw-bold">
+                                                                    <?php echo number_format($product['price'] * (1 - $product['discount'] / 100), 0, ',', ' '); ?> ₽
+                                                                </span>
+                                                            </div>
                                                         <?php else: ?>
                                                             <?php echo number_format($product['price'], 0, ',', ' '); ?> ₽
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-center">
                                                         <?php if ($product['stock'] > 0): ?>
                                                             <span class="badge bg-success"><?php echo $product['stock']; ?> шт.</span>
                                                         <?php else: ?>
                                                             <span class="badge bg-danger">Нет в наличии</span>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <a href="index.php?tab=products&action=edit&id=<?php echo $product['id']; ?>" class="btn btn-outline-primary">
+                                                    <td class="text-center">
+                                                        <div class="d-flex justify-content-center">
+                                                            <a href="index.php?tab=products&action=edit&id=<?php echo $product['id']; ?>" class="btn btn-outline-primary action-btn me-1">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a href="index.php?tab=products&action=delete&id=<?php echo $product['id']; ?>" class="btn btn-outline-danger" onclick="return confirm('Вы уверены, что хотите удалить этот товар?');">
+                                                            <a href="index.php?tab=products&action=delete&id=<?php echo $product['id']; ?>" class="btn btn-outline-danger action-btn" onclick="return confirm('Вы уверены, что хотите удалить этот товар?');">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -1139,8 +1331,8 @@ include_once '../includes/header/header.php';
                                     $categories = getCategories();
                                     if (count($categories) > 0): 
                                     ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
+                                    <div class="table-responsive category-table-wrapper">
+                                        <table class="table table-hover category-table">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>ID</th>
@@ -1154,8 +1346,8 @@ include_once '../includes/header/header.php';
                                                 <?php foreach ($categories as $category): ?>
                                                 <tr>
                                                     <td><?php echo $category['id']; ?></td>
-                                                    <td><?php echo htmlspecialchars($category['name']); ?></td>
-                                                    <td><?php echo htmlspecialchars(mb_substr($category['description'] ?? '', 0, 50)) . (mb_strlen($category['description'] ?? '') > 50 ? '...' : ''); ?></td>
+                                                    <td class="text-truncate"><?php echo htmlspecialchars($category['name']); ?></td>
+                                                    <td class="text-truncate"><?php echo htmlspecialchars(mb_substr($category['description'] ?? '', 0, 50)) . (mb_strlen($category['description'] ?? '') > 50 ? '...' : ''); ?></td>
                                                     <td>
                                                         <?php
                                                         // Подсчет товаров в категории
@@ -1167,10 +1359,10 @@ include_once '../includes/header/header.php';
                                                     </td>
                                                     <td>
                                                         <div class="btn-group btn-group-sm">
-                                                            <a href="index.php?tab=categories&action=edit&id=<?php echo $category['id']; ?>" class="btn btn-outline-primary">
+                                                            <a href="index.php?tab=categories&action=edit&id=<?php echo $category['id']; ?>" class="btn btn-outline-primary action-btn">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a href="index.php?tab=categories&action=delete&id=<?php echo $category['id']; ?>" class="btn btn-outline-danger" onclick="return confirm('Вы уверены, что хотите удалить эту категорию?');">
+                                                            <a href="index.php?tab=categories&action=delete&id=<?php echo $category['id']; ?>" class="btn btn-outline-danger action-btn" onclick="return confirm('Вы уверены, что хотите удалить эту категорию?');">
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -1212,8 +1404,8 @@ include_once '../includes/header/header.php';
                                 </div>
                                 
                                 <?php if (count($orders) > 0): ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
+                                    <div class="table-responsive order-table-wrapper">
+                                        <table class="table table-hover order-table">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>ID</th>
@@ -1229,7 +1421,7 @@ include_once '../includes/header/header.php';
                                                 <?php foreach ($orders as $order): ?>
                                                     <tr>
                                                         <td><?php echo $order['id']; ?></td>
-                                                        <td>
+                                                        <td class="text-truncate">
                                                             <?php echo htmlspecialchars($order['fullname'] ?? 'Нет данных'); ?><br>
                                                             <small class="text-muted"><?php echo htmlspecialchars($order['email'] ?? 'Нет email'); ?></small>
                                                         </td>
@@ -1270,16 +1462,16 @@ include_once '../includes/header/header.php';
                                                             </span>
                                                         </td>
                                                         <td><?php echo $order['created_at'] ? date('d.m.Y H:i', strtotime($order['created_at'])) : 'Нет даты'; ?></td>
-                                                        <td>
+                                                        <td class="text-truncate">
                                                             <?php echo htmlspecialchars($order['city'] ?? 'Нет города'); ?>,<br>
                                                             <?php echo htmlspecialchars($order['address'] ?? 'Нет адреса'); ?>
                                                         </td>
                                                         <td>
                                                             <div class="btn-group">
-                                                                <a href="view_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                                <a href="view_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-outline-primary action-btn">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
-                                                                <a href="edit_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-outline-success">
+                                                                <a href="edit_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-outline-success action-btn">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
                                                             </div>
@@ -1413,15 +1605,37 @@ include_once '../includes/header/header.php';
                                     </div>
                                 <?php endif; ?>
                                 
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
+                                <!-- Поисковая строка -->
+                                <div class="card mb-4 border-0 shadow-sm">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-8 col-lg-9 mb-2 mb-md-0">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-end-0">
+                                                        <i class="fas fa-search text-muted"></i>
+                                                    </span>
+                                                    <input type="text" id="userSearchInput" class="form-control border-start-0 ps-0" placeholder="Поиск по ФИО, Email или телефону...">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-lg-3">
+                                                <select id="userRoleFilter" class="form-select">
+                                                    <option value="">Все роли</option>
+                                                    <option value="Администратор">Администраторы</option>
+                                                    <option value="user">Пользователи</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive user-table-wrapper">
+                                    <table class="table table-hover user-table">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>ID</th>
                                                 <th>ФИО</th>
                                                 <th>Email</th>
                                                 <th>Телефон</th>
-                                                <th>Логин</th>
                                                 <th>Роль</th>
                                                 <th>Действия</th>
                                             </tr>
@@ -1431,21 +1645,20 @@ include_once '../includes/header/header.php';
                                                 <?php foreach ($users as $u): ?>
                                                     <tr>
                                                         <td><?php echo $u['id']; ?></td>
-                                                        <td><?php echo htmlspecialchars($u['fullname']); ?></td>
-                                                        <td><?php echo htmlspecialchars($u['email']); ?></td>
-                                                        <td><?php echo htmlspecialchars($u['phone']); ?></td>
-                                                        <td><?php echo htmlspecialchars($u['login']); ?></td>
+                                                        <td class="text-truncate"><?php echo htmlspecialchars($u['fullname']); ?></td>
+                                                        <td class="text-truncate"><?php echo htmlspecialchars($u['email']); ?></td>
+                                                        <td class="text-truncate"><?php echo htmlspecialchars($u['phone']); ?></td>
                                                         <td>
                                                             <span class="badge <?php echo $u['role'] === 'Администратор' ? 'bg-danger' : 'bg-primary'; ?> rounded-pill">
-                                                                <?php echo htmlspecialchars($u['role']); ?>
+                                                                <?php echo $u['role'] === 'Администратор' ? 'Админ' : 'User'; ?>
                                                             </span>
                                                         </td>
                                                         <td>
                                                             <div class="btn-group">
-                                                                <a href="edit_user.php?id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                                <a href="edit_user.php?id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-primary action-btn">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
-                                                                <a href="delete_user.php?id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?');">
+                                                                <a href="delete_user.php?id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-danger action-btn" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?');">
                                                                     <i class="fas fa-trash"></i>
                                                                 </a>
                                                             </div>
@@ -1454,7 +1667,7 @@ include_once '../includes/header/header.php';
                                                 <?php endforeach; ?>
                                             <?php else: ?>
                                                 <tr>
-                                                    <td colspan="7" class="text-center py-4">
+                                                    <td colspan="6" class="text-center py-4">
                                                         <div class="empty-state">
                                                             <div class="empty-state-icon mb-3">
                                                                 <i class="fas fa-users fa-3x text-muted"></i>
@@ -1656,16 +1869,121 @@ include_once '../includes/header/header.php';
                                         </button>
                                     </div>
                                     <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover" id="products-report">
+                                        <!-- Стили специально для таблицы отчетов -->
+                                        <style>
+                                            /* Стили для таблицы отчетов - убираем лишнее пространство */
+                                            #reports .report-table {
+                                                border-collapse: collapse !important;
+                                                width: 100% !important;
+                                                table-layout: fixed !important;
+                                                font-size: 0.9rem !important;
+                                                margin: 0 !important;
+                                            }
+                                            
+                                            /* Мобильные стили - принудительно включаем скролл */
+                                            @media (max-width: 767px) {
+                                                #reports .report-table-wrapper {
+                                                    overflow-x: auto !important;
+                                                    -webkit-overflow-scrolling: touch !important;
+                                                }
+                                                
+                                                #reports .report-table {
+                                                    min-width: 600px !important;
+                                                    width: auto !important;
+                                                }
+                                            }
+                                            
+                                            /* Убираем все отступы и лишнее пространство */
+                                            #reports .report-table th,
+                                            #reports .report-table td {
+                                                padding: 8px 0 !important;
+                                                white-space: nowrap !important;
+                                                border-bottom: 1px solid #dee2e6 !important;
+                                            }
+                                            
+                                            /* Уточняем ширины колонок */
+                                            #reports .report-table th:nth-child(1) { /* # */
+                                                width: 4% !important;
+                                                min-width: 25px !important;
+                                                text-align: left !important;
+                                                padding-right: 0 !important;
+                                            }
+                                            
+                                            #reports .report-table th:nth-child(2) { /* Наименование товара */
+                                                width: 25% !important;
+                                                min-width: 180px !important; 
+                                                text-align: left !important;
+                                                padding-left: 0 !important;
+                                            }
+                                            
+                                            #reports .report-table th:nth-child(3) { /* Категория */
+                                                width: 15% !important;
+                                                min-width: 120px !important;
+                                                text-align: left !important;
+                                            }
+                                            
+                                            #reports .report-table th:nth-child(4) { /* Кол-во продаж */
+                                                width: 18% !important;
+                                                min-width: 100px !important;
+                                                text-align: left !important;
+                                            }
+                                            
+                                            #reports .report-table th:nth-child(5) { /* Сумма продаж */
+                                                width: 18% !important;
+                                                min-width: 120px !important;
+                                                text-align: left !important;
+                                            }
+                                            
+                                            #reports .report-table th:nth-child(6) { /* Средняя цена */
+                                                width: 20% !important;
+                                                min-width: 120px !important;
+                                                text-align: left !important;
+                                            }
+                                        </style>
+                                        
+                                        <!-- Скрипт для управления скроллингом таблицы -->
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                function adjustReportTableScroll() {
+                                                    const tableWrapper = document.querySelector('#reports .report-table-wrapper');
+                                                    if (!tableWrapper) return;
+                                                    
+                                                    // На мобильных - всегда включаем скроллинг
+                                                    if (window.innerWidth <= 767) {
+                                                        tableWrapper.style.overflowX = 'auto';
+                                                        tableWrapper.style.webkitOverflowScrolling = 'touch';
+                                                        tableWrapper.style.maxWidth = '100%';
+                                                        
+                                                        // Устанавливаем минимальную ширину для таблицы
+                                                        const table = tableWrapper.querySelector('.report-table');
+                                                        if (table) {
+                                                            table.style.minWidth = '660px';
+                                                            table.style.width = 'auto';
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                // Применяем при загрузке страницы
+                                                adjustReportTableScroll();
+                                                
+                                                // Применяем при изменении размера окна
+                                                window.addEventListener('resize', adjustReportTableScroll);
+                                                
+                                                // Дополнительно применяем после полной загрузки DOM
+                                                setTimeout(adjustReportTableScroll, 500);
+                                            });
+                                        </script>
+                                        
+                                        <div class="table-responsive report-table-wrapper">
+                                            <table class="table table-hover report-table" id="products-report">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col">#</th>
-                                                        <th scope="col">Наименование товара</th>
-                                                        <th scope="col">Категория</th>
-                                                        <th scope="col">Кол-во продаж</th>
-                                                        <th scope="col">Сумма продаж</th>
-                                                        <th scope="col">Средняя цена</th>
+                                                        <th scope="col" style="width: 4% !important; max-width: 25px !important; text-align: left !important; padding: 8px 0 !important;">#</th>
+                                                        <th scope="col" style="width: 25% !important; text-align: left !important; padding: 8px 0 !important;">Наименование товара</th>
+                                                        <th scope="col" style="width: 15% !important; text-align: left !important; padding: 8px 0 !important;">Категория</th>
+                                                        <th scope="col" style="width: 18% !important; text-align: left !important; padding: 8px 0 !important;">Кол-во продаж</th>
+                                                        <th scope="col" style="width: 18% !important; text-align: left !important; padding: 8px 0 !important;">Сумма продаж (₽)</th>
+                                                        <th scope="col" style="width: 20% !important; text-align: left !important; padding: 8px 0 !important;">Средняя цена (₽)</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="report-data">
@@ -1803,19 +2121,127 @@ include_once '../includes/header/header.php';
     }
 }
 
-/* Стили для таблицы пользователей */
+/* Общие стили для таблиц */
 .table {
     border-radius: 12px;
     overflow: hidden;
+    width: 100% !important;
+    margin-bottom: 0 !important;
 }
 
+.table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    margin-bottom: 1.5rem !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+
+/* Специальные стили для таблицы пользователей */
+.user-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: visible !important;
+}
+
+.user-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.user-table th:nth-child(1) { /* ID */
+    width: 50px !important;
+}
+
+.user-table th:nth-child(2) { /* ФИО */
+    width: 25% !important;
+}
+
+.user-table th:nth-child(3) { /* Email */
+    width: 25% !important;
+}
+
+.user-table th:nth-child(4) { /* Телефон */
+    width: 20% !important;
+}
+
+.user-table th:nth-child(5) { /* Роль */
+    width: 15% !important;
+}
+
+.user-table th:nth-child(6) { /* Действия */
+    width: 100px !important;
+}
+
+.user-table .text-truncate {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.user-table .action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Общие стили для ячеек таблиц */
 .table th {
     font-weight: 600;
     border-bottom-width: 1px;
+    white-space: nowrap !important;
+    padding: 0.6rem !important;
 }
 
 .table td {
     vertical-align: middle;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 200px !important;
+    padding: 0.6rem !important;
+}
+
+/* Адаптивные стили для таблицы */
+@media (max-width: 991px) {
+    .table th, .table td {
+        font-size: 0.85rem !important;
+        padding: 0.5rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.4rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .user-table th:nth-child(1) { /* ID */
+        width: 40px !important;
+    }
+}
+
+/* Для мобильных устройств */
+@media (max-width: 767px) {
+    .table th, .table td {
+        font-size: 0.8rem !important;
+        padding: 0.4rem !important;
+    }
+    
+    .user-table th:nth-child(4), 
+    .user-table td:nth-child(4) {
+        display: none !important;
+    }
+    
+    .user-table th:nth-child(2) { /* ФИО */
+        width: 35% !important;
+    }
+    
+    .user-table th:nth-child(3) { /* Email */
+        width: 35% !important;
+    }
 }
 
 .badge {
@@ -1860,10 +2286,15 @@ include_once '../includes/header/header.php';
 
 /* Стили для отображения цветов */
 .color-dot {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
     border-radius: 50%;
     border: 1px solid #ddd;
+    display: inline-block;
+    margin-right: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Стили для конкретных цветов */
@@ -1877,6 +2308,432 @@ include_once '../includes/header/header.php';
 .color-pink { background-color: #ff2d55; }
 .color-gold { background-color: #d4af37; }
 .color-silver { background-color: #c0c0c0; }
+
+/* Специальные стили для таблицы товаров */
+.product-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    margin-bottom: 1.5rem !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+}
+
+.product-table {
+    width: 100% !important;
+    /* Уменьшаем минимальную ширину таблицы для лучшего размещения */
+    min-width: 750px !important; 
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Стили для скроллбара таблицы */
+.product-table-wrapper::-webkit-scrollbar {
+    height: 8px !important;
+    background-color: #f5f5f5 !important;
+}
+
+/* Особый стиль для удаленной колонки цвета, чтобы настройки стилей оставались для других таблиц */
+#products .product-table-wrapper {
+    overflow-x: visible !important; /* Отключаем горизонтальную прокрутку для таблицы товаров */
+}
+
+#products .product-table {
+    min-width: auto !important; /* Убираем минимальную ширину, позволяя таблице адаптироваться к контейнеру */
+}
+
+.product-table th:nth-child(1) { /* ID */
+    width: 50px !important;
+    min-width: 50px !important;
+}
+
+.product-table th:nth-child(2) { /* Изображение */
+    width: 70px !important;
+    min-width: 70px !important;
+}
+
+.product-table th:nth-child(3) { /* Название */
+    width: 30% !important;
+    min-width: 200px !important;
+}
+
+.product-table th:nth-child(4) { /* Категория */
+    width: 20% !important;
+    min-width: 130px !important;
+}
+
+.product-table th:nth-child(5) { /* Цена */
+    width: 15% !important;
+    min-width: 100px !important;
+}
+
+.product-table th:nth-child(6) { /* Наличие */
+    width: 15% !important;
+    min-width: 100px !important;
+}
+
+.product-table th:nth-child(7) { /* Действия */
+    width: 100px !important;
+    min-width: 100px !important;
+}
+
+/* Улучшенные стили для ячеек */
+.product-table td {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.9rem !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    border-bottom: 1px solid #f2f2f2 !important;
+}
+
+.product-table .product-name {
+    max-width: 100% !important;
+    padding-right: 10px !important;
+}
+
+.product-table .product-name span {
+    max-width: 100% !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Стиль для изображения */
+.product-table td:nth-child(2) {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Стиль для кнопок действий */
+.product-table .action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 2px !important;
+}
+
+/* Эффект при наведении на строку */
+.product-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+/* Специальные стили для таблицы категорий */
+.category-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: visible !important;
+}
+
+.category-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.category-table th:nth-child(1) { /* ID */
+    width: 50px !important;
+}
+
+.category-table th:nth-child(2) { /* Название */
+    width: 25% !important;
+}
+
+.category-table th:nth-child(3) { /* Описание */
+    width: 45% !important;
+}
+
+.category-table th:nth-child(4) { /* Товаров */
+    width: 10% !important;
+}
+
+.category-table th:nth-child(5) { /* Действия */
+    width: 100px !important;
+}
+
+/* Специальные стили для таблицы заказов */
+.order-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: visible !important;
+}
+
+.order-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.order-table th:nth-child(1) { /* ID */
+    width: 40px !important;
+}
+
+.order-table th:nth-child(2) { /* Пользователь */
+    width: 20% !important;
+}
+
+.order-table th:nth-child(3) { /* Сумма */
+    width: 10% !important;
+}
+
+.order-table th:nth-child(4) { /* Статус */
+    width: 12% !important;
+}
+
+.order-table th:nth-child(5) { /* Дата */
+    width: 15% !important;
+}
+
+.order-table th:nth-child(6) { /* Адрес */
+    width: 20% !important;
+}
+
+.order-table th:nth-child(7) { /* Действия */
+    width: 90px !important;
+}
+
+/* Специальные стили для таблицы отчетов */
+.report-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: visible !important;
+}
+
+.report-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.report-table th:nth-child(1) { /* # */
+    width: 40px !important;
+}
+
+.report-table th:nth-child(2) { /* Наименование товара */
+    width: 35% !important;
+}
+
+.report-table th:nth-child(3) { /* Категория */
+    width: 15% !important;
+}
+
+.report-table th:nth-child(4) { /* Кол-во продаж */
+    width: 15% !important;
+}
+
+.report-table th:nth-child(5) { /* Сумма продаж */
+    width: 15% !important;
+}
+
+.report-table th:nth-child(6) { /* Средняя цена */
+    width: 15% !important;
+}
+
+/* Общие стили для таблиц */
+.user-table .text-truncate,
+.product-table .text-truncate,
+.category-table .text-truncate,
+.order-table .text-truncate,
+.report-table .text-truncate {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.user-table .action-btn,
+.product-table .action-btn,
+.category-table .action-btn,
+.order-table .action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 767px) {
+    /* Стили для скрытия определенных колонок на мобильных */
+    .product-table th:nth-child(4),
+    .product-table td:nth-child(4) {
+        display: none !important;
+    }
+    
+    .order-table th:nth-child(5),
+    .order-table td:nth-child(5),
+    .order-table th:nth-child(6),
+    .order-table td:nth-child(6) {
+        display: none !important;
+    }
+    
+    .report-table th:nth-child(3),
+    .report-table td:nth-child(3) {
+        display: none !important;
+    }
+    
+    .product-table th:nth-child(3),
+    .category-table th:nth-child(2),
+    .order-table th:nth-child(2),
+    .report-table th:nth-child(2) {
+        width: 40% !important;
+    }
+}
+
+/* Специальные стили для вкладки products */
+#products .product-table th {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+#products .product-table td {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+#products .product-table th:nth-child(1) { /* ID */
+    width: 50px !important;
+    min-width: 50px !important;
+}
+
+#products .product-table th:nth-child(2) { /* Изображение */
+    width: 70px !important;
+    min-width: 70px !important;
+}
+
+#products .product-table th:nth-child(3) { /* Название */
+    width: 30% !important;
+    min-width: 200px !important;
+}
+
+#products .product-table th:nth-child(4) { /* Категория */
+    width: 20% !important;
+    min-width: 130px !important;
+}
+
+#products .product-table th:nth-child(5) { /* Цена */
+    width: 15% !important;
+    min-width: 100px !important;
+}
+
+#products .product-table th:nth-child(6) { /* Наличие */
+    width: 15% !important;
+    min-width: 100px !important;
+}
+
+#products .product-table th:nth-child(7) { /* Действия */
+    width: 100px !important;
+    min-width: 100px !important;
+}
+
+#products .product-table .action-btn {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+#products .badge {
+    padding: 0.4em 0.6em !important;
+    font-size: 0.8rem !important;
+}
+
+/* Улучшение отображения информации о цвете в деталях товара */
+.color-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.color-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background-color: #f7f7f7;
+    border: 1px solid #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.color-item.active {
+    background-color: #e8f4fd;
+    border-color: #007bff;
+}
+
+.color-preview {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-right: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 767px) {
+    #products .product-table {
+        min-width: 650px !important;
+    }
+    
+    #products .product-table th, 
+    #products .product-table td {
+        font-size: 0.85rem !important;
+        padding: 0.4rem !important;
+    }
+    
+    #products .product-table th:nth-child(3) { /* Название */
+        width: 25% !important;
+        min-width: 150px !important;
+    }
+}
+
+/* Особый стиль для удаленной колонки цвета, чтобы настройки стилей оставались для других таблиц */
+#products .product-table th:nth-child(5), 
+#products .product-table td:nth-child(5) {
+    width: 15% !important;
+    min-width: 100px !important;
+}
+
+/* Отключение горизонтальной прокрутки для таблицы товаров */
+#products .product-table-wrapper {
+    overflow-x: visible !important;
+}
+
+#products .product-table {
+    min-width: auto !important;
+}
+
+/* Новые стили для таблиц на мобильных устройствах */
+@media (max-width: 767px) {
+    .product-table-wrapper {
+        overflow-x: auto !important; /* Разрешаем горизонтальную прокрутку */
+        margin-bottom: 1rem !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .product-table {
+        min-width: 800px !important; /* Устанавливаем минимальную ширину таблицы для мобильных */
+        font-size: 0.8rem !important;
+    }
+    
+    .product-table th,
+    .product-table td {
+        padding: 0.4rem 0.5rem !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Уменьшаем кнопки в таблице */
+    .product-table .action-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    /* Уменьшаем размер бейджей */
+    .product-table .badge {
+        font-size: 0.7rem !important;
+        padding: 0.25em 0.5em !important;
+    }
+}
 </style>
 
 <script>
@@ -1895,6 +2752,140 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.boxShadow = '0 4px 15px rgba(77, 97, 252, 0.1)';
         });
     });
+    
+    // Функционал поиска пользователей
+    const userSearchInput = document.getElementById('userSearchInput');
+    const userRoleFilter = document.getElementById('userRoleFilter');
+    
+    if(userSearchInput && userRoleFilter) {
+        const userTable = document.querySelector('.user-table');
+        const userRows = userTable ? userTable.querySelectorAll('tbody tr') : [];
+        
+        function filterUsers() {
+            const searchText = userSearchInput.value.toLowerCase();
+            const roleFilter = userRoleFilter.value;
+            
+            userRows.forEach(row => {
+                const fullname = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                const phone = row.cells[3] ? row.cells[3].textContent.toLowerCase() : '';
+                const role = row.querySelector('.badge') ? row.querySelector('.badge').textContent.trim() : '';
+                
+                // Пропускаем строку с пустым состоянием (если нет пользователей или строка с "Нет результатов")
+                if (row.classList.contains('empty-filter-state') || row.cells.length <= 1) {
+                    return;
+                }
+                
+                const matchesSearch = fullname.includes(searchText) || 
+                                     email.includes(searchText) || 
+                                     phone.includes(searchText);
+                
+                const matchesRole = roleFilter === '' || 
+                                   (roleFilter === 'Администратор' && role === 'Админ') || 
+                                   (roleFilter === 'user' && role === 'User');
+                
+                if (matchesSearch && matchesRole) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Проверяем, есть ли видимые строки
+            const visibleRows = Array.from(userRows).filter(row => row.style.display !== 'none' && !row.classList.contains('empty-filter-state'));
+            const emptyStateRow = userTable.querySelector('tbody tr.empty-filter-state');
+            
+            // Если нет видимых строк и нет строки с сообщением о пустом результате, добавляем её
+            if (visibleRows.length === 0 && !emptyStateRow && userRows.length > 0) {
+                const tbody = userTable.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.className = 'empty-filter-state';
+                newRow.innerHTML = `
+                    <td colspan="6" class="text-center py-4">
+                        <div class="empty-state">
+                            <div class="empty-state-icon mb-3">
+                                <i class="fas fa-search fa-3x text-muted"></i>
+                            </div>
+                            <h5>Нет результатов</h5>
+                            <p class="text-muted">По вашему запросу ничего не найдено</p>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(newRow);
+            } 
+            // Если есть видимые строки и есть строка с сообщением, удаляем её
+            else if (visibleRows.length > 0 && emptyStateRow) {
+                emptyStateRow.remove();
+            }
+        }
+        
+        userSearchInput.addEventListener('input', filterUsers);
+        userRoleFilter.addEventListener('change', filterUsers);
+    }
+    
+    // Функционал поиска товаров
+    const productSearchInput = document.getElementById('productSearchInput');
+    const productCategoryFilter = document.getElementById('productCategoryFilter');
+    
+    if (productSearchInput && productCategoryFilter) {
+        const productTable = document.querySelector('.product-table');
+        const productRows = productTable ? productTable.querySelectorAll('tbody tr') : [];
+        
+        function filterProducts() {
+            const searchText = productSearchInput.value.toLowerCase();
+            const categoryFilter = productCategoryFilter.value.toLowerCase();
+            
+            productRows.forEach(row => {
+                // Используем data-атрибуты для поиска
+                const productName = row.getAttribute('data-name') || '';
+                const productCategory = row.getAttribute('data-category') || '';
+                
+                // Пропускаем строку с пустым состоянием
+                if (row.classList.contains('empty-filter-state') || row.cells.length <= 1) {
+                    return;
+                }
+                
+                const matchesSearch = productName.includes(searchText);
+                const matchesCategory = categoryFilter === '' || productCategory === categoryFilter;
+                
+                if (matchesSearch && matchesCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Проверяем, есть ли видимые строки
+            const visibleRows = Array.from(productRows).filter(row => row.style.display !== 'none' && !row.classList.contains('empty-filter-state'));
+            const emptyStateRow = productTable.querySelector('tbody tr.empty-filter-state');
+            
+            // Если нет видимых строк и нет строки с сообщением о пустом результате, добавляем её
+            if (visibleRows.length === 0 && !emptyStateRow && productRows.length > 0) {
+                const tbody = productTable.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.className = 'empty-filter-state';
+                newRow.innerHTML = `
+                    <td colspan="8" class="text-center py-4">
+                        <div class="empty-state">
+                            <div class="empty-state-icon mb-3">
+                                <i class="fas fa-search fa-3x text-muted"></i>
+                            </div>
+                            <h5>Нет результатов</h5>
+                            <p class="text-muted">По вашему запросу ничего не найдено</p>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(newRow);
+            } 
+            // Если есть видимые строки и есть строка с сообщением, удаляем её
+            else if (visibleRows.length > 0 && emptyStateRow) {
+                emptyStateRow.remove();
+            }
+        }
+        
+        productSearchInput.addEventListener('input', filterProducts);
+        productCategoryFilter.addEventListener('change', filterProducts);
+    }
 });
 </script>
 
@@ -1944,6 +2935,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Подключаем SheetJS для экспорта в Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    
+    <!-- Подключаем скрипт для исправления мобильного отображения таблиц -->
+    <script src="mobile-fix.js"></script>
     
     <!-- Скрипт для работы с отчетами -->
     <script>

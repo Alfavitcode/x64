@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Май 22 2025 г., 17:29
+-- Время создания: Май 30 2025 г., 21:29
 -- Версия сервера: 8.0.25-15
 -- Версия PHP: 8.2.25
 
@@ -46,9 +46,11 @@ INSERT INTO `cart` (`id`, `user_id`, `session_id`, `product_id`, `quantity`, `cr
 (63, 9, '254d90db05961888411f838bad019a84', 10, 1, '2025-05-21 20:27:47'),
 (64, 9, '254d90db05961888411f838bad019a84', 9, 1, '2025-05-21 20:27:48'),
 (65, 9, '254d90db05961888411f838bad019a84', 11, 1, '2025-05-21 20:28:00'),
-(68, 10, 'fa989a4bfb7e2fa1c5d67c4c1afa914e', 11, 3, '2025-05-21 21:05:46'),
-(69, 11, '', 10, 1, '2025-05-22 00:34:29'),
-(70, 10, '', 10, 1, '2025-05-22 04:55:48');
+(71, 12, '', 11, 7, '2025-05-22 19:17:57'),
+(72, 12, '', 10, 7, '2025-05-22 19:17:57'),
+(73, 12, '', 9, 7, '2025-05-22 19:17:58'),
+(91, 11, '', 11, 1, '2025-05-23 22:28:01'),
+(107, 13, '', 10, 1, '2025-05-28 08:09:16');
 
 -- --------------------------------------------------------
 
@@ -107,7 +109,7 @@ CREATE TABLE `orders` (
 
 INSERT INTO `orders` (`id`, `user_id`, `session_id`, `fullname`, `email`, `phone`, `region`, `city`, `address`, `postal_code`, `payment_method`, `delivery_method`, `delivery_cost`, `total_amount`, `status`, `comment`, `cancel_reason`, `created_at`, `updated_at`) VALUES
 (1, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'Тульская область', 'Чернь', 'Тургенева 97б', '312121', 'card', 'courier', 300.00, 4715.00, 'closed', '', 'бебе с бубу', '2025-05-21 15:31:13', '2025-05-21 16:18:47'),
-(2, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'Тульская область', 'Чернь', 'Тургенева 97б', '3121212', 'cash', 'post', 250.00, 4235.00, 'completed', 'asas', NULL, '2025-05-21 15:42:27', '2025-05-21 15:58:40'),
+(2, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'Тульская область', 'Чернь', 'Тургенева 97б', '3121212', 'cash', 'post', 250.00, 4235.00, 'closed', 'asas', NULL, '2025-05-21 15:42:27', '2025-05-28 09:51:58'),
 (3, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', '', 'Чернь', 'Тургенева 97б', '', 'card', 'courier', 300.00, 1020.00, 'cancelled', '', 'бебе бубу', '2025-05-21 16:19:23', '2025-05-21 16:19:35'),
 (4, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', '', 'Чернь', '1212', '', 'card', 'courier', 300.00, 38800.00, 'closed', '', NULL, '2025-05-21 16:23:00', '2025-05-21 16:23:15'),
 (5, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'Тульская область', 'Чернь', 'Тургенева 97б', '121', 'cash', 'post', 250.00, 3130.00, 'pending', '', NULL, '2025-05-21 16:46:10', '2025-05-21 16:46:10'),
@@ -116,7 +118,29 @@ INSERT INTO `orders` (`id`, `user_id`, `session_id`, `fullname`, `email`, `phone
 (8, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'ывы', 'ваы', 'ыфвфыв', '', 'card', 'courier', 300.00, 1020.00, 'processing', '', NULL, '2025-05-21 17:11:30', '2025-05-21 19:51:24'),
 (9, 7, '12ar11u3nl40144sq5t86j2mnvkn3s6v', 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', '', 'аваы', 'ываыва', '', 'card', 'courier', 300.00, 35580.00, 'closed', '', NULL, '2025-05-21 17:11:55', '2025-05-21 17:12:19'),
 (10, 6, 'fa989a4bfb7e2fa1c5d67c4c1afa914e', 'Калашников Михаил Дмитриевич', 'kmd2005@list.ru', '+7 (919) 200-07-31', 'Орловская оьдл', 'Чернь', 'Тургенева 97б', '', 'card', 'courier', 300.00, 1000.00, 'pending', '', NULL, '2025-05-21 19:51:37', '2025-05-21 19:51:37'),
-(11, 9, '254d90db05961888411f838bad019a84', 'в', 'sobaka@mail.ru', '+8 (900) 000-00-00', 'Орловская область', 'Г. Мценсе', 'Улица приключений', '353535', 'cash', 'courier', 300.00, 1855.00, 'pending', '', NULL, '2025-05-21 20:15:02', '2025-05-21 20:15:02');
+(11, 9, '254d90db05961888411f838bad019a84', 'в', 'sobaka@mail.ru', '+8 (900) 000-00-00', 'Орловская область', 'Г. Мценсе', 'Улица приключений', '353535', 'cash', 'courier', 300.00, 1855.00, 'pending', '', NULL, '2025-05-21 20:15:02', '2025-05-21 20:15:02'),
+(12, 10, '5c88560227e1779c5f750d043e047b92', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'Тульская область', 'Чернь', 'Тургенева 97б', '323232323', 'card', 'courier', 300.00, 3500.00, 'pending', 'dfdfd', NULL, '2025-05-26 12:54:50', '2025-05-26 12:54:50'),
+(13, 10, '721bf55ebe946f9d5eacc8f1b799d1d0', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'Тульская область', 'Чернь', 'Тургенева 97б', '', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-27 15:43:44', '2025-05-27 15:43:44'),
+(14, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', '222', '222', '22', '222222', 'card', 'courier', 300.00, 2700.00, 'closed', '', NULL, '2025-05-27 22:35:02', '2025-05-28 08:24:58'),
+(15, 14, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+79622763927', 'Орловская обл.', 'Мценск', 'г. Мценск, Улица Машиностроителей, 2', '303031', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-27 23:44:03', '2025-05-27 23:44:03'),
+(16, 14, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+79622763927', 'Орловская обл.', 'Мценск', 'г. Мценск, Улица Машиностроителей, 2', '303031', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-27 23:44:19', '2025-05-27 23:44:19'),
+(17, 14, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+79622763927', '1', '1', 'vlad i vostok', '1', 'card', 'post', 300.00, 1200.00, 'pending', '<3', NULL, '2025-05-27 23:52:01', '2025-05-28 09:58:43'),
+(18, 14, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+79622763927', '1', '1', '1', '1', 'card', 'courier', 300.00, 1200.00, 'processing', '<3', NULL, '2025-05-28 00:01:43', '2025-05-28 09:54:32'),
+(19, 14, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+79622763927', 'вфы', 'фыв', 'г. Мценск, Улица Машиностроителей, 2', '303031', 'card', 'courier', 300.00, 1000.00, 'closed', '<3', NULL, '2025-05-28 00:02:50', '2025-05-28 09:54:44'),
+(20, 10, 'a133e8c8216002f14393809272b03690', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'gfhg', 'hgdghgh', 'fghff', 'ddggfgf', 'card', 'courier', 300.00, 8300.00, 'closed', '', NULL, '2025-05-28 09:53:16', '2025-05-28 09:54:22'),
+(21, 10, 'a133e8c8216002f14393809272b03690', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'uyhg', 'hghghg', 'fghfghfgh', '466576', 'card', 'courier', 300.00, 135300.00, 'completed', '', NULL, '2025-05-28 10:02:30', '2025-05-28 10:02:41'),
+(22, 15, '9eb04a5da886711faeb9699d9048c9f3', 'Марина', 'prosekova.mp@bk.ru', '+7 999582-69-43', '', 'Москва', 'Москва', '', 'card', 'courier', 300.00, 1000.00, 'processing', '', NULL, '2025-05-28 11:09:44', '2025-05-28 15:45:48'),
+(23, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'sad2', '111', '222', '222', 'card', 'courier', 300.00, 1100.00, 'pending', '', NULL, '2025-05-29 01:09:00', '2025-05-29 01:56:47'),
+(24, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'asdsdadsa', 'cxz', 'dsa', 'asdsda', 'card', 'courier', 300.00, 1000.00, 'pending', '', NULL, '2025-05-29 01:18:06', '2025-05-29 01:42:39'),
+(25, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'asdasd', 'dsa', 'ads', 'asd', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-29 01:25:39', '2025-05-29 01:31:02'),
+(26, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'sda', 'asd', 'asd', 'asd', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-29 01:40:24', '2025-05-29 01:42:30'),
+(27, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', '222', '22', '222', '222', 'card', 'courier', 300.00, 1200.00, 'pending', '', NULL, '2025-05-29 01:51:08', '2025-05-29 01:53:40'),
+(28, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'das', 'dasads', 'sad', 'dsa', 'card', 'courier', 300.00, 1000.00, 'pending', '', NULL, '2025-05-29 02:22:23', '2025-05-29 02:22:52'),
+(29, 8, 'edd859ad3788c23b27361fbd669d421d', 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'asd', 'dsaasd', 'sad', 'ads', 'card', 'courier', 300.00, 1200.00, 'closed', '', 'вывыыв', '2025-05-29 02:24:02', '2025-05-30 14:01:41'),
+(30, 10, '01a4e8f06759b9e9f777e1b9576a640a', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', '', 'Мценск', 'пррп', '303030', 'cash', 'courier', 300.00, 1100.00, 'processing', '', NULL, '2025-05-30 08:26:19', '2025-05-30 08:28:16'),
+(31, 10, 'c902ebe7f9f327cab483157d0bf7a0b7', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', '', 'авыава', 'вавава', '', 'card', 'post', 250.00, 2650.00, 'pending', '', NULL, '2025-05-30 14:02:18', '2025-05-30 14:02:18'),
+(32, 10, 'c902ebe7f9f327cab483157d0bf7a0b7', 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'выаывыв', 'ывыв', 'ывывы', 'ывы321212', 'card', 'courier', 300.00, 2700.00, 'closed', '', NULL, '2025-05-30 14:02:41', '2025-05-30 14:03:57'),
+(33, 16, 'b59f1c2572e9e4da6218b0aca1c40bc6', 'Agagaba', 'kogda_ymryt_evrey@mail.ru', '89000000000', 'Da', 'Da', 'Da', 'Da', 'card', 'courier', 300.00, 5100.00, 'pending', '', NULL, '2025-05-30 18:20:45', '2025-05-30 18:20:45');
 
 -- --------------------------------------------------------
 
@@ -155,7 +179,37 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `name`, `price`, `qua
 (13, 9, 11, 'Крышка iPhone 14', 720.00, 49, 35280.00, '2025-05-21 17:11:55'),
 (14, 10, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-21 19:51:37'),
 (15, 11, 9, 'Крышка iPhone 14', 855.00, 1, 855.00, '2025-05-21 20:15:02'),
-(16, 11, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-21 20:15:02');
+(16, 11, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-21 20:15:02'),
+(17, 12, 11, 'Крышка iPhone 14', 800.00, 4, 3200.00, '2025-05-26 12:54:50'),
+(18, 13, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-27 15:43:44'),
+(19, 14, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-27 22:35:02'),
+(20, 14, 11, 'Крышка iPhone 14', 800.00, 1, 800.00, '2025-05-27 22:35:02'),
+(21, 14, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-27 22:35:02'),
+(22, 15, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-27 23:44:03'),
+(23, 16, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-27 23:44:19'),
+(24, 17, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-27 23:52:01'),
+(25, 18, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-28 00:01:43'),
+(26, 19, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-28 00:02:50'),
+(27, 20, 11, 'Крышка iPhone 14', 800.00, 10, 8000.00, '2025-05-28 09:53:16'),
+(28, 21, 9, 'Крышка iPhone 14', 900.00, 150, 135000.00, '2025-05-28 10:02:30'),
+(29, 22, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-28 11:09:44'),
+(30, 23, 11, 'Крышка iPhone 14', 800.00, 1, 800.00, '2025-05-29 01:09:00'),
+(31, 24, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-29 01:18:06'),
+(32, 25, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-29 01:25:39'),
+(33, 26, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-29 01:40:24'),
+(34, 27, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-29 01:51:08'),
+(35, 28, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-29 02:22:23'),
+(36, 29, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-29 02:24:02'),
+(37, 30, 11, 'Крышка iPhone 14', 800.00, 1, 800.00, '2025-05-30 08:26:19'),
+(38, 31, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-30 14:02:18'),
+(39, 31, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-30 14:02:18'),
+(40, 31, 11, 'Крышка iPhone 14', 800.00, 1, 800.00, '2025-05-30 14:02:18'),
+(41, 32, 11, 'Крышка iPhone 14', 800.00, 1, 800.00, '2025-05-30 14:02:41'),
+(42, 32, 10, 'Крышка iPhone 8 ', 700.00, 1, 700.00, '2025-05-30 14:02:41'),
+(43, 32, 9, 'Крышка iPhone 14', 900.00, 1, 900.00, '2025-05-30 14:02:41'),
+(44, 33, 11, 'Крышка iPhone 14', 800.00, 2, 1600.00, '2025-05-30 18:20:45'),
+(45, 33, 10, 'Крышка iPhone 8 ', 700.00, 2, 1400.00, '2025-05-30 18:20:45'),
+(46, 33, 9, 'Крышка iPhone 14', 900.00, 2, 1800.00, '2025-05-30 18:20:45');
 
 -- --------------------------------------------------------
 
@@ -187,9 +241,9 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`id`, `name`, `description`, `price`, `category`, `color`, `image`, `sku`, `stock`, `is_new`, `is_bestseller`, `discount`, `rating`, `reviews_count`, `created_at`, `updated_at`) VALUES
-(9, 'Крышка iPhone 14', 'Крышка iPhone 14 RED', 900.00, 'iPhone', 'red', '/img/products/14 red.jpg', '1', 500, 1, 0, 5, 0.0, 0, '2025-05-20 20:33:59', '2025-05-21 20:20:54'),
-(10, 'Крышка iPhone 8 ', 'Задняя крышка для телефона iPhone 8 Розовое золото', 700.00, 'iPhone', 'black', '/img/products/8 розовое золото.PNG', '2', 500, 1, 0, 0, 0.0, 0, '2025-05-21 08:36:49', '2025-05-21 20:20:47'),
-(11, 'Крышка iPhone 14', 'Задняя крышка iPhone 14 синяя', 800.00, 'iPhone', 'red', '/img/products/8 красный.PNG', '3', 500, 1, 0, 10, 0.0, 0, '2025-05-21 09:06:46', '2025-05-21 20:20:34');
+(9, 'Крышка iPhone 14', 'Крышка iPhone 14 RED', 900.00, 'iPhone', 'red', '/img/products/14 red.jpg', '1', 336, 1, 0, 5, 0.0, 0, '2025-05-20 20:33:59', '2025-05-30 18:20:45'),
+(10, 'Крышка iPhone 8 ', 'Задняя крышка для телефона iPhone 8 Розовое золото', 700.00, 'iPhone', 'black', '/img/products/8 розовое золото.PNG', '2', 491, 1, 0, 0, 0.0, 0, '2025-05-21 08:36:49', '2025-05-30 18:20:45'),
+(11, 'Крышка iPhone 14', 'Задняя крышка iPhone 14 синяя', 800.00, 'iPhone', 'red', '/img/products/8 красный.PNG', '3', 479, 1, 0, 10, 0.0, 0, '2025-05-21 09:06:46', '2025-05-30 18:20:45');
 
 -- --------------------------------------------------------
 
@@ -226,6 +280,20 @@ INSERT INTO `product_colors` (`id`, `product_id`, `sku`, `color_name`, `color_co
 (10, 3, 'GALAXYS23CASE', 'Розовое золото', '#ffc0cb', '/img/products/8 розовое золото.PNG', 'Чехол цвета розовое золото для Samsung Galaxy S23. Улучшенная защита камеры.', 1690.00, 0),
 (11, 4, 'XIAOMI13CASE', 'Красный', '#ff5252', '/img/products/14 red.jpg', 'Стильный красный чехол для Xiaomi 13. Прочный материал и отличное качество сборки.', 1290.00, 1),
 (12, 4, 'XIAOMI13CASE', 'Черный', '#000000', '/img/products/8 розовое золото.PNG', 'Классический черный чехол для Xiaomi 13. Идеально подходит для повседневного использования.', 1290.00, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `remember_tokens`
+--
+
+CREATE TABLE `remember_tokens` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -300,8 +368,12 @@ INSERT INTO `users` (`id`, `fullname`, `email`, `phone`, `login`, `password`, `r
 (7, 'Калашников Михаил Дмитриевич', 'acv@mail.ru', '+7 (919) 200-07-31', 'kirieshka', '$2y$10$y9CL8zIShMAlJKT9q7Yvfe6qehTcTLHB5KmUM0.q63B//zTeqn54C', 'Администратор', NULL, NULL, NULL, NULL),
 (8, 'Филимонов Денис Юрьевич', 'Alfavit@gmail.ru', '+79053024129', 'alfavittt', '$2y$10$wyk0JkgFGdS9iKCtEsgwS.PSkJ7MbDrpap6jX/PL0YhNAxiZhmBRK', 'Администратор', NULL, NULL, NULL, NULL),
 (9, 'в', 'sobaka@mail.ru', '+8 (900) 000-00-00', 'Ter_1337', '$2y$10$l2jdcQNc883Sx2EAIdKAUeuV5oB68AkUBdY.0yS6Xll0C4RhtAece', 'user', NULL, NULL, NULL, NULL),
-(10, 'Мишаня Кириешка', 'reb@mail.ru', '+79053024129', 'Rebiks', '$2y$10$kO/Y09C6u4IF5qposaI0Be.cSE/iF9c9uA3Y/7x4Z2PSmpG/0DT6e', 'Администратор', NULL, NULL, NULL, NULL),
-(11, 'Филимонов Денис Юрьевич', 'Alfavitden@gmail.com', '+7 (962) 276-39-27', 'Alfavit', '$2y$10$LRXHaw7zHfHo3dbg2fYkXujBJ8u7WvPe2eLNbHrcNhQVvct.pz1Ae', 'Администратор', NULL, NULL, NULL, NULL);
+(10, 'Михаил Калашников', 'reb@mail.ru', '+79053024129', 'Rebiks', '$2y$10$kAmZdsq8N/pY7rTK5bJcFulB4p/1aPHxWiPKKV47VGjia5OjNxDWm', 'Администратор', '1815051685', 'MihanKT', NULL, NULL),
+(11, 'Филимонов Денис Юрьевич', 'Alfavitden@gmail.com', '+7 (962) 276-39-27', 'Alfavit', '$2y$10$LRXHaw7zHfHo3dbg2fYkXujBJ8u7WvPe2eLNbHrcNhQVvct.pz1Ae', 'Администратор', NULL, NULL, NULL, NULL),
+(12, 'd', 'sobak12a@mail.ru', '+8 (900) 000-00-00', 'D', '$2y$10$XBNAw/lYDjuHNVZX97/TFeAvzRTMhVYSe.K4sFiqK8y.pxTVcGTnq', 'Администратор', NULL, NULL, NULL, NULL),
+(13, 'sfsdgdsg', 'mail@mail.ru', '+7 (948) 634-86-43', 'MGE_BRAT', '$2y$10$sUezBqxBkjrmfkgMm1xEJu7LQJ.2/BPuE.3xI15zncH.GOI7YJqc2', 'user', '1356118709', 'chelovek_rek', NULL, NULL),
+(14, 'Филимонов Денис Юрьевич', 'den.filia9@mail.ru', '+7 (962) 276-39-27', 'testme', '$2y$10$B5XiqhX5tjYq4vS9Wuv2H.V6ssoVe5JPg9hYEdOwZvlc1feM3iZVu', 'user', NULL, NULL, NULL, NULL),
+(15, 'Марина', 'prosekova.mp@bk.ru', '+7 (999) 582-69-43', 'prosekova.mp', '$2y$10$MpIyAjly6XwV49QpuXbZWO1GRY11jp1gUq4/QgRMfra6xmQWD8Nze', 'user', '970596360', 'prosekova_mp', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -380,6 +452,13 @@ ALTER TABLE `product_colors`
   ADD KEY `sku` (`sku`);
 
 --
+-- Индексы таблицы `remember_tokens`
+--
+ALTER TABLE `remember_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Индексы таблицы `reviews`
 --
 ALTER TABLE `reviews`
@@ -421,37 +500,43 @@ ALTER TABLE `wishlist`
 -- AUTO_INCREMENT для таблицы `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT для таблицы `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT для таблицы `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT для таблицы `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT для таблицы `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT для таблицы `product_colors`
 --
 ALTER TABLE `product_colors`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT для таблицы `remember_tokens`
+--
+ALTER TABLE `remember_tokens`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT для таблицы `reviews`
@@ -463,13 +548,13 @@ ALTER TABLE `reviews`
 -- AUTO_INCREMENT для таблицы `telegram_verification_codes`
 --
 ALTER TABLE `telegram_verification_codes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT для таблицы `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT для таблицы `wishlist`
@@ -482,49 +567,16 @@ ALTER TABLE `wishlist`
 --
 
 --
--- Ограничения внешнего ключа таблицы `cart`
---
-ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Ограничения внешнего ключа таблицы `categories`
---
-ALTER TABLE `categories`
-  ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
-
---
--- Ограничения внешнего ключа таблицы `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
 -- Ограничения внешнего ключа таблицы `order_items`
 --
 ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Ограничения внешнего ключа таблицы `product_colors`
+-- Ограничения внешнего ключа таблицы `remember_tokens`
 --
-ALTER TABLE `product_colors`
-  ADD CONSTRAINT `product_colors_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE;
-
---
--- Ограничения внешнего ключа таблицы `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE;
-
---
--- Ограничения внешнего ключа таблицы `wishlist`
---
-ALTER TABLE `wishlist`
-  ADD CONSTRAINT `wishlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `wishlist_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE;
+ALTER TABLE `remember_tokens`
+  ADD CONSTRAINT `remember_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

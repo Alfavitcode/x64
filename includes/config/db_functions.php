@@ -7,15 +7,25 @@ require_once 'db_config.php';
  * 
  * @param int $limit Лимит товаров (по умолчанию все)
  * @param string $category Категория товаров (по умолчанию все)
+ * @param int $subcategory_id ID подкатегории (по умолчанию все)
  * @return array Массив товаров
  */
-function getProducts($limit = null, $category = null) {
+function getProducts($limit = null, $category = null, $subcategory_id = null) {
     global $conn;
     
     $sql = "SELECT * FROM product";
+    $conditions = [];
     
     if ($category && $category != 'all') {
-        $sql .= " WHERE category = '" . mysqli_real_escape_string($conn, $category) . "'";
+        $conditions[] = "category = '" . mysqli_real_escape_string($conn, $category) . "'";
+    }
+    
+    if ($subcategory_id) {
+        $conditions[] = "subcategory_id = " . (int)$subcategory_id;
+    }
+    
+    if (!empty($conditions)) {
+        $sql .= " WHERE " . implode(" AND ", $conditions);
     }
     
     $sql .= " ORDER BY id DESC";
@@ -1555,6 +1565,12 @@ function updateOrderStatus($order_id, $status) {
     $current_status_row = mysqli_fetch_assoc($current_status_result);
     $current_status = $current_status_row ? $current_status_row['status'] : '';
     
+    // Проверяем, можно ли редактировать заказ
+    // Если заказ уже закрыт или выполнен, запрещаем изменение статуса
+    if ($current_status === 'closed' || $current_status === 'completed') {
+        return false;
+    }
+    
     // Обновляем статус заказа
     $sql = "UPDATE `orders` SET 
             `status` = '" . mysqli_real_escape_string($conn, $status) . "'
@@ -2082,5 +2098,205 @@ function removeRememberToken($user_id) {
     
     $sql = "DELETE FROM remember_tokens WHERE user_id = " . (int)$user_id;
     mysqli_query($conn, $sql);
+}
+
+/**
+ * Получение подкатегорий для указанной родительской категории
+ * 
+ * @param int|string $parent Идентификатор или название родительской категории
+ * @return array Массив подкатегорий
+ */
+function getSubcategories($parent) {
+    global $conn;
+    
+    // Если передано название категории, находим её ID
+    if (!is_numeric($parent)) {
+        $sql = "SELECT id FROM categories WHERE name = '" . mysqli_real_escape_string($conn, $parent) . "'";
+        $result = mysqli_query($conn, $sql);
+        
+        if ($result && mysqli_num_rows($result) > 0) {
+            $category = mysqli_fetch_assoc($result);
+            $parent_id = $category['id'];
+        } else {
+            return [];
+        }
+    } else {
+        $parent_id = (int)$parent;
+    }
+    
+    // Получаем подкатегории
+    $sql = "SELECT * FROM categories WHERE parent_id = $parent_id ORDER BY name";
+    $result = mysqli_query($conn, $sql);
+    $subcategories = [];
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $subcategories[] = $row;
+        }
+    }
+    
+    return $subcategories;
+}
+
+/**
+ * Получение популярных подкатегорий для указанной родительской категории
+ * 
+ * @param string $category Название категории
+ * @param int $limit Количество подкатегорий (по умолчанию 5)
+ * @return array Массив подкатегорий с количеством товаров
+ */
+function getPopularSubcategories($category, $limit = 5) {
+    global $conn;
+    
+    // Сначала проверяем, существуют ли подкатегории для данной категории
+    $subcategories = getSubcategories($category);
+    
+    // Если подкатегорий нет, создаем стандартный набор
+    if (empty($subcategories)) {
+        if ($category == 'iPhone') {
+            // Создаем подкатегории для iPhone
+            addCategory('Чехлы для iPhone', 'Защитные чехлы для iPhone', '', getCategoryIdByName('iPhone'));
+            addCategory('Зарядные устройства для iPhone', 'Зарядные устройства для iPhone', '', getCategoryIdByName('iPhone'));
+            addCategory('Защитные стекла для iPhone', 'Защитные стекла для iPhone', '', getCategoryIdByName('iPhone'));
+            addCategory('Наушники Apple', 'Наушники для iPhone', '', getCategoryIdByName('iPhone'));
+            addCategory('Аксессуары для iPhone', 'Другие аксессуары для iPhone', '', getCategoryIdByName('iPhone'));
+        } elseif ($category == 'Android') {
+            // Создаем подкатегории для Android
+            addCategory('Чехлы для Android', 'Защитные чехлы для Android', '', getCategoryIdByName('Android'));
+            addCategory('Зарядные устройства для Android', 'Зарядные устройства для Android', '', getCategoryIdByName('Android'));
+            addCategory('Защитные стекла для Android', 'Защитные стекла для Android', '', getCategoryIdByName('Android'));
+            addCategory('Наушники Android', 'Наушники для Android', '', getCategoryIdByName('Android'));
+            addCategory('Аксессуары для Android', 'Другие аксессуары для Android', '', getCategoryIdByName('Android'));
+        }
+        
+        // Получаем подкатегории снова
+        $subcategories = getSubcategories($category);
+    }
+    
+    // Для каждой подкатегории считаем количество товаров
+    $result = [];
+    foreach ($subcategories as $subcategory) {
+        $sql = "SELECT COUNT(*) as count FROM product WHERE subcategory_id = " . $subcategory['id'];
+        $query_result = mysqli_query($conn, $sql);
+        
+        if ($query_result) {
+            $count = mysqli_fetch_assoc($query_result)['count'];
+        } else {
+            $count = 0;
+        }
+        
+        $result[] = [
+            'id' => $subcategory['id'],
+            'name' => $subcategory['name'],
+            'count' => $count
+        ];
+    }
+    
+    // Сортируем по количеству товаров
+    usort($result, function($a, $b) {
+        return $b['count'] - $a['count'];
+    });
+    
+    // Возвращаем ограниченное количество
+    return array_slice($result, 0, $limit);
+}
+
+/**
+ * Получение ID категории по её имени
+ * 
+ * @param string $name Название категории
+ * @return int|null ID категории или null, если категория не найдена
+ */
+function getCategoryIdByName($name) {
+    global $conn;
+    
+    $sql = "SELECT id FROM categories WHERE name = '" . mysqli_real_escape_string($conn, $name) . "'";
+    $result = mysqli_query($conn, $sql);
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        return mysqli_fetch_assoc($result)['id'];
+    }
+    
+    return null;
+}
+
+/**
+ * Обновляет структуру таблицы product для поддержки подкатегорий
+ */
+function updateProductTableForSubcategories() {
+    global $conn;
+    
+    // Проверяем, существует ли поле subcategory_id
+    $result = mysqli_query($conn, "SHOW COLUMNS FROM product LIKE 'subcategory_id'");
+    $exists = (mysqli_num_rows($result) > 0);
+    
+    // Если поля нет, добавляем его
+    if (!$exists) {
+        $sql = "ALTER TABLE product ADD COLUMN subcategory_id INT(11) NULL";
+        mysqli_query($conn, $sql);
+    }
+}
+
+// Вызываем функцию при подключении файла
+updateProductTableForSubcategories();
+
+/**
+ * Удаление заказа и связанных с ним данных
+ * 
+ * @param int $order_id ID заказа
+ * @return array Результат операции
+ */
+function deleteOrder($order_id) {
+    global $conn;
+    
+    // Начинаем транзакцию
+    mysqli_begin_transaction($conn);
+    
+    try {
+        // Получаем текущий статус заказа перед удалением
+        $status_query = "SELECT status FROM orders WHERE id = " . (int)$order_id;
+        $status_result = mysqli_query($conn, $status_query);
+        $status_row = mysqli_fetch_assoc($status_result);
+        
+        // Проверяем, можно ли удалить заказ
+        // Если заказ уже выполнен или закрыт, запрещаем удаление
+        if ($status_row && ($status_row['status'] === 'completed' || $status_row['status'] === 'closed')) {
+            return [
+                'success' => false,
+                'message' => 'Невозможно удалить заказ в статусе "' . 
+                             ($status_row['status'] === 'completed' ? 'Выполнен' : 'Закрыт') . '"'
+            ];
+        }
+        
+        // Удаляем элементы заказа (у нас уже есть внешний ключ ON DELETE CASCADE,
+        // но для надежности удалим явно)
+        $delete_items_sql = "DELETE FROM order_items WHERE order_id = " . (int)$order_id;
+        if (!mysqli_query($conn, $delete_items_sql)) {
+            throw new Exception("Ошибка при удалении элементов заказа: " . mysqli_error($conn));
+        }
+        
+        // Удаляем сам заказ
+        $delete_order_sql = "DELETE FROM orders WHERE id = " . (int)$order_id;
+        if (!mysqli_query($conn, $delete_order_sql)) {
+            throw new Exception("Ошибка при удалении заказа: " . mysqli_error($conn));
+        }
+        
+        // Фиксируем транзакцию
+        mysqli_commit($conn);
+        
+        return [
+            'success' => true,
+            'message' => 'Заказ #' . $order_id . ' успешно удален'
+        ];
+        
+    } catch (Exception $e) {
+        // Откатываем транзакцию в случае ошибки
+        mysqli_rollback($conn);
+        
+        return [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
+    }
 }
  

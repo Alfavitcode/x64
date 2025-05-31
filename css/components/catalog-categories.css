@@ -1,0 +1,147 @@
+/* Стили для категорий и подкатегорий в каталоге */
+
+/* Переопределение стилей для активных категорий */
+.list-group-item.active {
+    background-color: transparent !important;
+    border-color: rgba(0, 0, 0, 0.125) !important;
+    color: inherit !important;
+    z-index: 1 !important;
+}
+
+/* Исключение для "Все категории" */
+.list-group-item:first-child.active {
+    background-color: transparent !important;
+}
+
+/* Восстановление стандартного стиля для стрелок */
+.subcategory-toggle {
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.subcategory-toggle:hover {
+    color: var(--bs-primary);
+}
+
+.subcategories-menu {
+    margin-top: 8px;
+    animation: fadeIn 0.3s ease;
+    border-left: 2px solid #e9ecef;
+    background-color: #ffffff;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стиль для активной категории */
+.category-item.active {
+    background-color: transparent !important;
+}
+
+.category-item.active > .d-flex > a {
+    color: var(--bs-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* Стиль для подкатегорий */
+.subcategory-link {
+    color: #555;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin-bottom: 2px;
+    position: relative;
+    border-left: 3px solid transparent;
+    padding-left: 7px;
+    margin-left: 0;
+    background-color: transparent;
+}
+
+.subcategory-link i {
+    margin-right: 8px;
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+    color: #777;
+}
+
+.subcategory-link .link-text {
+    flex-grow: 1;
+}
+
+.subcategory-link:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    color: #0d6efd;
+    border-left-color: #0d6efd;
+}
+
+/* Стиль только для активной подкатегории */
+.active-subcategory {
+    background-color: rgba(13, 110, 253, 0.05);
+    color: #0d6efd !important;
+    font-weight: 500;
+    border-left: 3px solid #0d6efd;
+}
+
+.active-subcategory i {
+    color: #0d6efd;
+}
+
+/* Скрываем подкатегории по умолчанию */
+.subcategories-menu {
+    display: none;
+}
+
+/* Переопределяем стиль при явном показе через JavaScript */
+.subcategories-menu.show {
+    display: block;
+}
+
+/* Стили для индикатора загрузки */
+.catalog-content.loading {
+    position: relative;
+}
+
+.catalog-content.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 100;
+}
+
+.catalog-content.loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 101;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+} 

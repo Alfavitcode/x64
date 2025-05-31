@@ -1,0 +1,225 @@
+/* Критические стили для мобильных устройств */
+@media (max-width: 767px) {
+    /* Таблицы должны иметь горизонтальный скроллинг на мобильных */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Минимальная ширина таблиц */
+    .table {
+        min-width: 800px !important;
+    }
+    
+    /* Специфические стили для таблицы товаров */
+    .product-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .product-table {
+        min-width: 800px !important;
+    }
+    
+    /* Исправление заголовков в таблице товаров - предотвращение наложения */
+    .product-table th:nth-child(1) { /* ID */
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        padding-right: 0 !important;
+    }
+    
+    .product-table th:nth-child(2) { /* Изображение */
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        text-align: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .product-table th:nth-child(3) { /* Название */
+        width: 180px !important;
+        min-width: 180px !important;
+        max-width: 180px !important;
+        padding-left: 10px !important;
+    }
+    
+    .product-table th:nth-child(4) { /* Категория */
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+    
+    .product-table th:nth-child(5) { /* Цена */
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+    
+    .product-table th:nth-child(6) { /* Наличие */
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        text-align: center !important;
+    }
+    
+    .product-table th:nth-child(7) { /* Действия */
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        padding-left: 5px !important;
+        text-align: center !important;
+    }
+    
+    /* Выравнивание содержимого ячеек с заголовками */
+    .product-table td:nth-child(1) { text-align: left !important; padding-right: 0 !important; }
+    .product-table td:nth-child(2) { text-align: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .product-table td:nth-child(3) { padding-left: 10px !important; }
+    .product-table td:nth-child(4) { padding-left: 5px !important; padding-right: 5px !important; }
+    .product-table td:nth-child(5) { padding-left: 5px !important; padding-right: 5px !important; }
+    .product-table td:nth-child(6) { text-align: center !important; padding-left: 5px !important; padding-right: 5px !important; }
+    .product-table td:nth-child(7) { text-align: center !important; padding-left: 5px !important; }
+    
+    /* Специальные стили для таблицы товаров в разделе #products */
+    #products .product-table {
+        min-width: 630px !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+    
+    #products .product-table th,
+    #products .product-table td {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    
+    #products .product-table-wrapper {
+        overflow-x: auto !important;
+        margin-bottom: 1rem !important;
+        max-width: 100% !important;
+    }
+    
+    /* Уменьшаем размеры изображений в таблице */
+    #products .product-table img {
+        max-width: 50px !important;
+        max-height: 50px !important;
+    }
+    
+    /* Увеличиваем общий размер таблицы для учета фиксированных ширин колонок */
+    .product-table {
+        min-width: 630px !important;
+    }
+    
+    /* Исправления для элементов таблицы */
+    table th, table td {
+        white-space: nowrap !important;
+        padding: 0.5rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Предотвращаем перекрытие заголовков */
+    table th {
+        overflow: visible !important;
+        text-overflow: clip !important;
+        word-break: normal !important;
+    }
+    
+    /* Фиксирование различных багов с фиксированной шириной */
+    div[style*="overflow-x: visible"] {
+        overflow-x: auto !important;
+    }
+    
+    div[style*="overflow: hidden"] {
+        overflow: visible !important;
+        overflow-x: auto !important;
+    }
+    
+    /* Сброс стилей, которые могут мешать скроллингу */
+    [class*="overflow-hidden"],
+    [class*="overflow-x-hidden"] {
+        overflow: visible !important;
+        overflow-x: auto !important;
+    }
+    
+    /* Force horizontal scrolling for tables */
+    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100% !important;
+    }
+    
+    /* Specific styles for reports table */
+    #reports .report-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100% !important;
+    }
+    
+    #reports .report-table {
+        min-width: 660px !important;
+        width: auto !important;
+    }
+    
+    #reports .report-table th,
+    #reports .report-table td {
+        white-space: nowrap !important;
+    }
+}
+
+/* Desktop styles - explicitly prevent horizontal scrolling */
+@media (min-width: 768px) {
+    /* Hide horizontal scrollbar on desktop */
+    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
+        overflow-x: hidden !important;
+    }
+    
+    /* Full width tables on desktop */
+    .product-table, .category-table, .order-table, .report-table, .user-table {
+        width: 100% !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+    
+    /* Make product table responsive on desktop */
+    #products .product-table {
+        width: 100% !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+    
+    /* Optimize column width on desktop */
+    #products .product-table th:nth-child(1) { width: 5% !important; } /* ID */
+    #products .product-table th:nth-child(2) { width: 8% !important; } /* Изображение */
+    #products .product-table th:nth-child(3) { width: 30% !important; } /* Название */
+    #products .product-table th:nth-child(4) { width: 15% !important; } /* Категория */
+    #products .product-table th:nth-child(5) { width: 15% !important; } /* Цена */
+    #products .product-table th:nth-child(6) { width: 12% !important; } /* Наличие */
+    #products .product-table th:nth-child(7) { width: 15% !important; } /* Действия */
+    
+    /* Ensure text doesn't overflow on desktop */
+    #products .product-table td {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Special handling for reports table on desktop */
+    #reports .report-table-wrapper {
+        overflow-x: hidden !important;
+    }
+    
+    #reports .report-table {
+        min-width: auto !important;
+        width: 100% !important;
+    }
+} 
