@@ -24,6 +24,10 @@ if (!$user) {
     header("Location: logout.php");
     exit;
 }
+
+// Получаем заказы пользователя для отображения счетчика
+$orders = getUserOrders($user_id);
+$orderCount = count($orders);
 ?>
 
 <section class="profile-section">
@@ -31,49 +35,28 @@ if (!$user) {
         <div class="row">
             <!-- Боковое меню -->
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="profile-card profile-sidebar">
-                    <div class="profile-menu-header">
-                        <h5 class="mb-0">Личный кабинет</h5>
-                    </div>
-                    <ul class="profile-menu">
-                        <li class="profile-menu-item">
-                            <a href="profile.php">
-                                <i class="fas fa-user"></i>
-                                Мой профиль
-                            </a>
-                        </li>
-                        <li class="profile-menu-item">
-                            <a href="orders.php">
-                                <i class="fas fa-shopping-bag"></i>
-                                Мои заказы
-                            </a>
-                        </li>
-                        
-                        <li class="profile-menu-item">
-                            <a href="telegram.php">
-                                <i class="fab fa-telegram"></i>
-                                Привязка Telegram
-                            </a>
-                        </li>
-                        
-                        <li class="profile-menu-item active">
-                            <a href="settings.php">
-                                <i class="fas fa-cog"></i>
-                                Настройки
-                            </a>
-                        </li>
-                        <li class="profile-menu-item logout">
-                            <a href="logout.php">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Выйти
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <?php include_once 'includes/sidebar.php'; ?>
             </div>
             
             <!-- Основное содержимое -->
             <div class="col-lg-9 col-md-8">
+                <!-- Сообщения об успехе и ошибках -->
+                <?php if (isset($_SESSION['success_message'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+                        <?php echo $_SESSION['success_message']; ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['success_message']); ?>
+                <?php endif; ?>
+                
+                <?php if (isset($_SESSION['error_message'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+                        <?php echo $_SESSION['error_message']; ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['error_message']); ?>
+                <?php endif; ?>
+                
                 <!-- Настройки профиля -->
                 <div class="profile-main-card mb-4">
                     <div class="profile-header">
@@ -93,14 +76,16 @@ if (!$user) {
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control rounded-4" id="login" name="login" value="<?php echo htmlspecialchars($user['login']); ?>" placeholder="username" required>
+                                        <input type="text" class="form-control rounded-4" id="login" name="login" value="<?php echo htmlspecialchars($user['login']); ?>" placeholder="username" readonly>
                                         <label for="login">Логин</label>
+                                        <small class="text-muted">Логин изменить нельзя</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <div class="form-floating">
-                                        <input type="email" class="form-control rounded-4" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" placeholder="mail@example.com" required>
+                                        <input type="email" class="form-control rounded-4" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" placeholder="mail@example.com" readonly>
                                         <label for="email">Email</label>
+                                        <small class="text-muted">Email изменить нельзя</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
@@ -109,29 +94,10 @@ if (!$user) {
                                         <label for="phone">Телефон</label>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control rounded-4" id="role" value="<?php echo htmlspecialchars($user['role']); ?>" placeholder="Роль" readonly>
-                                        <label for="role">Роль</label>
-                                        <small class="text-muted">Роль пользователя изменить нельзя</small>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="alert alert-info rounded-4 mb-4">
-                                <div class="d-flex">
-                                    <div class="me-3">
-                                        <i class="fas fa-info-circle fa-2x text-info"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="alert-heading">Функционал в разработке</h5>
-                                        <p class="mb-0">В настоящее время функционал изменения настроек находится в разработке. Скоро вы сможете обновлять свои данные.</p>
-                                    </div>
-                                </div>
                             </div>
                             
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary rounded-pill px-4 py-2" disabled>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
                                     <i class="fas fa-save me-2"></i>Сохранить изменения
                                 </button>
                             </div>
@@ -185,20 +151,8 @@ if (!$user) {
                                 </div>
                             </div>
                             
-                            <div class="alert alert-info rounded-4 mb-4">
-                                <div class="d-flex">
-                                    <div class="me-3">
-                                        <i class="fas fa-info-circle fa-2x text-info"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="alert-heading">Функционал в разработке</h5>
-                                        <p class="mb-0">В настоящее время функционал смены пароля находится в разработке. Скоро вы сможете сменить свой пароль.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="text-end">
-                                <button type="submit" class="btn btn-danger rounded-pill px-4 py-2" disabled>
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 py-2">
                                     <i class="fas fa-lock me-2"></i>Изменить пароль
                                 </button>
                             </div>
@@ -209,6 +163,14 @@ if (!$user) {
         </div>
     </div>
 </section>
+
+<?php
+// Подключаем файл со стилями для профиля
+include_once 'includes/profile_styles.php';
+
+// Подключаем подвал сайта
+include_once '../includes/footer/footer.php';
+?>
 
 <style>
 /* Дополнительные стили для страницы настроек */
@@ -250,39 +212,22 @@ if (!$user) {
     box-shadow: 0 0 0 0.25rem rgba(77, 97, 252, 0.15);
 }
 
-.rounded-4 {
-    border-radius: 12px !important;
-}
-
-.alert-info {
-    background-color: rgba(23, 162, 184, 0.05);
-    border-color: rgba(23, 162, 184, 0.1);
-    color: #0c5460;
-}
-
-/* Стили для поля пароля */
 .password-field {
     position: relative;
 }
 
 .password-toggle {
     position: absolute;
+    right: 15px;
     top: 50%;
-    right: 1rem;
     transform: translateY(-50%);
     cursor: pointer;
-    z-index: 5;
     color: #6c757d;
-    transition: all 0.3s;
+    z-index: 10;
 }
 
 .password-toggle:hover {
     color: var(--primary-color);
-}
-
-/* Стили для индикатора силы пароля */
-.password-strength {
-    margin-top: -15px;
 }
 </style>
 
@@ -290,7 +235,7 @@ if (!$user) {
 // Функция для переключения видимости пароля
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
-    const icon = input.nextElementSibling.nextElementSibling.querySelector('i');
+    const icon = input.parentElement.querySelector('.password-toggle i');
     
     if (input.type === 'password') {
         input.type = 'text';
@@ -303,24 +248,17 @@ function togglePassword(inputId) {
     }
 }
 
-// Анимации для форм
+// Проверка совпадения паролей
 document.addEventListener('DOMContentLoaded', function() {
-    // Анимация для полей формы при фокусе
-    const formControls = document.querySelectorAll('.form-control');
-    formControls.forEach(control => {
-        control.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-5px)';
-            this.parentElement.style.transition = 'all 0.3s ease';
-        });
-        
-        control.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
+    const newPasswordInput = document.getElementById('new_password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const passwordForm = document.getElementById('passwordForm');
+    
+    passwordForm.addEventListener('submit', function(event) {
+        if (newPasswordInput.value !== confirmPasswordInput.value) {
+            event.preventDefault();
+            alert('Пароли не совпадают!');
+        }
     });
 });
-</script>
-
-<?php
-// Подключаем подвал сайта
-include_once '../includes/footer/footer.php';
-?> 
+</script> 

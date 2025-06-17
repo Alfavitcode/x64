@@ -1,0 +1,218 @@
+/**
+ * Специальные стили для исправления бледного меню в каталоге
+ */
+
+/* Основные блоки */
+.catalog-sidebar {
+    position: sticky !important;
+    top: 20px !important;
+}
+
+/* Блоки категорий и фильтров */
+.sidebar-widget,
+.categories-widget,
+.filters-widget,
+.card {
+    background-color: white !important;
+    border: none !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    margin-bottom: 25px !important;
+}
+
+/* Заголовки блоков */
+.card-header,
+.category-header,
+.filter-header {
+    background: #4e73df !important;
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px 20px !important;
+    font-weight: 600 !important;
+    border-radius: 0 !important;
+}
+
+/* Заголовки внутри блоков */
+.widget-title {
+    color: white !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+/* Тело карточек */
+.sidebar-widget .card-body,
+.categories-widget .card-body,
+.filters-widget .card-body {
+    background-color: white !important;
+    padding: 15px !important;
+    border: none !important;
+}
+
+/* Списки категорий */
+.categories-list {
+    background-color: white !important;
+    border: none !important;
+}
+
+.list-group-item {
+    background-color: white !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-color: #eaecf4 !important;
+    padding: 12px 20px !important;
+}
+
+/* Стили для ссылок в меню категорий */
+.list-group-item a {
+    color: #5a5c69 !important;
+    display: block !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+.list-group-item:hover a {
+    color: #4e73df !important;
+    transform: translateX(5px) !important;
+}
+
+.list-group-item.active a {
+    color: #4e73df !important;
+    font-weight: 600 !important;
+}
+
+/* Стили для меню подкатегорий */
+.subcategories-menu {
+    transition: all 0.3s ease !important;
+}
+
+/* Обязательно показываем подкатегории, если они имеют класс show */
+.subcategories-menu.show {
+    display: block !important;
+    height: auto !important;
+    opacity: 1 !important;
+}
+
+/* Стили для подкатегорий */
+.subcategory-link {
+    color: #6c757d !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 0 !important;
+}
+
+.subcategory-link:hover {
+    color: #4e73df !important;
+    transform: translateX(5px) !important;
+}
+
+.subcategory-link i {
+    color: #adb5bd !important;
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+.subcategory-link:hover i {
+    color: #4e73df !important;
+}
+
+/* Активная подкатегория */
+.subcategory-link.active-subcategory {
+    color: #4e73df !important;
+    font-weight: 600 !important;
+}
+
+.subcategory-link.active-subcategory i {
+    color: #4e73df !important;
+}
+
+/* Кнопки фильтров */
+#apply-filters {
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3) !important;
+}
+
+#reset-filters {
+    border: 1px solid #d1d3e2 !important;
+    background-color: white !important;
+}
+
+/* Исправление для бледного фона */
+.catalog-section {
+    background-color: #f8f9fc !important;
+}
+
+/* Стили для фильтров */
+.filter-title {
+    font-weight: 600 !important;
+    color: #2e3a59 !important;
+    margin-bottom: 15px !important;
+    position: relative !important;
+    padding-bottom: 8px !important;
+}
+
+.filter-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 40px !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, #4e73df, transparent) !important;
+}
+
+.price-range {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.price-input {
+    border-radius: 10px !important;
+    border: 1px solid #e3e6f0 !important;
+    padding: 8px 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.price-input:focus {
+    border-color: #4e73df !important;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25) !important;
+}
+
+.range-sep {
+    font-weight: 600 !important;
+    color: #6c757d !important;
+    margin: 0 8px !important;
+}
+
+.checkbox-group {
+    margin-bottom: 15px !important;
+}
+
+.form-check {
+    padding-left: 30px !important;
+    margin-bottom: 10px !important;
+    position: relative !important;
+    transition: all 0.3s ease !important;
+    border-radius: 8px !important;
+    padding: 8px 8px 8px 30px !important;
+}
+
+.form-check:hover {
+    background-color: #f8f9fc !important;
+}
+
+.form-check-input {
+    margin-top: 0.2rem !important;
+}
+
+.form-check-label {
+    cursor: pointer !important;
+    user-select: none !important;
+    color: #5a5c69 !important;
+} 

@@ -1,5 +1,32 @@
-/* Критические стили для мобильных устройств */
+/* Критические стили для мобильных устройств - загружаются в первую очередь */
 @media (max-width: 767px) {
+    /* Обеспечиваем горизонтальный скролл для таблиц */
+    .table-responsive,
+    .product-table-wrapper, 
+    .category-table-wrapper, 
+    .order-table-wrapper, 
+    .user-table-wrapper, 
+    .report-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    
+    /* Минимальная ширина таблиц */
+    .product-table, 
+    .category-table, 
+    .order-table, 
+    .user-table, 
+    .report-table,
+    .table {
+        min-width: 600px !important;
+        width: auto !important;
+    }
+    
+    /* Удаляем индикатор скролла */
+    
     /* Таблицы должны иметь горизонтальный скроллинг на мобильных */
     .table-responsive {
         overflow-x: auto !important;
@@ -19,6 +46,21 @@
     
     .product-table {
         min-width: 800px !important;
+    }
+    
+    /* Принудительно включаем скролл для всех таблиц */
+    #categories .category-table-wrapper,
+    #orders .order-table-wrapper,
+    #users .user-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    #categories .category-table,
+    #orders .order-table,
+    #users .user-table {
+        min-width: 600px !important;
+        width: auto !important;
     }
     
     /* Исправление заголовков в таблице товаров - предотвращение наложения */

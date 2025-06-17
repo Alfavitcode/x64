@@ -107,8 +107,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include_once '../includes/header/header.php';
 
 ?>
+<section class="admin-section">
+    <div class="container">
+        <div class="row justify-content-center">
             <!-- Основное содержимое -->
-            <div class="col-lg-9 col-md-8">
+            <div class="col-lg-8 col-md-10">
                 <!-- Форма редактирования пользователя -->
                 <div class="profile-main-card">
                     <div class="profile-header">
@@ -249,8 +252,28 @@ include_once '../includes/header/header.php';
     transition: all 0.3s;
 }
 
-.password-toggle:hover {
-    color: var(--primary-color);
+/* Добавляем стили для центрирования */
+.admin-section {
+    padding: 2rem 0;
+}
+
+.profile-main-card {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-header {
+    border-bottom: 1px solid #f2f2f2;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.profile-name {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 </style>
 
@@ -258,7 +281,7 @@ include_once '../includes/header/header.php';
 // Функция для переключения видимости пароля
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
-    const icon = input.nextElementSibling.nextElementSibling.querySelector('i');
+    const icon = input.parentElement.querySelector('.password-toggle i');
     
     if (input.type === 'password') {
         input.type = 'text';
@@ -270,22 +293,6 @@ function togglePassword(inputId) {
         icon.classList.add('fa-eye');
     }
 }
-
-// Анимации для форм
-document.addEventListener('DOMContentLoaded', function() {
-    // Анимация для полей формы при фокусе
-    const formControls = document.querySelectorAll('.form-control, .form-select');
-    formControls.forEach(control => {
-        control.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-5px)';
-            this.parentElement.style.transition = 'all 0.3s ease';
-        });
-        
-        control.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
-    });
-});
 </script>
 
 <?php

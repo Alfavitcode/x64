@@ -1,0 +1,703 @@
+/* Определение переменных цветов */
+:root {
+    --primary-color: #4d61fc;
+    --secondary-color: #6c757d;
+    --primary-color-rgb: 77, 97, 252;
+    --secondary-color-rgb: 108, 117, 125;
+    --accent-color: #FF5722;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-radius: 10px;
+    --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* Улучшенные стили для страниц FAQ и пользовательского соглашения */
+
+/* Основные стили */
+.faq-container, .legal-container {
+    padding: 2rem 0;
+}
+
+.faq-header, .legal-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.faq-header h1, .legal-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.faq-header h1::after, .legal-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.faq-header:hover h1::after, .legal-header:hover h1::after {
+    width: 120px;
+}
+
+.faq-header p, .legal-header p {
+    max-width: 700px;
+    margin: 0 auto;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Карточки FAQ */
+.faq-card {
+    height: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.faq-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.faq-card__header {
+    padding: 1.5rem;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.faq-card__header::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease;
+}
+
+.faq-card:hover .faq-card__header::before {
+    transform: scale(3);
+}
+
+.faq-card__header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.faq-card__body {
+    padding: 1.5rem;
+    background: white;
+}
+
+.faq-card__image {
+    margin: 1rem -1.5rem;
+    overflow: hidden;
+    height: 150px;
+}
+
+.faq-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.faq-card:hover .faq-card__image img {
+    transform: scale(1.1);
+}
+
+.faq-btn {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 30px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.faq-btn:hover {
+    background: var(--secondary-color);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Аккордеон */
+.faq-accordion {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.faq-accordion h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.faq-accordion h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transform: translateX(-50%);
+}
+
+.faq-accordion-item {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.faq-accordion-header {
+    padding: 1.25rem;
+    background: #f8f9fa;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.faq-accordion-header h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    padding-right: 30px;
+}
+
+.faq-accordion-header::after {
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+}
+
+.faq-accordion-item.active .faq-accordion-header {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.faq-accordion-item.active .faq-accordion-header::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.faq-accordion-body {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    background: white;
+}
+
+.faq-accordion-item.active .faq-accordion-body {
+    padding: 1.5rem;
+    max-height: 1000px;
+}
+
+/* Стили для страницы пользовательского соглашения */
+.legal-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.legal-content .card {
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    border: none;
+    overflow: hidden;
+}
+
+.legal-content .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.legal-content .card-body {
+    position: relative;
+}
+
+.legal-content .card-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 0;
+    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+    transition: height 0.3s ease;
+}
+
+.legal-content .card:hover .card-body::before {
+    height: 100%;
+}
+
+.legal-content h2 {
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.legal-content .card:hover h2 {
+    transform: translateX(10px);
+}
+
+.legal-content p, .legal-content ul, .legal-content ol {
+    color: #6c757d;
+    line-height: 1.8;
+}
+
+.legal-content ul li, .legal-content ol li {
+    margin-bottom: 0.5rem;
+}
+
+.legal-alert {
+    border-left: 5px solid var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    transition: all 0.3s ease;
+}
+
+.legal-alert:hover {
+    transform: translateX(5px);
+}
+
+/* Анимации для элементов */
+.animate-on-load {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-load.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-scroll.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Стили для навигации по страницам */
+.faq-nav {
+    position: sticky;
+    top: 80px;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.faq-nav-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.faq-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.faq-nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.faq-nav-link {
+    display: block;
+    padding: 0.5rem 0;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    padding-left: 10px;
+}
+
+.faq-nav-link:hover, .faq-nav-link.active {
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+    padding-left: 15px;
+}
+
+/* Анимация для секций при скролле */
+.section-animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.section-animate.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Кнопка "Наверх" */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    background: var(--secondary-color);
+    transform: translateY(-5px);
+}
+
+/* Медиа-запросы */
+@media (max-width: 991px) {
+    .faq-nav {
+        position: relative;
+        top: 0;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .faq-header h1, .legal-header h1 {
+        font-size: 2rem;
+    }
+    
+    .faq-card__header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .faq-accordion-header h3 {
+        font-size: 1rem;
+    }
+    
+    .legal-content h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Стили для таблиц */
+.faq-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.faq-table thead {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.faq-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 500;
+}
+
+.faq-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.faq-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.faq-table tbody tr:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    transform: scale(1.01);
+}
+
+.faq-table td {
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Анимированные иконки */
+.animated-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.faq-card:hover .animated-icon,
+.faq-accordion-item.active .animated-icon {
+    transform: rotate(360deg);
+}
+
+/* Плавное появление контента */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Пульсирующая анимация для важных элементов */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Стили для цитат и блоков с примечаниями */
+.faq-quote {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    background-color: #f8f9fa;
+    border-left: 5px solid var(--primary-color);
+    position: relative;
+    border-radius: 0 10px 10px 0;
+}
+
+.faq-quote::before {
+    content: '\f10d';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: rgba(var(--primary-color-rgb), 0.2);
+    font-size: 2rem;
+}
+
+.faq-note {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 10px;
+    position: relative;
+}
+
+.faq-note::before {
+    content: '\f05a';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+    color: #ffc107;
+}
+
+/* Стили для изображений */
+.faq-image {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.faq-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.faq-image img {
+    width: 100%;
+    height: auto;
+}
+
+/* Стили для шагов (инструкций) */
+.faq-steps {
+    counter-reset: step;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.faq-step {
+    position: relative;
+    padding: 1.5rem 1.5rem 1.5rem 4rem;
+    margin-bottom: 1.5rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.faq-step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 1.5rem;
+    top: 1.5rem;
+    width: 30px;
+    height: 30px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.faq-step:hover {
+    transform: translateX(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.faq-step h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+/* Стили для вкладок */
+.faq-tabs {
+    margin: 2rem 0;
+}
+
+.faq-tabs-nav {
+    display: flex;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.faq-tab-link {
+    padding: 1rem 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+}
+
+.faq-tab-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.faq-tab-content {
+    display: none;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.faq-tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Анимация для перехода между страницами */
+.page-transition {
+    animation: pageTransition 0.5s ease;
+}
+
+@keyframes pageTransition {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для оглавления */
+.faq-toc {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.faq-toc-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.faq-toc-list {
+    padding-left: 1.5rem;
+    margin-bottom: 0;
+}
+
+.faq-toc-item {
+    margin-bottom: 0.5rem;
+}
+
+.faq-toc-link {
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.faq-toc-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+} 

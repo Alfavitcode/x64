@@ -405,8 +405,8 @@ function getStatusClass($status) {
                         </div>
                     </div>
                     <div class="mt-3">
-                        <a href="mailto:<?php echo htmlspecialchars($order['email']); ?>" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-envelope me-2"></i>Написать клиенту
+                        <a href="print_receipt.php?id=<?php echo $order_id; ?>" class="btn btn-outline-primary w-100" target="_blank">
+                            <i class="fas fa-print me-2"></i>Распечатать чек
                         </a>
                         <?php if ($order['status'] !== 'closed' && $order['status'] !== 'completed'): ?>
                             <button type="button" class="btn btn-outline-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">

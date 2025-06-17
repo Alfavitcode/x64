@@ -1,0 +1,200 @@
+/**
+ * Исправленные стили для фильтра сортировки
+ */
+
+/* Контейнер сортировки */
+.catalog-sort {
+    display: flex !important;
+    align-items: center !important;
+    background-color: #f8f9fa !important;
+    padding: 15px 20px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 20px !important;
+}
+
+/* Текст "Сортировать по:" */
+.catalog-sort label {
+    margin-right: 10px !important;
+    font-weight: 600 !important;
+    color: #2d3142 !important;
+    white-space: nowrap !important;
+}
+
+/* Селект сортировки */
+.sort-select {
+    min-width: 200px !important;
+    border: 1px solid #e1e4e8 !important;
+    border-radius: 6px !important;
+    padding: 8px 15px !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    color: #333 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    
+    /* Убираем стандартные стрелки для всех браузеров */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    
+    /* Добавляем свою единственную стрелку */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%234e73df' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px !important;
+    
+    padding-right: 32px !important;
+    z-index: 100 !important;
+}
+
+/* Стили при наведении */
+.sort-select:hover {
+    border-color: #4e73df !important;
+}
+
+/* Стили при фокусе */
+.sort-select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25) !important;
+    border-color: #4e73df !important;
+}
+
+/* Стили для вариантов селекта */
+.sort-select option {
+    padding: 10px !important;
+    background-color: white !important;
+    color: #333 !important;
+    font-size: 14px !important;
+}
+
+/* Убираем стрелку контейнера */
+.catalog-sort::after {
+    content: '' !important;
+    display: none !important;
+}
+
+/* Исправление для мобильных устройств */
+@media (max-width: 576px) {
+    .catalog-sort {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    .catalog-sort label {
+        margin-bottom: 8px !important;
+    }
+    
+    .sort-select {
+        width: 100% !important;
+    }
+}
+
+/* Пульсирующая кнопка применения фильтров */
+@keyframes btn-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(78, 115, 223, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(78, 115, 223, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(78, 115, 223, 0);
+    }
+}
+
+.btn-pulse {
+    animation: btn-pulse 1s ease-out !important;
+}
+
+/* Стили для полей ввода цены */
+.price-input {
+    appearance: textfield !important;
+    -moz-appearance: textfield !important;
+    -webkit-appearance: textfield !important;
+    border: 1px solid #e1e4e8 !important;
+    border-radius: 6px !important;
+    padding: 8px 15px !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    color: #333 !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+}
+
+.price-input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25) !important;
+    border-color: #4e73df !important;
+}
+
+.price-input::-webkit-inner-spin-button,
+.price-input::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* Стили для чекбоксов фильтра */
+.filter-checkbox {
+    cursor: pointer !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.filter-checkbox:checked {
+    background-color: #4e73df !important;
+    border-color: #4e73df !important;
+}
+
+/* Дополнительные правила для скрытия стрелок в различных браузерах */
+/* Firefox */
+.sort-select::-moz-focus-inner {
+    border: 0 !important;
+}
+
+/* IE 10+ */
+.sort-select::-ms-expand {
+    display: none !important;
+}
+
+/* Microsoft Edge */
+@supports (-ms-ime-align:auto) {
+    .sort-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%234e73df' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 10px center !important;
+    }
+}
+
+/* Убедимся, что стили для Bootstrap не перекрывают наши настройки */
+.form-select.sort-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%234e73df' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px !important;
+}
+
+/* Увеличиваем специфичность для гарантированного переопределения стилей Bootstrap */
+select.form-select.sort-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%234e73df' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px !important;
+    padding-right: 32px !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    border: 1px solid #e1e4e8 !important;
+}
+
+/* Chrome и Safari */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    select.form-select.sort-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%234e73df' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-position: right 10px center !important;
+        -webkit-appearance: none !important;
+    }
+} 

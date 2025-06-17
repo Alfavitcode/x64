@@ -1,0 +1,627 @@
+/**
+ * Улучшенные стили для страницы каталога
+ */
+
+/* Стили для заголовка страницы */
+.page-header {
+    position: relative;
+    background: linear-gradient(135deg, #f8f9fc 0%, #eaecf4 100%);
+    border-radius: 15px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/img/patterns/pattern-dots.svg');
+    background-size: 20px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.page-title {
+    position: relative;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #2e3a59;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: #4e73df;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #2e59d9;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+
+/* Стили для боковой панели */
+.catalog-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-widget {
+    margin-bottom: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: none;
+    background-color: #fff;
+}
+
+.sidebar-widget:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.widget-title {
+    font-weight: 600;
+    color: #2e3a59;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+}
+
+/* Изменяем стили для заголовков категорий и фильтров */
+.sidebar-widget .card-header,
+.categories-widget .card-header, 
+.filters-widget .card-header,
+.category-header,
+.filter-header {
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px 20px !important;
+    font-weight: 600 !important;
+}
+
+/* Добавляем стили для заголовков внутри виджетов */
+.sidebar-widget .widget-title,
+.categories-widget .widget-title,
+.filters-widget .widget-title {
+    color: white !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Стили для категорий */
+.categories-list {
+    margin: 0;
+    padding: 0;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    border-color: #eaecf4;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item.active {
+    background-color: rgba(78, 115, 223, 0.1);
+    border-color: #eaecf4;
+    color: #4e73df;
+}
+
+.list-group-item a {
+    color: #5a5c69;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fc;
+}
+
+.list-group-item:hover a {
+    color: #4e73df;
+    transform: translateX(5px);
+}
+
+.list-group-item.active a {
+    color: #4e73df;
+    font-weight: 600;
+}
+
+.subcategory-toggle {
+    cursor: pointer;
+    color: #adb5bd;
+    transition: all 0.3s ease;
+}
+
+.subcategory-toggle:hover {
+    color: #4e73df;
+}
+
+.subcategories-menu {
+    display: none;
+    overflow: hidden;
+}
+
+/* Добавляем стиль для отображения меню подкатегорий */
+.subcategories-menu.show {
+    display: block;
+}
+
+.subcategory-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.subcategory-link:hover {
+    color: #4e73df;
+    transform: translateX(5px);
+}
+
+.subcategory-link i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+    color: #adb5bd;
+}
+
+.subcategory-link:hover i {
+    color: #4e73df;
+}
+
+.link-text {
+    flex: 1;
+}
+
+/* Стили для фильтров */
+.filter-title {
+    font-weight: 600;
+    color: #2e3a59;
+    margin-bottom: 15px;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.filter-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #4e73df, transparent);
+}
+
+.price-range {
+    display: flex;
+    align-items: center;
+}
+
+.price-input {
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+}
+
+.price-input:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.range-sep {
+    font-weight: 600;
+    color: #6c757d;
+    margin: 0 8px;
+}
+
+.checkbox-group {
+    margin-bottom: 15px;
+}
+
+.form-check {
+    padding-left: 30px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 8px 8px 8px 30px;
+}
+
+.form-check:hover {
+    background-color: #f8f9fc;
+}
+
+.form-check-input {
+    margin-top: 0.2rem;
+}
+
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Стили для кнопок фильтров */
+#apply-filters, #reset-filters {
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#apply-filters {
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%);
+    border: none;
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+}
+
+#apply-filters:hover {
+    box-shadow: 0 6px 15px rgba(78, 115, 223, 0.4);
+    transform: translateY(-2px);
+}
+
+#reset-filters {
+    border: 1px solid #d1d3e2;
+}
+
+#reset-filters:hover {
+    background-color: #eaecf4;
+}
+
+/* Стили для заголовка каталога */
+.catalog-header {
+    background-color: #f8f9fc;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.catalog-count .badge {
+    font-weight: 500;
+    padding: 8px 15px;
+    box-shadow: 0 2px 5px rgba(78, 115, 223, 0.2);
+}
+
+.sort-select {
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    padding: 8px 30px 8px 12px;
+    background-position: right 12px center;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.sort-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Улучшенные стили для карточек товаров */
+.product-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border: none;
+}
+
+.product-image {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.product-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: all 0.5s ease;
+}
+
+.product-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.badge {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.badge-new {
+    background-color: #4e73df;
+    color: white;
+}
+
+.badge-bestseller {
+    background-color: #f6c23e;
+    color: white;
+}
+
+.badge-sale {
+    background-color: #e74a3b;
+    color: white;
+}
+
+.product-info {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-category {
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.product-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.product-title a {
+    color: #2e3a59;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.product-title a:hover {
+    color: #4e73df;
+}
+
+.product-price {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.current-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2e3a59;
+}
+
+.old-price {
+    font-size: 0.9rem;
+    color: #adb5bd;
+    text-decoration: line-through;
+}
+
+.product-actions {
+    margin-top: auto;
+}
+
+.btn-add-to-cart {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-weight: 500;
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%);
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+}
+
+.btn-add-to-cart:hover {
+    box-shadow: 0 6px 15px rgba(78, 115, 223, 0.4);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #3a5ccc 0%, #2e59d9 100%);
+}
+
+/* Стили для пустого каталога */
+.empty-catalog {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 40px 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.empty-catalog-icon {
+    color: #adb5bd;
+    margin-bottom: 20px;
+}
+
+.btn-catalog {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+}
+
+.btn-catalog:hover {
+    box-shadow: 0 6px 15px rgba(78, 115, 223, 0.4);
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Стили для пагинации */
+.pagination {
+    margin-top: 30px;
+}
+
+.page-item {
+    margin: 0 3px;
+}
+
+.page-link {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4e73df;
+    border: 1px solid #e3e6f0;
+    transition: all 0.3s ease;
+}
+
+.page-item.active .page-link {
+    background-color: #4e73df;
+    border-color: #4e73df;
+    color: white;
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+}
+
+.page-link:hover {
+    background-color: #4e73df;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+}
+
+.page-item.disabled .page-link {
+    color: #adb5bd;
+    background-color: #f8f9fc;
+    border-color: #e3e6f0;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 991.98px) {
+    .catalog-sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 30px;
+    }
+    
+    .sidebar-widget {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .page-header {
+        padding: 20px 0;
+    }
+    
+    .catalog-header {
+        padding: 10px;
+        flex-direction: column;
+    }
+    
+    .catalog-count {
+        margin-bottom: 10px;
+    }
+    
+    .sort-select {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .page-link {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Анимации и эффекты */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Эффект загрузки для карточек товаров */
+.product-card.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Эффект наведения для категорий */
+.category-item:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* Эффект для информации о поиске */
+.search-info-card {
+    animation: fadeIn 0.5s ease-out;
+    border-left: 4px solid #4e73df !important;
+}
+
+/* Стили для блоков категорий и фильтров */
+.categories-widget, .filters-widget {
+    background-color: #ffffff;
+} 

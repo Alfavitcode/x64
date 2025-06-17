@@ -24,14 +24,14 @@ $cart_is_empty = empty($cart_items);
         <!-- Красивый дизайн для пустой корзины -->
         <div class="empty-cart-container">
             <div class="empty-cart-animation">
+                <div class="cart-pulse"></div>
                 <div class="cart-icon">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="cart-pulse"></div>
             </div>
             <h3 class="empty-cart-title">Ваша корзина пуста</h3>
             <p class="empty-cart-text">Похоже, вы еще не добавили товары в корзину</p>
-            <a href="/catalog.php" class="btn btn-primary btn-lg mt-3 rounded-pill">
+            <a href="/catalog.php" class="btn btn-primary btn-lg mt-3 rounded-pill animated-button">
                 <i class="fas fa-shopping-bag me-2"></i>Перейти к покупкам
             </a>
         </div>
@@ -139,9 +139,9 @@ $cart_is_empty = empty($cart_items);
     transform: scale(0.95);
 }
 .row-loader {
-    display: inline-block;
+    position: relative;
+    z-index: 2;
     margin-left: 10px;
-    vertical-align: middle;
 }
 /* Анимация для изменения цены */
 @keyframes priceUpdate {
@@ -169,6 +169,48 @@ $cart_is_empty = empty($cart_items);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
     margin: 2rem auto;
     max-width: 600px;
+    animation: fadeIn 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Декоративные элементы для пустой корзины */
+.empty-cart-container::before,
+.empty-cart-container::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0.05;
+    animation: float 15s infinite ease-in-out;
+}
+
+.empty-cart-container::before {
+    background-color: #4e73df;
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.empty-cart-container::after {
+    background-color: #4e73df;
+    bottom: -100px;
+    left: -100px;
+    animation-delay: 7.5s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, -10px) rotate(5deg); }
+    50% { transform: translate(5px, 5px) rotate(0deg); }
+    75% { transform: translate(-5px, 10px) rotate(-5deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .empty-cart-animation {
@@ -176,6 +218,9 @@ $cart_is_empty = empty($cart_items);
     width: 120px;
     height: 120px;
     margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cart-icon {
@@ -186,6 +231,12 @@ $cart_is_empty = empty($cart_items);
     font-size: 3.5rem;
     color: #0d6efd;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(0 4px 6px rgba(13, 110, 253, 0.3));
 }
 
 .cart-pulse {
@@ -198,20 +249,44 @@ $cart_is_empty = empty($cart_items);
     background-color: rgba(13, 110, 253, 0.1);
     border-radius: 50%;
     z-index: 1;
+}
+
+/* Отдельная анимация для пульсации */
+.cart-pulse:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-radius: 50%;
     animation: pulse 2s infinite;
+}
+
+.cart-pulse:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(13, 110, 253, 0.05);
+    border-radius: 50%;
+    animation: pulse 2s infinite 1s;
 }
 
 @keyframes pulse {
     0% {
-        transform: translate(-50%, -50%) scale(0.8);
+        transform: scale(0.8);
         opacity: 0.8;
     }
     50% {
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: scale(1.2);
         opacity: 0.4;
     }
     100% {
-        transform: translate(-50%, -50%) scale(0.8);
+        transform: scale(0.8);
         opacity: 0.8;
     }
 }
@@ -220,12 +295,67 @@ $cart_is_empty = empty($cart_items);
     font-size: 1.75rem;
     margin-bottom: 0.75rem;
     color: #333;
+    animation: slideDown 0.5s ease-out 0.3s both;
+    position: relative;
+    z-index: 2;
 }
 
 .empty-cart-text {
     color: #6c757d;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
+    animation: slideDown 0.5s ease-out 0.5s both;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Анимированная кнопка */
+.animated-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease-out 0.7s both;
+    z-index: 2;
+}
+
+.animated-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(13, 110, 253, 0.3);
+}
+
+.animated-button:active {
+    transform: translateY(-1px);
+}
+
+.animated-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    z-index: -1;
+    transition: all 0.5s ease;
+}
+
+.animated-button:hover::before {
+    width: 300px;
+    height: 300px;
+    opacity: 1;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Стили для списка товаров в корзине */
@@ -246,8 +376,26 @@ $cart_is_empty = empty($cart_items);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    animation: fadeIn 0.4s ease-out;
+    animation: fadeInItem 0.5s ease-out;
+    animation-fill-mode: both;
 }
+
+@keyframes fadeInItem {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Добавляем задержку для каждого элемента корзины */
+.cart-item:nth-child(1) { animation-delay: 0.1s; }
+.cart-item:nth-child(2) { animation-delay: 0.2s; }
+.cart-item:nth-child(3) { animation-delay: 0.3s; }
+.cart-item:nth-child(4) { animation-delay: 0.4s; }
+.cart-item:nth-child(5) { animation-delay: 0.5s; }
+.cart-item:nth-child(6) { animation-delay: 0.6s; }
+.cart-item:nth-child(7) { animation-delay: 0.7s; }
+.cart-item:nth-child(8) { animation-delay: 0.8s; }
+.cart-item:nth-child(9) { animation-delay: 0.9s; }
+.cart-item:nth-child(10) { animation-delay: 1s; }
 
 .cart-item:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
@@ -263,12 +411,23 @@ $cart_is_empty = empty($cart_items);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .cart-item-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    transition: all 0.5s ease;
+}
+
+.cart-item:hover .cart-item-image {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cart-item:hover .cart-item-image img {
+    transform: scale(1.1);
 }
 
 .cart-item-details {
@@ -413,11 +572,35 @@ $cart_is_empty = empty($cart_items);
     overflow: hidden;
     position: sticky;
     top: 1rem;
+    animation: fadeInRight 0.8s ease-out;
+    transform-origin: right center;
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .cart-summary-header {
     padding: 1.25rem;
     border-bottom: 1px solid #f1f1f1;
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-summary-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4e73df, #6f42c1);
+    animation: lineGrow 2s ease-out forwards;
+}
+
+@keyframes lineGrow {
+    to { width: 100%; }
 }
 
 .cart-summary-header h5 {
@@ -435,12 +618,48 @@ $cart_is_empty = empty($cart_items);
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    animation: fadeIn 0.5s ease-out;
+    animation-fill-mode: both;
 }
+
+.cart-summary-row:nth-child(1) { animation-delay: 0.3s; }
+.cart-summary-row:nth-child(2) { animation-delay: 0.5s; }
 
 .cart-summary-row.total-row {
     margin-bottom: 1.5rem;
     padding-top: 1rem;
     border-top: 1px solid #f1f1f1;
+    animation-delay: 0.7s;
+}
+
+#checkout-button {
+    animation: fadeIn 0.5s ease-out 0.9s both;
+    position: relative;
+    overflow: hidden;
+}
+
+#checkout-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    animation: shineEffect 3s infinite;
+}
+
+@keyframes shineEffect {
+    0% { transform: translateX(-100%) rotate(30deg); }
+    20%, 100% { transform: translateX(100%) rotate(30deg); }
+}
+
+/* Остальные стили остаются без изменений */
+.row-loader {
+    position: relative;
+    z-index: 2;
+    margin-left: 10px;
 }
 
 /* Адаптивность для мобильных устройств */
@@ -493,6 +712,52 @@ $cart_is_empty = empty($cart_items);
     .quantity-value {
         width: 28px;
     }
+    
+    /* Адаптивные анимации для мобильных устройств */
+    .empty-cart-animation {
+        transform: scale(0.9);
+    }
+    
+    .cart-summary {
+        animation: fadeIn 0.8s ease-out;
+        transform-origin: center;
+    }
+    
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.cart-item.loading .cart-item-price,
+.cart-item.loading .cart-item-subtotal,
+.cart-item.loading .quantity-value {
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-item.loading .cart-item-price::before,
+.cart-item.loading .cart-item-subtotal::before,
+.cart-item.loading .quantity-value::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    z-index: 2;
 }
 
 /* Анимации и интерактивные эффекты */
@@ -538,7 +803,8 @@ $cart_is_empty = empty($cart_items);
 
 /* Эффект при наведении на кнопку оформления заказа */
 #checkout-button:hover {
-    animation: pulse 1s infinite;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(13, 110, 253, 0.3);
 }
 
 /* Плавный переход для всех элементов */
@@ -564,12 +830,6 @@ $cart_is_empty = empty($cart_items);
     pointer-events: none;
 }
 
-.row-loader {
-    position: relative;
-    z-index: 2;
-    margin-left: 10px;
-}
-
 @keyframes shimmer {
     0% {
         background-position: -200% 0;
@@ -577,28 +837,6 @@ $cart_is_empty = empty($cart_items);
     100% {
         background-position: 200% 0;
     }
-}
-
-.cart-item.loading .cart-item-price,
-.cart-item.loading .cart-item-subtotal,
-.cart-item.loading .quantity-value {
-    position: relative;
-    overflow: hidden;
-}
-
-.cart-item.loading .cart-item-price::before,
-.cart-item.loading .cart-item-subtotal::before,
-.cart-item.loading .quantity-value::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    z-index: 2;
 }
 </style>
 
@@ -992,7 +1230,105 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatPrice(price) {
         return new Intl.NumberFormat('ru-RU').format(price);
     }
+
+    // Добавляем анимацию для иконки корзины
+    const cartIcon = document.querySelector('.cart-icon i');
+    if (cartIcon) {
+        // Начальная анимация
+        cartIcon.style.transform = 'scale(0)';
+        setTimeout(() => {
+            cartIcon.style.transition = 'transform 0.5s ease-out';
+            cartIcon.style.transform = 'scale(1)';
+        }, 300);
+        
+        // Периодическая анимация
+        setInterval(() => {
+            cartIcon.style.transition = 'transform 0.3s ease';
+            cartIcon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cartIcon.style.transform = 'scale(1)';
+            }, 300);
+        }, 3000);
+    }
+
+    // Новые анимации для элементов корзины
+    animateCartItems();
+    animateQuantityButtons();
+    addHoverEffects();
 });
+
+// Функция для анимации элементов корзины
+function animateCartItems() {
+    // Анимация для кнопки оформления заказа
+    const checkoutButton = document.getElementById('checkout-button');
+    if (checkoutButton) {
+        checkoutButton.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.boxShadow = '0 8px 15px rgba(13, 110, 253, 0.3)';
+        });
+        
+        checkoutButton.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+    }
+    
+    // Анимация для элементов корзины при прокрутке
+    const cartItems = document.querySelectorAll('.cart-item');
+    if (cartItems.length > 0) {
+        // Создаем наблюдатель за видимостью элементов
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Наблюдаем за каждым элементом корзины
+        cartItems.forEach(item => {
+            observer.observe(item);
+        });
+    }
+}
+
+// Функция для анимации кнопок изменения количества
+function animateQuantityButtons() {
+    const quantityBtns = document.querySelectorAll('.quantity-btn');
+    
+    quantityBtns.forEach(btn => {
+        btn.addEventListener('mousedown', function() {
+            this.classList.add('btn-active');
+        });
+        
+        btn.addEventListener('mouseup', function() {
+            setTimeout(() => {
+                this.classList.remove('btn-active');
+            }, 150);
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.classList.remove('btn-active');
+        });
+    });
+}
+
+// Функция для добавления эффектов при наведении
+function addHoverEffects() {
+    // Эффект при наведении на кнопку удаления
+    const removeBtns = document.querySelectorAll('.btn-remove');
+    removeBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'rotate(90deg)';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
+}
 </script>
 
 <?php include_once '../includes/footer/footer.php'; ?> 

@@ -13,6 +13,65 @@
     background-color: transparent !important;
 }
 
+/* НОВЫЕ СТИЛИ ДЛЯ БЛОКОВ КАТЕГОРИЙ И ФИЛЬТРОВ */
+/* Основные блоки */
+.catalog-sidebar {
+    position: sticky !important;
+    top: 20px !important;
+}
+
+.sidebar-widget {
+    background-color: white !important;
+    border: none !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    margin-bottom: 25px !important;
+}
+
+.categories-widget, .filters-widget {
+    background-color: white !important;
+    border: none !important;
+}
+
+/* Заголовки блоков */
+.card-header, .category-header, .filter-header {
+    background: #4e73df !important; /* Сплошной синий цвет */
+    background: linear-gradient(135deg, #4e73df 0%, #3a5ccc 100%) !important; /* Градиент */
+    color: white !important;
+    border: none !important;
+    padding: 15px 20px !important;
+    font-weight: 600 !important;
+    border-radius: 0 !important;
+}
+
+.widget-title {
+    color: white !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+/* Тело карточек */
+.sidebar-widget .card-body {
+    background-color: white !important;
+    padding: 15px !important;
+    border: none !important;
+}
+
+/* Стили для списка категорий */
+.categories-list {
+    background-color: white !important;
+    border: none !important;
+}
+
+.list-group-item {
+    background-color: white !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-color: #eaecf4 !important;
+    padding: 12px 20px !important;
+}
+
 /* Восстановление стандартного стиля для стрелок */
 .subcategory-toggle {
     cursor: pointer;

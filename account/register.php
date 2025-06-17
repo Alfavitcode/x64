@@ -37,6 +37,9 @@ if (isset($_GET['error'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Регистрация</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -53,7 +56,7 @@ if (isset($_GET['error'])) {
         }
         
         body {
-            background: var(--background-color);
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -62,6 +65,20 @@ if (isset($_GET['error'])) {
             padding: 30px 0;
             color: var(--text-color);
             position: relative; /* Добавлено для корректного позиционирования */
+        }
+        
+        /* Добавляем специальные стили для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                background: #ffffff !important;
+            }
+            
+            /* Удаляем любые фоновые изображения */
+            body:before, body:after,
+            .background-slider, .background-panorama,
+            .background-darken, .background-overlay {
+                display: none !important;
+            }
         }
         
         .register-container {
@@ -76,9 +93,9 @@ if (isset($_GET['error'])) {
             border: none;
             box-shadow: var(--card-shadow);
             overflow: hidden;
-            transition: all var(--transition-speed);
-            backdrop-filter: blur(5px); /* Добавлен эффект размытия */
-            background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform, opacity;
+            background-color: #ffffff;
         }
         
         .card:hover {
@@ -112,7 +129,8 @@ if (isset($_GET['error'])) {
             border: 1px solid #e0e0e0;
             background-color: rgba(250, 250, 250, 0.95); /* Немного прозрачный фон для полей ввода */
             box-shadow: var(--input-shadow);
-            transition: all var(--transition-speed);
+            transition: all 0.3s ease;
+            will-change: transform, box-shadow;
         }
         
         .form-control:focus {
@@ -139,6 +157,8 @@ if (isset($_GET['error'])) {
             color: #adb5bd;
             z-index: 10;
             font-size: 16px;
+            transition: all 0.3s ease;
+            will-change: transform, color;
         }
         
         /* Больше не нужно, т.к. отступ задан для самого input */
@@ -152,7 +172,8 @@ if (isset($_GET['error'])) {
             border-radius: 10px;
             padding: 12px 25px;
             font-weight: 600;
-            transition: all var(--transition-speed);
+            transition: all 0.3s ease;
+            will-change: transform, background-color;
             box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
         }
         
@@ -235,7 +256,7 @@ if (isset($_GET['error'])) {
             width: 25%;
             margin-right: 2px;
             background-color: #e0e0e0;
-            transition: all var(--transition-speed);
+            transition: background-color 0.5s ease, width 0.5s ease;
         }
         
         .strength-weak .segment-1 {
@@ -284,9 +305,95 @@ if (isset($_GET['error'])) {
             color: white;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
+        
+        /* Добавляем стиль для кнопки возврата на главную */
+        .back-to-home {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            padding: 10px 15px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(77, 97, 252, 0.3);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-to-home:hover {
+            background: #3a4cd1; /* Более темный оттенок синего */
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(77, 97, 252, 0.4);
+            color: white;
+        }
+        
+        .back-to-home i {
+            margin-right: 8px;
+        }
+        
+        /* Стили для анимаций */
+        .form-control {
+            transition: all 0.3s ease;
+            will-change: transform, box-shadow;
+        }
+        
+        .input-icon {
+            transition: all 0.3s ease;
+            will-change: transform, color;
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+            will-change: transform, background-color;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Эффект пульсации для кнопки отправки формы */
+        @keyframes pulse-shadow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(78, 115, 223, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(78, 115, 223, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(78, 115, 223, 0);
+            }
+        }
+        
+        .btn-primary[type="submit"] {
+            animation: pulse-shadow 2s infinite;
+        }
+        
+        /* Индикатор силы пароля с анимацией */
+        .strength-segment {
+            transition: background-color 0.5s ease, width 0.5s ease;
+        }
+        
+        /* Добавляем специальные стили для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                background: #ffffff !important;
+            }
+            
+            /* Удаляем любые фоновые изображения */
+            body:before, body:after,
+            .background-slider, .background-panorama,
+            .background-darken, .background-overlay {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <a href="../index.php" class="back-to-home">
+        <i class="fas fa-arrow-left"></i> Вернуться на главную
+    </a>
     <div class="register-container">
         <div class="card">
             <div class="card-header">
@@ -367,7 +474,8 @@ if (isset($_GET['error'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <script src="../js/animations/background-slider.js"></script>
+    <script src="../js/libs/particles.min.js"></script>
+    <script src="../js/animations/auth-animations.js"></script>
     <script>
         $(document).ready(function() {
             // Маска для телефона

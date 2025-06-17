@@ -1,0 +1,56 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон карты -->
+  <rect width="100%" height="100%" fill="#e9ecef"/>
+  
+  <!-- Паттерн линий для дорог -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 0 20 L 40 20" stroke="#d6d9dc" stroke-width="2"/>
+      <path d="M 20 0 L 20 40" stroke="#d6d9dc" stroke-width="2"/>
+    </pattern>
+    
+    <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#aeb3b8"/>
+    </pattern>
+  </defs>
+  
+  <!-- Заполняем фон паттерном -->
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+  <rect width="100%" height="100%" fill="url(#dots)"/>
+  
+  <!-- Добавляем основные дороги -->
+  <path d="M 0 300 L 800 300" stroke="#c4c8cc" stroke-width="20"/>
+  <path d="M 400 0 L 400 600" stroke="#c4c8cc" stroke-width="20"/>
+  
+  <!-- Добавляем более мелкие дороги -->
+  <path d="M 0 150 L 800 150" stroke="#d6d9dc" stroke-width="10"/>
+  <path d="M 0 450 L 800 450" stroke="#d6d9dc" stroke-width="10"/>
+  <path d="M 200 0 L 200 600" stroke="#d6d9dc" stroke-width="10"/>
+  <path d="M 600 0 L 600 600" stroke="#d6d9dc" stroke-width="10"/>
+  
+  <!-- Добавляем дополнительные мелкие дороги -->
+  <path d="M 100 0 L 100 600" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 300 0 L 300 600" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 500 0 L 500 600" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 700 0 L 700 600" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 0 75 L 800 75" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 0 225 L 800 225" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 0 375 L 800 375" stroke="#d6d9dc" stroke-width="5"/>
+  <path d="M 0 525 L 800 525" stroke="#d6d9dc" stroke-width="5"/>
+  
+  <!-- Добавляем "парки" (зеленые области) -->
+  <rect x="50" y="50" width="100" height="100" rx="20" ry="20" fill="#c6e5b1" stroke="#a9d68d" stroke-width="2"/>
+  <rect x="600" y="100" width="150" height="100" rx="20" ry="20" fill="#c6e5b1" stroke="#a9d68d" stroke-width="2"/>
+  <rect x="150" y="400" width="100" height="150" rx="20" ry="20" fill="#c6e5b1" stroke="#a9d68d" stroke-width="2"/>
+  <rect x="650" y="450" width="100" height="100" rx="20" ry="20" fill="#c6e5b1" stroke="#a9d68d" stroke-width="2"/>
+  
+  <!-- Добавляем "реку" -->
+  <path d="M 0 200 C 150 250, 250 150, 400 200 C 550 250, 650 150, 800 200" 
+        stroke="#b8d9e9" stroke-width="30" fill="none"/>
+  
+  <!-- Накладываем легкий градиент для эффекта глубины -->
+  <rect width="100%" height="100%" fill="url(#grid)" opacity="0.5"/>
+  
+  <!-- Добавляем точку для маркера (координаты центра) -->
+  <circle cx="400" cy="300" r="5" fill="#e52238" opacity="0.0"/>
+</svg> 

@@ -107,12 +107,325 @@ if ($user_id) {
 // Задаем заголовок страницы
 $page_title = 'Оформление заказа';
 
-// Подключаем дополнительные стили
+// Подключаем дополнительные стили и скрипты
 $additional_styles = '<link rel="stylesheet" href="/css/checkout.css">';
+$additional_scripts = '
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+';
 
 // Подключаем шапку сайта
 include_once 'includes/header/header.php';
 ?>
+
+<!-- Дополнительные стили для анимаций и улучшенного дизайна -->
+<style>
+    /* Улучшенные стили для карточек */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s, box-shadow 0.4s;
+        overflow: hidden;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(77, 97, 252, 0.18);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #f1f5ff 0%, #e7eeff 100%);
+        border-bottom: none;
+        padding: 20px;
+    }
+    
+    .card-header h5 {
+        margin: 0;
+        color: #2e3a59;
+        font-weight: 700;
+        font-size: 18px;
+    }
+    
+    .card-body {
+        padding: 25px;
+    }
+    
+    /* Улучшенные стили для полей ввода */
+    .form-floating {
+        margin-bottom: 20px;
+    }
+    
+    .form-control, .form-select {
+        height: auto;
+        padding: 15px 20px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(77, 97, 252, 0.15);
+    }
+    
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+    
+    /* Fix for floating label white square */
+    .form-floating {
+        position: relative;
+    }
+    
+    .form-floating > label {
+        padding: 1rem 1.25rem;
+        opacity: 0.65;
+        z-index: 1;
+    }
+    
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label,
+    .form-floating > .form-select ~ label {
+        opacity: 0.8;
+        transform: scale(0.85) translateY(-1.75rem) translateX(0.15rem);
+        background-color: transparent;
+        padding: 0 5px;
+        height: auto;
+        color: var(--primary-color);
+        font-weight: 600;
+        z-index: 1;
+    }
+    
+    .form-floating > label::after {
+        content: "";
+        position: absolute;
+        background-color: transparent;
+        height: 100%;
+        width: 100%;
+        left: 0;
+        top: 0;
+        z-index: -1;
+    }
+    
+    /* Улучшенные стили для радио-кнопок */
+    .form-check {
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        border: 2px solid transparent;
+    }
+    
+    .form-check:hover {
+        background-color: #f1f5ff;
+    }
+    
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-top: 0.25em;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .form-check-input:checked ~ .form-check-label {
+        color: var(--primary-color);
+    }
+    
+    .form-check-input:checked ~ .form-check-label strong {
+        color: var(--primary-color);
+    }
+    
+    .form-check-input:checked + .form-check-label {
+        font-weight: 500;
+    }
+    
+    .form-check-input:checked ~ .form-check {
+        border-color: var(--primary-color);
+        background-color: rgba(77, 97, 252, 0.05);
+    }
+    
+    /* Стили для иконок в радио-кнопках */
+    .form-check .fas, .form-check .fab {
+        font-size: 18px;
+    }
+    
+    /* Анимированная кнопка отправки */
+    .btn-primary {
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #3a4cd1 100%);
+        border: none;
+        color: white;
+        box-shadow: 0 6px 15px rgba(77, 97, 252, 0.25);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(77, 97, 252, 0.3);
+    }
+    
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+        transform: skewX(-25deg);
+        transition: all 0.6s ease;
+    }
+    
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+    
+    /* Улучшенные стили для сводки заказа */
+    .order-summary {
+        position: sticky;
+        top: 80px;
+    }
+    
+    .order-summary-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+    
+    .order-summary-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .item-price-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: rgba(77, 97, 252, 0.1);
+        color: var(--primary-color);
+        border-radius: 30px;
+        font-weight: 600;
+    }
+    
+    .delivery-price-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: rgba(77, 97, 252, 0.1);
+        color: var(--primary-color);
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .delivery-price-badge.free {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    .total-price-wrapper {
+        background: linear-gradient(135deg, #f1f5ff 0%, #e7eeff 100%);
+        padding: 8px 15px;
+        border-radius: 30px;
+    }
+    
+    .total-price {
+        font-weight: 700;
+        font-size: 20px;
+        color: var(--primary-color);
+    }
+    
+    /* Анимации для элементов страницы */
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    
+    .animate-fade-right {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    
+    .animate-fade-left {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    
+    .animate-scale {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    
+    /* Анимация для обновления цены */
+    @keyframes priceUpdate {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    .price-update {
+        animation: priceUpdate 0.5s ease;
+        color: var(--primary-color);
+    }
+    
+    /* Анимация пульсации */
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(77, 97, 252, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(77, 97, 252, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(77, 97, 252, 0); }
+    }
+    
+    .pulse-animation {
+        animation: pulse 1.5s infinite;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 991.98px) {
+        .order-summary {
+            position: relative;
+            top: 0;
+            margin-top: 30px;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .form-check {
+            padding: 10px;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        
+        .product-info {
+            flex-direction: column;
+        }
+        
+        .order-summary-img {
+            margin-bottom: 10px;
+        }
+    }
+</style>
 
 <main class="main-content">
     <div class="container mt-4">
@@ -389,7 +702,7 @@ include_once 'includes/header/header.php';
                                 <i class="fas fa-check-circle me-2"></i>Оформить заказ
                             </button>
                             <div class="form-text text-center mt-2">
-                                Нажимая на кнопку, вы даете согласие на обработку персональных данных и соглашаетесь с <a href="/privacy.php">политикой конфиденциальности</a>
+                                Нажимая на кнопку, вы даете согласие на обработку персональных данных и соглашаетесь с <a href="/legal/privacy-policy.php">политикой конфиденциальности</a>
                             </div>
                         </div>
                     </div>
@@ -610,32 +923,161 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-/* Анимация пульсации для уведомления */
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
-}
-
-.pulse-animation {
-    animation: pulse 1.5s infinite;
-}
-
-/* Стили для alert-success */
-.alert-success {
-    border-left: 5px solid #198754;
-}
-
-.alert-success .fa-check-circle {
-    color: #198754;
-}
-
-/* Предотвращаем скрытие уведомления при прокрутке */
-#successAlert {
-    position: relative;
-    z-index: 100;
-}
-</style>
+<!-- JavaScript для анимаций -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // Анимация заголовка страницы
+    gsap.from('h1.mb-4', {
+        opacity: 0,
+        y: -30,
+        duration: 0.8,
+        ease: 'power2.out'
+    });
+    
+    // Анимация карточек
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        gsap.from(card, {
+            opacity: 0,
+            y: 50,
+            duration: 0.8,
+            delay: 0.1 * (index % 4),
+            ease: 'power2.out',
+            scrollTrigger: {
+                trigger: card,
+                start: 'top 90%',
+                toggleActions: 'play none none none'
+            }
+        });
+    });
+    
+    // Анимация полей формы
+    const formFields = document.querySelectorAll('.form-floating');
+    formFields.forEach((field, index) => {
+        gsap.from(field, {
+            opacity: 0,
+            x: index % 2 === 0 ? -30 : 30,
+            duration: 0.6,
+            delay: 0.1 * index,
+            ease: 'power2.out',
+            scrollTrigger: {
+                trigger: field,
+                start: 'top 90%',
+                toggleActions: 'play none none none'
+            }
+        });
+    });
+    
+    // Анимация радио-кнопок
+    const formChecks = document.querySelectorAll('.form-check');
+    formChecks.forEach((check, index) => {
+        gsap.from(check, {
+            opacity: 0,
+            x: -30,
+            duration: 0.6,
+            delay: 0.1 * index,
+            ease: 'power2.out',
+            scrollTrigger: {
+                trigger: check,
+                start: 'top 90%',
+                toggleActions: 'play none none none'
+            }
+        });
+    });
+    
+    // Анимация элементов в сводке заказа
+    const orderItems = document.querySelectorAll('.list-group-item');
+    orderItems.forEach((item, index) => {
+        gsap.from(item, {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.6,
+            delay: 0.1 * index,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+                trigger: item,
+                start: 'top 90%',
+                toggleActions: 'play none none none'
+            }
+        });
+    });
+    
+    // Анимация кнопки отправки
+    gsap.from('.btn-primary', {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.8,
+        delay: 0.5,
+        ease: 'elastic.out(1, 0.5)',
+        scrollTrigger: {
+            trigger: '.btn-primary',
+            start: 'top 90%',
+            toggleActions: 'play none none none'
+        }
+    });
+    
+    // Эффект при наведении на элементы формы
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            gsap.to(this, {
+                scale: 1.02,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+        
+        input.addEventListener('blur', function() {
+            gsap.to(this, {
+                scale: 1,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+    });
+    
+    // Анимация при выборе способа оплаты или доставки
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const label = this.closest('.form-check');
+                gsap.to(label, {
+                    backgroundColor: 'rgba(77, 97, 252, 0.05)',
+                    borderColor: 'var(--primary-color)',
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+                
+                // Сбрасываем стили для других элементов той же группы
+                const name = this.getAttribute('name');
+                const otherRadios = document.querySelectorAll(`input[name="${name}"]:not(:checked)`);
+                otherRadios.forEach(other => {
+                    const otherLabel = other.closest('.form-check');
+                    gsap.to(otherLabel, {
+                        backgroundColor: '#f8f9fa',
+                        borderColor: 'transparent',
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            }
+        });
+    });
+    
+    // Применяем начальные стили для выбранных радио-кнопок
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    checkedRadios.forEach(radio => {
+        const label = radio.closest('.form-check');
+        gsap.set(label, {
+            backgroundColor: 'rgba(77, 97, 252, 0.05)',
+            borderColor: 'var(--primary-color)'
+        });
+    });
+});
+</script>
 
 <?php include_once 'includes/footer/footer.php'; ?> 

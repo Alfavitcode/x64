@@ -17,6 +17,37 @@ function initProductCards() {
     
     // Применяем дополнительные интерактивные эффекты к карточкам товаров
     document.querySelectorAll('.product-card').forEach(card => {
+        // Проверяем наличие атрибута data-category и добавляем его при необходимости
+        if (!card.hasAttribute('data-category')) {
+            console.warn('Карточка товара не имеет атрибута data-category. Определяем категорию по бейджам...');
+            
+            // Пытаемся определить категории по бейджам
+            const badges = card.querySelectorAll('.badge');
+            const categories = [];
+            
+            badges.forEach(badge => {
+                if (badge.classList.contains('badge-new')) {
+                    categories.push('new');
+                }
+                if (badge.classList.contains('badge-bestseller')) {
+                    categories.push('bestsellers');
+                }
+                if (badge.classList.contains('badge-sale')) {
+                    categories.push('sale');
+                }
+            });
+            
+            // Если удалось определить категории, добавляем атрибут
+            if (categories.length > 0) {
+                card.setAttribute('data-category', categories.join(' '));
+                console.log('Добавлен атрибут data-category:', categories.join(' '));
+            } else {
+                // Если не удалось определить категории, добавляем 'all'
+                card.setAttribute('data-category', 'all');
+                console.log('Не удалось определить категории, добавлен атрибут data-category: all');
+            }
+        }
+        
         // Добавляем обработчики для анимации при наведении
         card.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-3px)';
@@ -122,11 +153,16 @@ function initFilters() {
             var cardCategories = $card.attr('data-category') || '';
             console.log('Категории карточки:', cardCategories);
             
+            // Преобразуем категории в массив для более точной проверки
+            var categoriesArray = cardCategories.split(' ');
+            
             // Проверяем соответствие выбранной категории
-            if (selectedCategory === 'all' || cardCategories.indexOf(selectedCategory) !== -1) {
+            if (selectedCategory === 'all' || categoriesArray.includes(selectedCategory)) {
+                // Показываем товар с анимацией
                 $item.fadeIn(300);
                 console.log('Показываем товар');
             } else {
+                // Скрываем товар с анимацией
                 $item.fadeOut(300);
                 console.log('Скрываем товар');
             }

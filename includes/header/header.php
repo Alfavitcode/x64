@@ -54,6 +54,34 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Определение CSS переменных для всего сайта */
+        :root {
+            --primary-color: #4d61fc;
+            --primary-color-hover: #3a4cd1;
+            --secondary-color: #6c757d;
+            --primary-color-rgb: 77, 97, 252;
+            --secondary-color-rgb: 108, 117, 125;
+        }
+        
+        /* Стили для эффекта печати в логотипе */
+        .typing-effect {
+            position: relative;
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        .cursor {
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.2em;
+            animation: cursor-blink 1s infinite;
+        }
+        
+        @keyframes cursor-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
         /* Принудительные стили для мобильного поиска */
         html body .mobile-search .search-results {
             position: fixed !important;
@@ -103,6 +131,155 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                 min-width: 350px !important;
             }
         }
+
+        /* Встроенные стили для мобильного меню - для гарантированной работы */
+        .mobile-menu-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 9998 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .mobile-menu {
+            position: fixed !important;
+            top: 0 !important;
+            right: -350px !important;
+            width: 320px !important;
+            max-width: 90% !important;
+            height: 100% !important;
+            background-color: white !important;
+            z-index: 9999 !important;
+            transition: right 0.3s ease !important;
+            display: flex !important;
+            flex-direction: column !important;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .mobile-menu-overlay.active .mobile-menu {
+            right: 0 !important;
+        }
+        
+        .mobile-menu__header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 15px !important;
+            border-bottom: 1px solid #e9ecef !important;
+        }
+        
+        .mobile-menu-close {
+            background: none !important;
+            border: none !important;
+            color: #212529 !important;
+            font-size: 20px !important;
+            cursor: pointer !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .mobile-menu__body {
+            flex: 1 !important;
+            overflow-y: auto !important;
+            padding: 0 !important;
+        }
+        
+        .mobile-menu__nav {
+            padding: 20px 0 !important;
+        }
+        
+        .mobile-menu__list {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        .mobile-menu__list li {
+            margin-bottom: 5px !important;
+        }
+        
+        .mobile-menu__list a {
+            display: block !important;
+            padding: 15px 20px !important;
+            color: #212529 !important;
+            font-weight: 500 !important;
+            font-size: 16px !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+        }
+        
+        .mobile-menu__list a.active {
+            color: #4d61fc !important;
+            font-weight: 600 !important;
+        }
+        
+        .mobile-menu__actions {
+            padding: 15px 0 !important;
+            border-top: 1px solid #e9ecef !important;
+        }
+        
+        .mobile-action {
+            display: flex !important;
+            align-items: center !important;
+            padding: 15px 20px !important;
+            color: #212529 !important;
+            font-weight: 500 !important;
+            font-size: 16px !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+        }
+        
+        .mobile-action i {
+            margin-right: 15px !important;
+            width: 20px !important;
+            text-align: center !important;
+            font-size: 18px !important;
+        }
+        
+        .mobile-menu-toggle {
+            display: none !important;
+            background-color: transparent !important;
+            border: none !important;
+            cursor: pointer !important;
+            width: 40px !important;
+            height: 40px !important;
+            position: relative !important;
+            padding: 0 !important;
+        }
+        
+        .mobile-menu-toggle span {
+            display: block !important;
+            width: 24px !important;
+            height: 2px !important;
+            background-color: #212529 !important;
+            margin: 5px auto !important;
+            transition: all 0.3s !important;
+        }
+        
+        @media (max-width: 991px) {
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,6 +294,8 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <!-- GSAP для плавных анимаций -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <!-- Мобильное меню -->
+    <script src="/js/mobile-menu.js"></script>
 </head>
 <body>
     <header class="header<?php echo ($useStandardHeader || $currentFile !== 'index.php') ? ' standard-header' : ''; ?>">
@@ -151,7 +330,7 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                     <li class="nav-menu__item nav-menu__item--dropdown">
                         <a href="/catalog.php" class="nav-menu__link<?php echo $currentFile === 'catalog.php' ? ' active' : ''; ?>">Каталог</a>
                     </li>
-                    <li class="nav-menu__item"><a href="/contacts.php" class="nav-menu__link<?php echo $currentFile === 'contacts.php' ? ' active' : ''; ?>">Контакты</a></li>
+                    <li class="nav-menu__item"><a href="/contact.php" class="nav-menu__link<?php echo $currentFile === 'contact.php' ? ' active' : ''; ?>">Контакты</a></li>
                 </ul>
             </nav>
             
@@ -175,13 +354,49 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
                 </a>
             </div>
             
-            <button class="mobile-menu-toggle" type="button" data-bs-toggle="modal" data-bs-target="#mobileMenuModal" aria-controls="mobileMenuModal">
-                <span></span>
-                <span></span>
-                <span></span>
+            <button class="mobile-menu-toggle" type="button" id="openMobileMenu" onclick="document.getElementById('mobileMenuOverlay').style.opacity='1'; document.getElementById('mobileMenuOverlay').style.visibility='visible'; document.querySelector('.mobile-menu').style.transform='translateX(0)'; document.body.style.overflow='hidden'; return false;" style="background-color: transparent; border: none; cursor: pointer; width: 40px; height: 40px; position: relative; padding: 0; z-index: 100; outline: none;">
+                <span style="display: block; width: 24px; height: 2px; background-color: #212529; margin: 5px auto; transition: all 0.3s;"></span>
+                <span style="display: block; width: 24px; height: 2px; background-color: #212529; margin: 5px auto; transition: all 0.3s;"></span>
+                <span style="display: block; width: 24px; height: 2px; background-color: #212529; margin: 5px auto; transition: all 0.3s;"></span>
             </button>
         </div>
     </header>
+    
+    <!-- Мобильное меню (не модальное окно) -->
+    <div id="mobileMenuOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9998; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease;">
+        <div class="mobile-menu" style="position: fixed; top: 0; right: 0; width: 320px; max-width: 90%; height: 100%; background-color: white; z-index: 9999; transform: translateX(100%); transition: transform 0.3s ease; display: flex !important; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1);">
+            <div class="mobile-menu__header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <div class="logo logo-static">x64</div>
+                <button type="button" id="closeMobileMenu" onclick="document.getElementById('mobileMenuOverlay').style.opacity='0'; document.getElementById('mobileMenuOverlay').style.visibility='hidden'; document.querySelector('.mobile-menu').style.transform='translateX(100%)'; document.body.style.overflow=''; return false;" style="background: none; border: none; color: #212529; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 0;">
+                <nav style="padding: 20px 0;">
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li><a href="/" style="display: block; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none; <?php echo $currentFile === 'index.php' ? 'color: #4d61fc; font-weight: 600;' : ''; ?>">Главная</a></li>
+                        <li><a href="/catalog.php" style="display: block; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none; <?php echo $currentFile === 'catalog.php' ? 'color: #4d61fc; font-weight: 600;' : ''; ?>">Каталог</a></li>
+                        <li><a href="/contact.php" style="display: block; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none; <?php echo $currentFile === 'contact.php' ? 'color: #4d61fc; font-weight: 600;' : ''; ?>">Контакты</a></li>
+                        <?php if ($isAdmin): ?>
+                        <li><a href="/admin/" style="display: block; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none; <?php echo strpos($currentFile, 'admin') !== false ? 'color: #4d61fc; font-weight: 600;' : ''; ?>">Админ-панель</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+                <div style="padding: 15px 0; border-top: 1px solid #e9ecef;">
+                    <a href="<?php echo $accountUrl; ?>" style="display: flex; align-items: center; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none;">
+                        <i class="fas fa-user" style="margin-right: 15px; width: 20px; text-align: center; font-size: 18px;"></i> <?php echo $isLoggedIn ? 'Личный кабинет' : 'Войти'; ?>
+                    </a>
+                    <a href="/cart" style="display: flex; align-items: center; padding: 15px 20px; color: #212529; font-weight: 500; font-size: 16px; transition: all 0.3s ease; text-decoration: none;">
+                        <div style="position: relative; margin-right: 15px;">
+                            <i class="fas fa-shopping-cart" style="margin-right: 0; width: 20px; text-align: center; font-size: 18px;"></i>
+                            <span class="cart-count"><?php echo $cart_count; ?></span>
+                        </div>
+                        Корзина
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Полноэкранный поиск -->
     <div class="fullscreen-search" id="fullscreen-search">
@@ -201,45 +416,75 @@ $useStandardHeader = isset($useStandardHeader) ? $useStandardHeader : false;
         </div>
     </div>
     
-    <!-- Модальное окно для мобильного меню -->
-    <div class="modal fade" id="mobileMenuModal" tabindex="-1" aria-labelledby="mobileMenuModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-end mobile-menu-modal">
-            <div class="modal-content mobile-menu">
-                <div class="modal-header mobile-menu__header">
-                    <div class="logo logo-static">x64</div>
-                    <button type="button" class="btn-close text-reset" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <nav class="mobile-menu__nav">
-                        <ul class="mobile-menu__list">
-                            <li><a href="/"<?php echo $currentFile === 'index.php' ? ' class="active"' : ''; ?>>Главная</a></li>
-                            <li><a href="/catalog.php"<?php echo $currentFile === 'catalog.php' ? ' class="active"' : ''; ?>>Каталог</a></li>
-                            <li><a href="/contacts.php"<?php echo $currentFile === 'contacts.php' ? ' class="active"' : ''; ?>>Контакты</a></li>
-                            <?php if ($isAdmin): ?>
-                            <li><a href="/admin/"<?php echo strpos($currentFile, 'admin') !== false ? ' class="active"' : ''; ?>>Админ-панель</a></li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                    <div class="mobile-menu__actions">
-                        <a href="<?php echo $accountUrl; ?>" class="mobile-action">
-                            <i class="fas fa-user"></i> <?php echo $isLoggedIn ? 'Личный кабинет' : 'Войти'; ?>
-                        </a>
-                        <a href="/wishlist" class="mobile-action"><i class="fas fa-heart"></i> Избранное</a>
-                        <a href="/cart" class="mobile-action">
-                            <div class="cart-icon-container">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span class="cart-count"><?php echo $cart_count; ?></span>
-                            </div>
-                            Корзина
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <main class="main-content"> 
+
+<!-- Упрощенный скрипт для мобильного меню - управление стилями напрямую -->
+<script>
+// Глобальные функции для прямого управления мобильным меню
+function openMobileMenuDirect() {
+    var overlay = document.getElementById('mobileMenuOverlay');
+    var menu = document.querySelector('.mobile-menu');
     
+    if (overlay && menu) {
+        console.log('Открываем меню напрямую');
+        // Прямая установка стилей
+        overlay.style.visibility = 'visible';
+        overlay.style.opacity = '1';
+        menu.style.transform = 'translateX(0)';
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('Элементы не найдены', {overlay, menu});
+    }
+}
+
+function closeMobileMenuDirect() {
+    var overlay = document.getElementById('mobileMenuOverlay');
+    var menu = document.querySelector('.mobile-menu');
+    
+    if (overlay && menu) {
+        console.log('Закрываем меню напрямую');
+        // Прямая установка стилей
+        overlay.style.visibility = 'hidden';
+        overlay.style.opacity = '0';
+        menu.style.transform = 'translateX(100%)';
+        document.body.style.overflow = '';
+    }
+}
+
+// Инициализация после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем элементы
+    var openBtn = document.getElementById('openMobileMenu');
+    var closeBtn = document.getElementById('closeMobileMenu');
+    var overlay = document.getElementById('mobileMenuOverlay');
+    
+    console.log('Инициализация прямого меню:', {openBtn, closeBtn, overlay});
+    
+    // Установка обработчиков
+    if (openBtn) {
+        openBtn.onclick = function(e) {
+            e.preventDefault();
+            openMobileMenuDirect();
+        };
+    }
+    
+    if (closeBtn) {
+        closeBtn.onclick = function(e) {
+            e.preventDefault();
+            closeMobileMenuDirect();
+        };
+    }
+    
+    if (overlay) {
+        overlay.onclick = function(e) {
+            if (e.target === overlay) {
+                closeMobileMenuDirect();
+            }
+        };
+    }
+});
+</script>
+
 <!-- Добавляем скрипт для живого поиска -->
 <script>
 $(document).ready(function() {
@@ -291,25 +536,6 @@ $(document).ready(function() {
         $('.modal-backdrop').remove();
     }
     
-    // Мобильное меню - блокировка скролла
-    $('#mobileMenuModal').on('show.bs.modal', function () {
-        $('body').addClass('overflow-hidden');
-    });
-    
-    $('#mobileMenuModal').on('hidden.bs.modal', function () {
-        setTimeout(enableScroll, 10);
-    });
-    
-    // Принудительно снимаем скролл-лок при клике на кнопку закрытия
-    $('.btn-close').on('click', function() {
-        setTimeout(enableScroll, 300);
-    });
-    
-    // Добавляем обработчик на клик по фону (закрытие модалки)
-    $(document).on('click', '.modal-backdrop', function() {
-        setTimeout(enableScroll, 10);
-    });
-    
     // Проверяем и исправляем скролл при загрузке страницы
     setTimeout(enableScroll, 1000);
     
@@ -359,12 +585,7 @@ $(document).ready(function() {
                         `;
                     });
                     
-                    // Добавляем ссылку на все результаты поиска
-                    html += `
-                        <a href="/search.php?query=${encodeURIComponent(query)}" class="search-all-results">
-                            Показать все результаты <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>`;
+                    html += `</div>`;
                     
                     searchResults.html(html).show();
                 } else {
@@ -425,12 +646,7 @@ $(document).ready(function() {
                         `;
                     });
                     
-                    // Добавляем ссылку на все результаты поиска
-                    html += `
-                        <a href="/search.php?query=${encodeURIComponent(query)}" class="fullscreen-search-all-results">
-                            Показать все результаты <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>`;
+                    html += `</div>`;
                     
                     fullscreenSearchResults.html(html).show();
                 } else {
@@ -473,3 +689,62 @@ $(document).ready(function() {
     });
 });
 </script> 
+
+<!-- Функция для анимации печати логотипа -->
+<script>
+function animateLogo() {
+    const logoElement = document.querySelector('.typing-effect');
+    const originalText = logoElement.getAttribute('data-text');
+    let isDeleting = false;
+    let charIndex = 0;
+    
+    function updateLogo() {
+        // Получаем текущий текст в зависимости от индекса
+        let currentText = originalText.substring(0, charIndex);
+        
+        // Добавляем курсор после текущего текста
+        logoElement.innerHTML = currentText + '<span class="cursor">|</span>';
+        
+        if (!isDeleting && charIndex <= originalText.length) {
+            // Добавляем символы
+            charIndex++;
+            
+            // Когда весь текст напечатан, подождать 1 секунду и начать удаление
+            if (charIndex > originalText.length) {
+                isDeleting = true;
+                setTimeout(updateLogo, 1000); // Ждем 1 секунду перед началом удаления
+                return;
+            }
+            
+            // Добавляем случайную задержку для эффекта реального печатания
+            const typingSpeed = Math.floor(Math.random() * 150) + 350; // 350-500ms
+            setTimeout(updateLogo, typingSpeed);
+        } else if (isDeleting && charIndex >= 0) {
+            // Удаляем символы
+            charIndex--;
+            
+            // Когда весь текст удален, начать заново
+            if (charIndex < 0) {
+                isDeleting = false;
+                charIndex = 0;
+                setTimeout(updateLogo, 500); // Небольшая пауза перед новым циклом
+                return;
+            }
+            
+            // Скорость удаления немного быстрее печатания
+            const deletingSpeed = Math.floor(Math.random() * 100) + 350; // 350-450ms
+            setTimeout(updateLogo, deletingSpeed);
+        }
+    }
+    
+    // Запускаем анимацию
+    updateLogo();
+}
+
+// Запуск анимации после загрузки страницы
+document.addEventListener('DOMContentLoaded', function() {
+    animateLogo();
+});
+</script> 
+</body>
+</html> 

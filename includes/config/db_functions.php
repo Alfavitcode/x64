@@ -262,7 +262,7 @@ function registerUser($fullname, $email, $phone, $login, $password, $role = 'use
 function getUserById($user_id) {
     global $conn;
     
-    $sql = "SELECT id, fullname, email, phone, login, role FROM users WHERE id = " . (int)$user_id;
+    $sql = "SELECT id, fullname, email, phone, login, password, role FROM users WHERE id = " . (int)$user_id;
     $result = mysqli_query($conn, $sql);
     
     if (mysqli_num_rows($result) > 0) {
@@ -597,74 +597,181 @@ function getColorCodes() {
 function addCategory($name, $description, $image, $parent_id = null) {
     global $conn;
     
-    $sql = "INSERT INTO categories (name, description, image, parent_id, created_at) VALUES (
-        '" . mysqli_real_escape_string($conn, $name) . "',
-        '" . mysqli_real_escape_string($conn, $description) . "',
-        '" . mysqli_real_escape_string($conn, $image) . "',
-        " . ($parent_id ? (int)$parent_id : "NULL") . ",
-        NOW()
-    )";
-    
-    if (mysqli_query($conn, $sql)) {
-        return [
-            'success' => true,
-            'category_id' => mysqli_insert_id($conn),
-            'message' => 'Категория успешно добавлена'
-        ];
-    } else {
+    try {
+        // Проверяем, существует ли категория с таким именем
+        $check_sql = "SELECT id FROM categories WHERE name = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("s", $name);
+        $check_stmt->execute();
+        $result = $check_stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            return [
+                'success' => false,
+                'message' => 'Категория с таким названием уже существует'
+            ];
+        }
+        
+        // Если указан parent_id, проверяем его существование
+        if ($parent_id) {
+            $check_parent_sql = "SELECT id FROM categories WHERE id = ?";
+            $check_parent_stmt = $conn->prepare($check_parent_sql);
+            $check_parent_stmt->bind_param("i", $parent_id);
+            $check_parent_stmt->execute();
+            if ($check_parent_stmt->get_result()->num_rows === 0) {
+                return [
+                    'success' => false,
+                    'message' => 'Родительская категория не существует'
+                ];
+            }
+        }
+        
+        // Добавляем новую категорию
+        $sql = "INSERT INTO categories (name, description, image, parent_id) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssi", $name, $description, $image, $parent_id);
+        
+        if ($stmt->execute()) {
+            return [
+                'success' => true,
+                'message' => 'Категория успешно добавлена',
+                'id' => $stmt->insert_id
+            ];
+        } else {
+            throw new Exception($stmt->error);
+        }
+    } catch (Exception $e) {
         return [
             'success' => false,
-            'message' => 'Ошибка при добавлении категории: ' . mysqli_error($conn)
+            'message' => 'Ошибка при добавлении категории: ' . $e->getMessage()
         ];
     }
 }
 
 /**
- * Обновление информации о категории
- * 
- * @param int $id ID категории
- * @param array $data Данные категории для обновления
- * @return array Массив с результатом обновления
+ * Обновление категории
  */
 function updateCategory($id, $data) {
     global $conn;
     
-    $id = (int)$id;
-    $updates = [];
-    
-    // Формируем строку обновления для каждого поля
-    foreach ($data as $field => $value) {
-        if ($field === 'parent_id') {
-            // Числовое поле или NULL
-            $updates[] = "`$field` = " . ($value ? (int)$value : "NULL");
-        } else {
-            // Строковые поля
-            $updates[] = "`$field` = '" . mysqli_real_escape_string($conn, $value) . "'";
+    try {
+        // Проверяем существование категории с таким же именем, исключая текущую
+        $check_sql = "SELECT id FROM categories WHERE name = ? AND id != ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("si", $data['name'], $id);
+        $check_stmt->execute();
+        $result = $check_stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            return [
+                'success' => false,
+                'message' => 'Категория с таким названием уже существует'
+            ];
         }
-    }
-    
-    // Если нет полей для обновления
-    if (empty($updates)) {
+        
+        // Если указан parent_id, проверяем его существование и валидность
+        if (!empty($data['parent_id'])) {
+            // Проверяем, не пытаемся ли мы установить категорию как родителя самой себе
+            if ($data['parent_id'] == $id) {
+                return [
+                    'success' => false,
+                    'message' => 'Категория не может быть родителем самой себе'
+                ];
+            }
+            
+            // Проверяем существование родительской категории
+            $check_parent_sql = "SELECT id FROM categories WHERE id = ?";
+            $check_parent_stmt = $conn->prepare($check_parent_sql);
+            $check_parent_stmt->bind_param("i", $data['parent_id']);
+            $check_parent_stmt->execute();
+            if ($check_parent_stmt->get_result()->num_rows === 0) {
+                return [
+                    'success' => false,
+                    'message' => 'Родительская категория не существует'
+                ];
+            }
+        }
+        
+        // Обновляем категорию
+        $sql = "UPDATE categories SET name = ?, description = ?, parent_id = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $parent_id = empty($data['parent_id']) ? null : $data['parent_id'];
+        $stmt->bind_param("ssii", $data['name'], $data['description'], $parent_id, $id);
+        
+        if ($stmt->execute()) {
+            return [
+                'success' => true,
+                'message' => 'Категория успешно обновлена'
+            ];
+        } else {
+            throw new Exception($stmt->error);
+        }
+    } catch (Exception $e) {
         return [
             'success' => false,
-            'message' => 'Нет данных для обновления'
-        ];
-    }
-    
-    $sql = "UPDATE categories SET " . implode(', ', $updates) . " WHERE id = $id";
-    
-    if (mysqli_query($conn, $sql)) {
-        return [
-            'success' => true,
-            'message' => 'Категория успешно обновлена'
-        ];
-    } else {
-        return [
-            'success' => false,
-            'message' => 'Ошибка при обновлении категории: ' . mysqli_error($conn)
+            'message' => 'Ошибка при обновлении категории: ' . $e->getMessage()
         ];
     }
 }
+
+/**
+ * Получение категории по ID
+ */
+function getCategoryById($id) {
+    global $conn;
+    
+    $sql = "SELECT c.*, pc.name as parent_name 
+            FROM categories c 
+            LEFT JOIN categories pc ON c.parent_id = pc.id 
+            WHERE c.id = ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_assoc();
+}
+
+/**
+ * Получение всех категорий
+ */
+function getAllCategories() {
+    global $conn;
+    
+    $sql = "SELECT c.*, pc.name as parent_name 
+            FROM categories c 
+            LEFT JOIN categories pc ON c.parent_id = pc.id 
+            ORDER BY c.parent_id IS NULL DESC, c.name ASC";
+    
+    $result = $conn->query($sql);
+    $categories = [];
+    
+    while ($row = $result->fetch_assoc()) {
+        $categories[] = $row;
+    }
+    
+    return $categories;
+}
+
+/**
+ * Получение основных категорий (без родителя)
+ */
+function getMainCategories() {
+    global $conn;
+    
+    $sql = "SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name ASC";
+    $result = $conn->query($sql);
+    $categories = [];
+    
+    while ($row = $result->fetch_assoc()) {
+        $categories[] = $row;
+    }
+    
+    return $categories;
+}
+
+
 
 /**
  * Удаление категории
@@ -702,25 +809,6 @@ function deleteCategory($id) {
             'message' => 'Ошибка при удалении категории: ' . mysqli_error($conn)
         ];
     }
-}
-
-/**
- * Получение информации о категории по ID
- * 
- * @param int $id ID категории
- * @return array|null Информация о категории или null, если категория не найдена
- */
-function getCategoryById($id) {
-    global $conn;
-    
-    $sql = "SELECT * FROM categories WHERE id = " . (int)$id;
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-    
-    return null;
 }
 
 /**
@@ -2148,92 +2236,47 @@ function getSubcategories($parent) {
 function getPopularSubcategories($category, $limit = 5) {
     global $conn;
     
-    // Сначала проверяем, существуют ли подкатегории для данной категории
-    $subcategories = getSubcategories($category);
-    
-    // Если подкатегорий нет, создаем стандартный набор
-    if (empty($subcategories)) {
-        if ($category == 'iPhone') {
-            // Создаем подкатегории для iPhone
-            addCategory('Чехлы для iPhone', 'Защитные чехлы для iPhone', '', getCategoryIdByName('iPhone'));
-            addCategory('Зарядные устройства для iPhone', 'Зарядные устройства для iPhone', '', getCategoryIdByName('iPhone'));
-            addCategory('Защитные стекла для iPhone', 'Защитные стекла для iPhone', '', getCategoryIdByName('iPhone'));
-            addCategory('Наушники Apple', 'Наушники для iPhone', '', getCategoryIdByName('iPhone'));
-            addCategory('Аксессуары для iPhone', 'Другие аксессуары для iPhone', '', getCategoryIdByName('iPhone'));
-        } elseif ($category == 'Android') {
-            // Создаем подкатегории для Android
-            addCategory('Чехлы для Android', 'Защитные чехлы для Android', '', getCategoryIdByName('Android'));
-            addCategory('Зарядные устройства для Android', 'Зарядные устройства для Android', '', getCategoryIdByName('Android'));
-            addCategory('Защитные стекла для Android', 'Защитные стекла для Android', '', getCategoryIdByName('Android'));
-            addCategory('Наушники Android', 'Наушники для Android', '', getCategoryIdByName('Android'));
-            addCategory('Аксессуары для Android', 'Другие аксессуары для Android', '', getCategoryIdByName('Android'));
-        }
-        
-        // Получаем подкатегории снова
-        $subcategories = getSubcategories($category);
+    // Получаем ID категории
+    $category_id = getCategoryIdByName($category);
+    if (!$category_id) {
+        return [];
     }
     
-    // Для каждой подкатегории считаем количество товаров
-    $result = [];
-    foreach ($subcategories as $subcategory) {
-        $sql = "SELECT COUNT(*) as count FROM product WHERE subcategory_id = " . $subcategory['id'];
-        $query_result = mysqli_query($conn, $sql);
-        
-        if ($query_result) {
-            $count = mysqli_fetch_assoc($query_result)['count'];
-        } else {
-            $count = 0;
-        }
-        
-        $result[] = [
-            'id' => $subcategory['id'],
-            'name' => $subcategory['name'],
-            'count' => $count
-        ];
-    }
-    
-    // Сортируем по количеству товаров
-    usort($result, function($a, $b) {
-        return $b['count'] - $a['count'];
-    });
-    
-    // Возвращаем ограниченное количество
-    return array_slice($result, 0, $limit);
+    // Получаем все подкатегории для данной категории
+    return getSubcategories($category_id);
 }
 
 /**
- * Получение ID категории по её имени
- * 
- * @param string $name Название категории
- * @return int|null ID категории или null, если категория не найдена
+ * Получение ID категории по имени
  */
 function getCategoryIdByName($name) {
     global $conn;
     
-    $sql = "SELECT id FROM categories WHERE name = '" . mysqli_real_escape_string($conn, $name) . "'";
-    $result = mysqli_query($conn, $sql);
+    $sql = "SELECT id FROM categories WHERE name = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
+    $result = $stmt->get_result();
     
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result)['id'];
+    if ($row = $result->fetch_assoc()) {
+        return $row['id'];
     }
     
     return null;
 }
 
 /**
- * Обновляет структуру таблицы product для поддержки подкатегорий
+ * Обновление таблицы товаров для поддержки подкатегорий
  */
 function updateProductTableForSubcategories() {
     global $conn;
     
-    // Проверяем, существует ли поле subcategory_id
-    $result = mysqli_query($conn, "SHOW COLUMNS FROM product LIKE 'subcategory_id'");
-    $exists = (mysqli_num_rows($result) > 0);
-    
-    // Если поля нет, добавляем его
-    if (!$exists) {
-        $sql = "ALTER TABLE product ADD COLUMN subcategory_id INT(11) NULL";
-        mysqli_query($conn, $sql);
+    // Проверяем, существует ли столбец subcategory_id
+    $result = $conn->query("SHOW COLUMNS FROM product LIKE 'subcategory_id'");
+    if ($result->num_rows === 0) {
+        // Добавляем столбец subcategory_id
+        $sql = "ALTER TABLE product ADD COLUMN subcategory_id INT NULL DEFAULT NULL";
+        $conn->query($sql);
     }
 }
 

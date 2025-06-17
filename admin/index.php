@@ -191,11 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     // Получаем данные из формы
     $name = $_POST['name'] ?? '';
     $description = $_POST['description'] ?? '';
+    $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
     
     // Если нет ошибок, добавляем категорию в базу данных
     if (empty($category_error)) {
-        // Передаем пустую строку вместо изображения
-        $result = addCategory($name, $description, '');
+        $result = addCategory($name, $description, '', $parent_id);
         
         if ($result['success']) {
             $category_added = true;
@@ -213,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_category'])) {
     $data = [
         'name' => $_POST['name'] ?? '',
         'description' => $_POST['description'] ?? '',
+        'parent_id' => !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null,
         'image' => ''  // Всегда устанавливаем пустую строку для изображения
     ];
     
@@ -272,17 +273,23 @@ include_once '../includes/header/header.php';
 <!-- Мета-тег для корректного отображения на мобильных устройствах -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<!-- Скрипт для обеспечения горизонтального скролла таблиц -->
+<script src="mobile-fix.js"></script>
+
 <!-- Инлайн-стили для мобильных устройств -->
 <style>
 @media (max-width: 767px) {
-    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
+    .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper, .table-responsive {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
     }
     
-    .product-table, .order-table {
+    .product-table, .order-table, .category-table, .user-table, .report-table, .table {
         min-width: 800px !important;
+        width: auto !important;
     }
     
     /* Принудительно отключаем стили, мешающие прокрутке */
@@ -293,12 +300,32 @@ include_once '../includes/header/header.php';
     #products .product-table {
         min-width: 800px !important;
     }
+    
+    /* Принудительно включаем скролл для всех таблиц */
+    #categories .category-table-wrapper,
+    #orders .order-table-wrapper,
+    #users .user-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    
+    #categories .category-table,
+    #orders .order-table,
+    #users .user-table {
+        min-width: 600px !important;
+        width: auto !important;
+    }
 }
 
 /* Стили для десктопа - принудительно отключаем горизонтальный скроллинг */
 @media (min-width: 768px) {
     .product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper {
-        overflow-x: hidden !important;
+        overflow-x: visible !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
     
     .product-table, .category-table, .order-table, .report-table, .user-table {
@@ -322,6 +349,42 @@ include_once '../includes/header/header.php';
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+    }
+}
+
+/* Мобильные стили для таблицы товаров */
+@media (max-width: 767px) {
+    #products .product-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    #products .product-table {
+        min-width: 800px !important;
+        width: 100% !important;
+        table-layout: auto !important;
+    }
+    
+    #products .product-table th,
+    #products .product-table td {
+        white-space: nowrap !important;
+    }
+}
+
+/* Десктопные стили для таблицы товаров */
+@media (min-width: 768px) {
+    #products .product-table-wrapper {
+        overflow-x: visible !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    #products .product-table {
+        min-width: auto !important;
+        width: 100% !important;
+        table-layout: fixed !important;
     }
 }
 </style>
@@ -361,6 +424,31 @@ include_once '../includes/header/header.php';
             for (var l = 0; l < productTables.length; l++) {
                 productTables[l].style.minWidth = '800px';
             }
+            
+            // Принудительно применяем стили для таблиц категорий, заказов и пользователей
+            var categoryWrappers = document.querySelectorAll('#categories .category-table-wrapper');
+            var orderWrappers = document.querySelectorAll('#orders .order-table-wrapper');
+            var userWrappers = document.querySelectorAll('#users .user-table-wrapper');
+            
+            function applyScrollToWrappers(wrappers) {
+                for (var m = 0; m < wrappers.length; m++) {
+                    wrappers[m].style.overflowX = 'auto';
+                    wrappers[m].style.webkitOverflowScrolling = 'touch';
+                    wrappers[m].style.maxWidth = '100%';
+                    wrappers[m].style.width = '100%';
+                    wrappers[m].style.display = 'block';
+                    
+                    var table = wrappers[m].querySelector('table');
+                    if (table) {
+                        table.style.minWidth = '600px';
+                        table.style.width = 'auto';
+                    }
+                }
+            }
+            
+            applyScrollToWrappers(categoryWrappers);
+            applyScrollToWrappers(orderWrappers);
+            applyScrollToWrappers(userWrappers);
         }
         
         // Применяем стили сразу
@@ -422,12 +510,6 @@ include_once '../includes/header/header.php';
                             <a href="index.php?tab=reports" class="tab-link" data-tab="reports">
                                 <i class="fas fa-chart-bar"></i>
                                 Отчеты
-                            </a>
-                        </li>
-                        <li class="profile-menu-item <?php echo $activeTab === 'settings' ? 'active' : ''; ?>">
-                            <a href="index.php?tab=settings" class="tab-link" data-tab="settings">
-                                <i class="fas fa-cog"></i>
-                                Настройки
                             </a>
                         </li>
                         <li class="profile-menu-item">
@@ -994,64 +1076,78 @@ include_once '../includes/header/header.php';
                                     <style>
                                         /* Специфичные стили только для таблицы товаров */
                                         #products .product-table {
-                                            border-collapse: separate !important;
-                                            border-spacing: 0 !important;
+                                            width: 100% !important;
+                                            min-width: auto !important;
+                                            max-width: 100% !important;
+                                            table-layout: fixed !important;
                                         }
                                         
-                                        /* Явное выравнивание заголовков */
                                         #products .product-table th {
-                                            padding: 10px 8px !important;
-                                            border-bottom: 2px solid #dee2e6 !important;
-                                            background-color: #f8f9fa !important;
-                                            position: relative !important;
-                                            overflow: visible !important;
+                                            padding: 0.5rem 0.5rem !important;
+                                            font-size: 0.9rem !important;
+                                            overflow: hidden !important;
                                             text-overflow: ellipsis !important;
+                                            white-space: nowrap !important;
                                         }
                                         
-                                        /* Специфичные ширины колонок */
-                                        #products .product-table th:nth-child(1) { width: 50px !important; }
-                                        #products .product-table th:nth-child(2) { width: 100px !important; }
-                                        #products .product-table th:nth-child(3) { width: 25% !important; min-width: 180px !important; }
-                                        #products .product-table th:nth-child(4) { width: 20% !important; min-width: 120px !important; }
-                                        #products .product-table th:nth-child(5) { width: 15% !important; min-width: 100px !important; }
-                                        #products .product-table th:nth-child(6) { width: 15% !important; min-width: 100px !important; }
-                                        #products .product-table th:nth-child(7) { width: 100px !important; }
-                                        
-                                        /* Отступы для ячеек */
                                         #products .product-table td {
-                                            padding: 8px !important;
-                                            vertical-align: middle !important;
+                                            padding: 0.5rem 0.5rem !important;
+                                            font-size: 0.9rem !important;
+                                            overflow: hidden !important;
+                                            text-overflow: ellipsis !important;
+                                            white-space: nowrap !important;
                                         }
                                         
-                                        /* Мобильные стили */
-                                        @media (max-width: 767px) {
-                                            #products .product-table {
-                                                min-width: 900px !important;
-                                            }
-                                            
-                                            #products .product-table th,
-                                            #products .product-table td {
-                                                white-space: nowrap !important;
-                                            }
-                                            
-                                            #products .product-table-wrapper {
-                                                overflow-x: auto !important;
-                                                -webkit-overflow-scrolling: touch !important;
-                                            }
+                                        #products .product-table th:nth-child(1) { /* ID */
+                                            width: 5% !important;
+                                            min-width: 40px !important;
+                                            max-width: 50px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(2) { /* Изображение */
+                                            width: 8% !important;
+                                            min-width: 60px !important;
+                                            max-width: 70px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(3) { /* Название */
+                                            width: 30% !important;
+                                            min-width: 150px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(4) { /* Категория */
+                                            width: 15% !important;
+                                            min-width: 100px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(5) { /* Цена */
+                                            width: 15% !important;
+                                            min-width: 80px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(6) { /* Наличие */
+                                            width: 12% !important;
+                                            min-width: 80px !important;
+                                        }
+                                        
+                                        #products .product-table th:nth-child(7) { /* Действия */
+                                            width: 15% !important;
+                                            min-width: 80px !important;
+                                            max-width: 100px !important;
                                         }
                                     </style>
                                     
-                                    <div class="table-responsive product-table-wrapper" style="overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; max-width: 100% !important;">
-                                        <table class="table table-hover product-table" style="min-width: 900px !important; width: 100% !important; table-layout: fixed !important;">
+                                    <div class="table-responsive product-table-wrapper">
+                                        <table class="table table-hover product-table">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th class="text-center" style="width: 40px !important; min-width: 40px !important; max-width: 40px !important;">ID</th>
-                                                    <th class="text-center" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important;">IMG</th>
-                                                    <th style="width: 180px !important; min-width: 180px !important; max-width: 180px !important; padding-left: 10px !important;">Название</th>
-                                                    <th style="width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding-left: 5px !important; padding-right: 5px !important;">Категория</th>
-                                                    <th style="width: 80px !important; min-width: 80px !important; max-width: 80px !important; padding-left: 5px !important; padding-right: 5px !important;">Цена</th>
-                                                    <th class="text-center" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important; padding-left: 5px !important; padding-right: 5px !important;">Наличие</th>
-                                                    <th class="text-center" style="width: 70px !important; min-width: 70px !important; max-width: 70px !important; text-align: center !important;">Действия</th>
+                                                    <th class="text-center">ID</th>
+                                                    <th class="text-center">IMG</th>
+                                                    <th>Название</th>
+                                                    <th>Категория</th>
+                                                    <th>Цена</th>
+                                                    <th class="text-center">Наличие</th>
+                                                    <th class="text-center">Действия</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1180,36 +1276,39 @@ include_once '../includes/header/header.php';
                                             </div>
                                         <?php endif; ?>
                                         
-                                        <form action="index.php?tab=categories" method="post" class="needs-validation" novalidate>
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                                        <div class="card-body p-4">
-                                                            <h5 class="card-title mb-4">Информация о категории</h5>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="name" class="form-label">Название категории *</label>
-                                                                <input type="text" class="form-control" id="name" name="name" required>
-                                                                <div class="invalid-feedback">Пожалуйста, введите название категории</div>
-                                                            </div>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="description" class="form-label">Описание</label>
-                                                                <textarea class="form-control" id="description" name="description" rows="5"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-4">
-                                                    <div class="d-grid gap-2">
-                                                        <button type="submit" name="add_category" class="btn btn-primary btn-lg rounded-pill">
-                                                            <i class="fas fa-plus me-2"></i>Добавить категорию
-                                                        </button>
-                                                        <a href="index.php?tab=categories" class="btn btn-outline-secondary rounded-pill">Отмена</a>
-                                                    </div>
+                                        <form action="index.php?tab=categories&action=add" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                            <div class="mb-4">
+                                                <label for="name" class="form-label">Название категории *</label>
+                                                <input type="text" class="form-control form-control-lg rounded-pill" id="name" name="name" required>
+                                                <div class="invalid-feedback">
+                                                    Пожалуйста, введите название категории
                                                 </div>
                                             </div>
+                                            
+                                            <div class="mb-4">
+                                                <label for="parent_category" class="form-label">Родительская категория</label>
+                                                <select class="form-select form-select-lg rounded-pill" id="parent_category" name="parent_id">
+                                                    <option value="">Нет (основная категория)</option>
+                                                    <?php
+                                                    // Получаем все основные категории
+                                                    $mainCategories = getMainCategories();
+                                                    
+                                                    // Выводим список категорий
+                                                    foreach ($mainCategories as $cat): ?>
+                                                        <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <div class="form-text">Оставьте пустым, чтобы создать основную категорию</div>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label for="description" class="form-label">Описание</label>
+                                                <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                                            </div>
+
+                                            <button type="submit" name="add_category" class="btn btn-primary btn-lg rounded-pill">
+                                                <i class="fas fa-plus-circle me-2"></i>Добавить категорию
+                                            </button>
                                         </form>
                                     </div>
                                 <?php elseif (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])): ?>
@@ -1271,35 +1370,45 @@ include_once '../includes/header/header.php';
                                         <form action="index.php?tab=categories&action=edit&id=<?php echo $category_id; ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                                             <input type="hidden" name="category_id" value="<?php echo $category_id; ?>">
                                             
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                                        <div class="card-body p-4">
-                                                            <h5 class="card-title mb-4">Информация о категории</h5>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="name" class="form-label">Название категории *</label>
-                                                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($category['name']); ?>" required>
-                                                                <div class="invalid-feedback">Пожалуйста, введите название категории</div>
-                                                            </div>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label for="description" class="form-label">Описание</label>
-                                                                <textarea class="form-control" id="description" name="description" rows="5"><?php echo htmlspecialchars($category['description'] ?? ''); ?></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-4">
-                                                    <div class="d-grid gap-2">
-                                                        <button type="submit" name="edit_category" class="btn btn-primary btn-lg rounded-pill">
-                                                            <i class="fas fa-save me-2"></i>Сохранить изменения
-                                                        </button>
-                                                        <a href="index.php?tab=categories" class="btn btn-outline-secondary rounded-pill">Отмена</a>
-                                                    </div>
+                                            <div class="mb-4">
+                                                <label for="name" class="form-label">Название категории *</label>
+                                                <input type="text" class="form-control form-control-lg rounded-pill" id="name" name="name" value="<?php echo htmlspecialchars($category['name']); ?>" required>
+                                                <div class="invalid-feedback">
+                                                    Пожалуйста, введите название категории
                                                 </div>
                                             </div>
+                                            
+                                            <div class="mb-4">
+                                                <label for="parent_category" class="form-label">Родительская категория</label>
+                                                <select class="form-select form-select-lg rounded-pill" id="parent_category" name="parent_id">
+                                                    <option value="">Нет (основная категория)</option>
+                                                    <?php
+                                                    // Получаем все основные категории
+                                                    $mainCategories = getMainCategories();
+                                                    
+                                                    // Фильтруем, чтобы исключить текущую категорию из списка
+                                                    $filteredCategories = array_filter($mainCategories, function($cat) use ($category_id) {
+                                                        return $cat['id'] != $category_id;
+                                                    });
+                                                    
+                                                    // Выводим список категорий
+                                                    foreach ($filteredCategories as $cat): 
+                                                        $selected = ($cat['id'] == $category['parent_id']) ? 'selected' : '';
+                                                    ?>
+                                                        <option value="<?php echo $cat['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($cat['name']); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <div class="form-text">Оставьте пустым, чтобы сделать основной категорией</div>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label for="description" class="form-label">Описание</label>
+                                                <textarea class="form-control" id="description" name="description" rows="5"><?php echo htmlspecialchars($category['description'] ?? ''); ?></textarea>
+                                            </div>
+
+                                            <button type="submit" name="edit_category" class="btn btn-primary btn-lg rounded-pill">
+                                                <i class="fas fa-save me-2"></i>Сохранить изменения
+                                            </button>
                                         </form>
                                     </div>
                                     <?php } ?>
@@ -2053,29 +2162,6 @@ include_once '../includes/header/header.php';
                         </div>
                     </div>
                     
-                    <!-- Вкладка: Настройки -->
-                    <div class="tab-pane <?php echo $activeTab === 'settings' ? 'active' : ''; ?>" id="settings">
-                        <div class="profile-main-card">
-                            <div class="profile-header">
-                                <h2 class="profile-name">Настройки сайта</h2>
-                                <p>Управление основными настройками сайта</p>
-                            </div>
-                            
-                            <div class="profile-body">
-                                <div class="alert alert-info rounded-4 mb-4">
-                                    <div class="d-flex">
-                                        <div class="me-3">
-                                            <i class="fas fa-info-circle fa-2x text-info"></i>
-                                        </div>
-                                        <div>
-                                            <h5 class="alert-heading">Функционал в разработке</h5>
-                                            <p class="mb-0">Функционал управления настройками сайта находится в разработке и скоро будет доступен.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -3364,6 +3450,41 @@ document.addEventListener('DOMContentLoaded', function() {
             
             paginationContainer.innerHTML = html;
         }
+    </script>
+    
+    <!-- Скрипт для правильного отображения таблицы товаров -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Функция для настройки таблицы товаров в зависимости от размера экрана
+            function adjustProductTable() {
+                const isDesktop = window.innerWidth >= 768;
+                const tableWrapper = document.querySelector('#products .product-table-wrapper');
+                const table = document.querySelector('#products .product-table');
+                
+                if (!tableWrapper || !table) return;
+                
+                if (isDesktop) {
+                    // Настройки для десктопа
+                    tableWrapper.style.overflowX = 'visible';
+                    table.style.minWidth = 'auto';
+                    table.style.width = '100%';
+                    table.style.tableLayout = 'fixed';
+                } else {
+                    // Настройки для мобильных
+                    tableWrapper.style.overflowX = 'auto';
+                    tableWrapper.style.webkitOverflowScrolling = 'touch';
+                    table.style.minWidth = '800px';
+                    table.style.width = '100%';
+                    table.style.tableLayout = 'auto';
+                }
+            }
+            
+            // Вызываем функцию при загрузке страницы
+            adjustProductTable();
+            
+            // Вызываем функцию при изменении размера окна
+            window.addEventListener('resize', adjustProductTable);
+        });
     </script>
 </body>
 </html> 

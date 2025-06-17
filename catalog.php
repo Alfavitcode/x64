@@ -27,7 +27,34 @@ $itemsPerPage = 6;
 // Получаем параметры фильтрации
 $minPrice = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? (int)$_GET['min_price'] : null;
 $maxPrice = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? (int)$_GET['max_price'] : null;
-$typeFilters = isset($_GET['type']) && is_array($_GET['type']) ? $_GET['type'] : [];
+
+// Улучшенная обработка массива типов товаров
+$typeFilters = [];
+if (isset($_GET['type']) && is_array($_GET['type'])) {
+    $typeFilters = $_GET['type'];
+} elseif (isset($_GET['type'])) {
+    // Если передан один параметр, преобразуем его в массив
+    $typeFilters = [$_GET['type']];
+}
+
+// Очистка и валидация параметров типов
+$validTypes = ['new', 'sale', 'bestseller'];
+$typeFilters = array_filter($typeFilters, function($type) use ($validTypes) {
+    return in_array($type, $validTypes);
+});
+
+// Отладочная информация
+if (isset($_GET['debug']) && $_GET['debug'] === 'true') {
+    echo '<pre>';
+    echo "Параметры фильтрации:\n";
+    echo "Категория: " . $currentCategory . "\n";
+    echo "Подкатегория: " . $currentSubcategory . "\n";
+    echo "Мин. цена: " . ($minPrice ?? 'не указана') . "\n";
+    echo "Макс. цена: " . ($maxPrice ?? 'не указана') . "\n";
+    echo "Типы товаров: " . implode(', ', $typeFilters) . "\n";
+    echo "Сортировка: " . ($sortBy ?? 'не указана') . "\n";
+    echo '</pre>';
+}
 
 // Получаем параметр сортировки
 $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'popular';
@@ -211,11 +238,26 @@ if ($isAjaxRequest) {
     // Выводим обновленный каталог товаров
     ?>
     <!-- AJAX-ответ: начало -->
+    <!-- Скрытые поля для хранения параметров -->
+    <div class="filter-params-storage" style="display:none;">
+        <input type="hidden" id="current-sort" value="<?php echo htmlspecialchars($sortBy); ?>">
+        <input type="hidden" id="current-category" value="<?php echo htmlspecialchars($currentCategory); ?>">
+        <input type="hidden" id="current-subcategory" value="<?php echo $currentSubcategory; ?>">
+        <?php if ($minPrice !== null): ?>
+        <input type="hidden" id="current-min-price" value="<?php echo $minPrice; ?>">
+        <?php endif; ?>
+        <?php if ($maxPrice !== null): ?>
+        <input type="hidden" id="current-max-price" value="<?php echo $maxPrice; ?>">
+        <?php endif; ?>
+        <?php foreach ($typeFilters as $type): ?>
+        <input type="hidden" class="current-type-filter" value="<?php echo htmlspecialchars($type); ?>">
+        <?php endforeach; ?>
+    </div>
+    
     <div class="catalog-header d-flex justify-content-between align-items-center mb-4 flex-wrap">
-        <div class="catalog-count mb-2 mb-sm-0"><span class="badge bg-primary rounded-pill fs-6"><?php echo $totalItems; ?> товаров</span></div>
-        <div class="catalog-sort d-flex align-items-center">
-            <label for="sort-select" class="me-2">Сортировать по:</label>
-            <select id="sort-select" class="form-select sort-select">
+        <div class="catalog-sort d-flex align-items-center" style="background-color: #f8f9fa !important; padding: 15px 20px !important; border-radius: 10px !important; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important; position: relative !important;">
+            <label for="sort-select" class="me-2" style="font-weight: 600 !important; color: #2d3142 !important;">Сортировать по:</label>
+            <select id="sort-select" class="form-select sort-select" data-current="<?php echo htmlspecialchars($sortBy); ?>" style="appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;">
                 <option value="popular" <?php echo $sortBy === 'popular' ? 'selected' : ''; ?>>Популярности</option>
                 <option value="price_asc" <?php echo $sortBy === 'price_asc' ? 'selected' : ''; ?>>Цене (по возрастанию)</option>
                 <option value="price_desc" <?php echo $sortBy === 'price_desc' ? 'selected' : ''; ?>>Цене (по убыванию)</option>
@@ -398,76 +440,210 @@ include_once 'includes/header/header.php';
 <!-- Подключение стилей для категорий и подкатегорий -->
 <link rel="stylesheet" href="/css/components/catalog-categories.css">
 
+<!-- Подключение улучшенных стилей для каталога -->
+<link rel="stylesheet" href="/css/components/catalog-enhanced.css">
+
+<!-- Подключение исправленных стилей для меню категорий и фильтров -->
+<link rel="stylesheet" href="/css/components/catalog-fix.css">
+
+<!-- Приоритетные стили для исправления бледного меню -->
+<link rel="stylesheet" href="/css/components/catalog-override.css">
+
+<!-- Исправленные стили для фильтра сортировки -->
+<link rel="stylesheet" href="/css/components/sort-filter-fix.css">
+
+<!-- Встроенные стили с наивысшим приоритетом -->
+<style>
+/* Критически важные стили, которые нельзя перезаписать */
+.card-header,
+.category-header,
+.filter-header,
+.sidebar-widget .card-header,
+.categories-widget .card-header,
+.filters-widget .card-header {
+    background: #2345c2 !important;
+    background-image: linear-gradient(135deg, #2c4cc5 0%, #1c35a3 100%) !important;
+    background-color: #2345c2 !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px 20px !important;
+    font-weight: 700 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 3px 8px rgba(28, 53, 163, 0.4) !important;
+}
+
+.widget-title,
+.sidebar-widget .widget-title,
+.categories-widget .widget-title,
+.filters-widget .widget-title {
+    color: white !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    letter-spacing: 0.5px !important;
+}
+
+#apply-filters {
+    background: #2345c2 !important;
+    background-image: linear-gradient(135deg, #2c4cc5 0%, #1c35a3 100%) !important;
+    background-color: #2345c2 !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(28, 53, 163, 0.4) !important;
+    font-weight: 600 !important;
+}
+
+.subcategories-menu.show {
+    display: block !important;
+    height: auto !important;
+    opacity: 1 !important;
+}
+</style>
+
+<!-- Подключение библиотек для анимаций -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="/js/animations/catalog-animations.js"></script>
+
+<!-- Подключение JavaScript для инициализации карточек товаров -->
+<script src="/js/product-cards.js"></script>
+
+<!-- Подключение JavaScript для инициализации категорий и подкатегорий -->
+<script src="/js/catalog-categories.js"></script>
+
+<!-- Подключение скрипта для исправления проблемы с бледными цветами -->
+<script src="/js/catalog-style-fix.js"></script>
+
+<!-- Подключение скрипта для отладки фильтров -->
+<script src="/js/debug-filters.js"></script>
+
+<!-- Подключение скрипта для исправления проблем с фильтрацией категорий и подкатегорий -->
+<script src="/js/catalog-subcategory-fix.js"></script>
+
+<!-- Стили для заголовка страницы -->
+<style>
+    /* Заголовок страницы */
+    .page-header-bg {
+        background: linear-gradient(135deg, #f1f5ff 0%, #e7eeff 100%);
+        border-radius: 15px;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .page-header-bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(77, 97, 252, 0.05) 0%, transparent 70%);
+        transform: rotate(-15deg);
+    }
+    
+    .page-title {
+        position: relative;
+        z-index: 2;
+        font-weight: 700;
+        color: #2e3a59;
+        margin-bottom: 10px;
+    }
+    
+    .breadcrumb {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+
 <!-- Заголовок страницы -->
-<section class="page-header py-4">
-    <div class="container">
-        <h1 class="page-title">
-            <?php if (!empty($searchQuery)): ?>
-                Результаты поиска: "<?php echo htmlspecialchars($searchQuery); ?>"
-            <?php else: ?>
-                Каталог товаров
-            <?php endif; ?>
-        </h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Главная</a></li>
-                <li class="breadcrumb-item<?php echo $currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0 ? ' active' : ''; ?>"<?php echo $currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0 ? ' aria-current="page"' : ''; ?>>
-                    <?php if ($currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0): ?>
-                        Каталог
-                    <?php else: ?>
-                        <a href="/catalog.php">Каталог</a>
-                    <?php endif; ?>
-                </li>
+<section class="py-4">
+    <div class="container mt-4 animate-fade-up">
+        <div class="page-header-bg">
+            <h1 class="page-title">
                 <?php if (!empty($searchQuery)): ?>
-                    <li class="breadcrumb-item active" aria-current="page">Поиск: <?php echo htmlspecialchars($searchQuery); ?></li>
-                <?php elseif ($currentCategory !== 'all'): ?>
-                    <li class="breadcrumb-item<?php echo $currentSubcategory === 0 ? ' active' : ''; ?>"<?php echo $currentSubcategory === 0 ? ' aria-current="page"' : ''; ?>>
-                        <?php if ($currentSubcategory === 0): ?>
-                            <?php echo htmlspecialchars($currentCategory); ?>
+                    Результаты поиска: "<?php echo htmlspecialchars($searchQuery); ?>"
+                <?php else: ?>
+                    Каталог товаров
+                <?php endif; ?>
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Главная</a></li>
+                    <li class="breadcrumb-item<?php echo $currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0 ? ' active' : ''; ?>"<?php echo $currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0 ? ' aria-current="page"' : ''; ?>>
+                        <?php if ($currentCategory === 'all' && empty($searchQuery) && $currentSubcategory === 0): ?>
+                            Каталог
                         <?php else: ?>
-                            <a href="/catalog.php?category=<?php echo urlencode($currentCategory); ?>"><?php echo htmlspecialchars($currentCategory); ?></a>
+                            <a href="/catalog.php">Каталог</a>
                         <?php endif; ?>
                     </li>
-                    <?php if ($currentSubcategory > 0): 
-                        $subcategoryName = '';
-                        $subcategories = getSubcategories($currentCategory);
-                        foreach ($subcategories as $subcategory) {
-                            if ($subcategory['id'] == $currentSubcategory) {
-                                $subcategoryName = $subcategory['name'];
-                                break;
+                    <?php if (!empty($searchQuery)): ?>
+                        <li class="breadcrumb-item active" aria-current="page">Поиск: <?php echo htmlspecialchars($searchQuery); ?></li>
+                    <?php elseif ($currentCategory !== 'all'): ?>
+                        <li class="breadcrumb-item<?php echo $currentSubcategory === 0 ? ' active' : ''; ?>"<?php echo $currentSubcategory === 0 ? ' aria-current="page"' : ''; ?>>
+                            <?php if ($currentSubcategory === 0): ?>
+                                <?php echo htmlspecialchars($currentCategory); ?>
+                            <?php else: ?>
+                                <a href="/catalog.php?category=<?php echo urlencode($currentCategory); ?>"><?php echo htmlspecialchars($currentCategory); ?></a>
+                            <?php endif; ?>
+                        </li>
+                        <?php if ($currentSubcategory > 0): 
+                            $subcategoryName = '';
+                            $subcategories = getSubcategories($currentCategory);
+                            foreach ($subcategories as $subcategory) {
+                                if ($subcategory['id'] == $currentSubcategory) {
+                                    $subcategoryName = $subcategory['name'];
+                                    break;
+                                }
                             }
-                        }
-                    ?>
-                    <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($subcategoryName); ?></li>
+                        ?>
+                        <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($subcategoryName); ?></li>
+                        <?php endif; ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </ol>
-        </nav>
+                </ol>
+            </nav>
+        </div>
     </div>
 </section>
 
 <!-- Каталог товаров -->
-<section class="catalog-section section py-5">
+<section class="catalog-section section py-5" style="background-color: #ffffff !important;">
     <div class="container">
+        <!-- Скрытые поля для хранения параметров -->
+        <div class="filter-params-storage" style="display:none;">
+            <input type="hidden" id="current-sort" value="<?php echo htmlspecialchars($sortBy); ?>">
+            <input type="hidden" id="current-category" value="<?php echo htmlspecialchars($currentCategory); ?>">
+            <input type="hidden" id="current-subcategory" value="<?php echo $currentSubcategory; ?>">
+            <?php if ($minPrice !== null): ?>
+            <input type="hidden" id="current-min-price" value="<?php echo $minPrice; ?>">
+            <?php endif; ?>
+            <?php if ($maxPrice !== null): ?>
+            <input type="hidden" id="current-max-price" value="<?php echo $maxPrice; ?>">
+            <?php endif; ?>
+            <?php foreach ($typeFilters as $type): ?>
+            <input type="hidden" class="current-type-filter" value="<?php echo htmlspecialchars($type); ?>">
+            <?php endforeach; ?>
+        </div>
+        
         <div class="row">
             <!-- Фильтры и категории -->
             <div class="col-lg-3 mb-4 mb-lg-0">
                 <aside class="catalog-sidebar">
-                    <div class="sidebar-widget categories-widget card mb-4">
-                        <div class="card-header">
-                            <h3 class="widget-title m-0 fs-5">Категории</h3>
+                    <div class="sidebar-widget categories-widget card mb-4" style="background-color: white !important; border: none !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;">
+                        <div class="card-header category-header" style="background: #2345c2 !important; background: linear-gradient(135deg, #2c4cc5 0%, #1c35a3 100%) !important; color: white !important; border: none !important; box-shadow: 0 3px 8px rgba(28, 53, 163, 0.4) !important;">
+                            <h3 class="widget-title m-0 fs-5" style="color: white !important; font-weight: 700 !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important; letter-spacing: 0.5px !important;">Категории</h3>
                         </div>
-                        <div class="card-body p-0">
-                            <ul class="categories-list list-group list-group-flush">
-                                <li class="list-group-item<?php echo $currentCategory === 'all' ? ' active' : ''; ?>">
-                                    <a class="text-decoration-none" href="/catalog.php">
+                        <div class="card-body p-0" style="background-color: white !important;">
+                            <ul class="categories-list list-group list-group-flush" style="background-color: white !important; border: none !important;">
+                                <li class="list-group-item<?php echo $currentCategory === 'all' ? ' active' : ''; ?>" style="background-color: white !important;">
+                                    <a class="text-decoration-none" href="/catalog.php" style="color: #5a5c69 !important;">
                                         <i class="fas fa-th-large me-2"></i> Все категории
                                     </a>
                                 </li>
                                 <?php foreach ($mainCategories as $category): 
                                     $categoryIcon = $category === 'Android' ? '<i class="fab fa-android me-2"></i>' : '<i class="fab fa-apple me-2"></i>';
                                     // Определяем, должно ли быть открыто меню подкатегорий
-                                    $isMenuOpen = false; // Всегда закрыто при загрузке страницы
+                                    $isMenuOpen = $currentCategory === $category; // Открываем меню для текущей категории
                                     $menuDisplay = $isMenuOpen ? 'block' : 'none';
                                     $toggleIcon = $isMenuOpen ? 'fa-chevron-up' : 'fa-chevron-down';
                                 ?>
@@ -478,7 +654,7 @@ include_once 'includes/header/header.php';
                                         </a>
                                         <span class="subcategory-toggle"><i class="fas <?php echo $toggleIcon; ?>"></i></span>
                                     </div>
-                                    <div class="subcategories-menu">
+                                    <div class="subcategories-menu <?php echo $isMenuOpen ? 'show' : ''; ?>" style="<?php echo $isMenuOpen ? 'display: block !important; height: auto !important; opacity: 1 !important;' : ''; ?>">
                                         <ul class="list-unstyled ps-3 mt-2 mb-0">
                                             <?php
                                             // Используем принудительно заданные подкатегории, если они есть
@@ -520,11 +696,11 @@ include_once 'includes/header/header.php';
                         </div>
                     </div>
                     
-                    <div class="sidebar-widget filters-widget card">
-                        <div class="card-header">
-                            <h3 class="widget-title m-0 fs-5">Фильтры</h3>
+                    <div class="sidebar-widget filters-widget card" style="background-color: white !important; border: none !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;">
+                        <div class="card-header filter-header" style="background: #2345c2 !important; background: linear-gradient(135deg, #2c4cc5 0%, #1c35a3 100%) !important; color: white !important; border: none !important; box-shadow: 0 3px 8px rgba(28, 53, 163, 0.4) !important;">
+                            <h3 class="widget-title m-0 fs-5" style="color: white !important; font-weight: 700 !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important; letter-spacing: 0.5px !important;">Фильтры</h3>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body" style="background-color: white !important;">
                             <form class="filter-form" id="ajax-filter-form" method="GET" action="/catalog.php" onsubmit="return false;">
                                 <!-- Скрытые поля для сохранения текущих параметров -->
                                 <input type="hidden" name="category" value="<?php echo htmlspecialchars($currentCategory); ?>">
@@ -540,13 +716,13 @@ include_once 'includes/header/header.php';
                                     <h4 class="filter-title fs-6 mb-2">Цена</h4>
                                     <div class="price-range row g-2">
                                         <div class="col">
-                                            <input type="number" min="0" placeholder="от" name="min_price" id="min-price" value="<?php echo $minPrice !== null ? $minPrice : ''; ?>" class="form-control price-input">
+                                            <input type="number" min="0" placeholder="от" name="min_price" id="min-price" value="<?php echo $minPrice !== null ? $minPrice : ''; ?>" class="form-control price-input" style="appearance: textfield !important; border: 1px solid #e1e4e8 !important; border-radius: 6px !important; padding: 8px 15px !important; width: 100% !important;">
                                         </div>
                                         <div class="col-auto d-flex align-items-center">
                                             <span class="range-sep">-</span>
                                         </div>
                                         <div class="col">
-                                            <input type="number" min="0" placeholder="до" name="max_price" id="max-price" value="<?php echo $maxPrice !== null ? $maxPrice : ''; ?>" class="form-control price-input">
+                                            <input type="number" min="0" placeholder="до" name="max_price" id="max-price" value="<?php echo $maxPrice !== null ? $maxPrice : ''; ?>" class="form-control price-input" style="appearance: textfield !important; border: 1px solid #e1e4e8 !important; border-radius: 6px !important; padding: 8px 15px !important; width: 100% !important;">
                                         </div>
                                     </div>
                                 </div>
@@ -576,7 +752,7 @@ include_once 'includes/header/header.php';
                                 </div>
                                 
                                 <div class="d-grid gap-2">
-                                    <button type="button" id="apply-filters" class="btn btn-primary">Применить</button>
+                                    <button type="button" id="apply-filters" class="btn btn-primary" style="background: #2345c2 !important; background: linear-gradient(135deg, #2c4cc5 0%, #1c35a3 100%) !important; border: none !important; color: white !important; box-shadow: 0 4px 12px rgba(28, 53, 163, 0.4) !important; font-weight: 600 !important;">Применить</button>
                                     <button type="button" id="reset-filters" class="btn btn-outline-secondary">Сбросить</button>
                                 </div>
                             </form>
@@ -606,10 +782,9 @@ include_once 'includes/header/header.php';
                     <?php endif; ?>
                     
                     <div class="catalog-header d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                        <div class="catalog-count mb-2 mb-sm-0"><span class="badge bg-primary rounded-pill fs-6"><?php echo $totalItems; ?> товаров</span></div>
-                        <div class="catalog-sort d-flex align-items-center">
-                            <label for="sort-select" class="me-2">Сортировать по:</label>
-                            <select id="sort-select" class="form-select sort-select">
+                        <div class="catalog-sort d-flex align-items-center" style="background-color: #f8f9fa !important; padding: 15px 20px !important; border-radius: 10px !important; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important; position: relative !important;">
+                            <label for="sort-select" class="me-2" style="font-weight: 600 !important; color: #2d3142 !important;">Сортировать по:</label>
+                            <select id="sort-select" class="form-select sort-select" data-current="<?php echo htmlspecialchars($sortBy); ?>" style="appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;">
                                 <option value="popular" <?php echo $sortBy === 'popular' ? 'selected' : ''; ?>>Популярности</option>
                                 <option value="price_asc" <?php echo $sortBy === 'price_asc' ? 'selected' : ''; ?>>Цене (по возрастанию)</option>
                                 <option value="price_desc" <?php echo $sortBy === 'price_desc' ? 'selected' : ''; ?>>Цене (по убыванию)</option>
@@ -777,13 +952,108 @@ include_once 'includes/header/header.php';
     </div>
 </section>
 
-<!-- Подключение JavaScript для инициализации карточек товаров -->
-<script src="/js/product-cards.js"></script>
-
-<!-- Подключение JavaScript для инициализации категорий и подкатегорий -->
-<script src="/js/catalog-categories.js"></script>
-
 <?php
 // Подключение футера
 include_once 'includes/footer/footer.php';
 ?> 
+
+<!-- Встроенный скрипт для исправления проблем с фильтрацией -->
+<script>
+// Эта функция запускается после загрузки страницы и всех других скриптов
+document.addEventListener('DOMContentLoaded', function() {
+    // Задержка для того, чтобы другие скрипты успели инициализироваться
+    setTimeout(function() {
+        console.log('Запуск дополнительного скрипта для исправления фильтров');
+        
+        // Исправление работы чекбоксов
+        const checkboxes = document.querySelectorAll('.filter-checkbox');
+        if (checkboxes.length > 0) {
+            console.log('Найдено чекбоксов:', checkboxes.length);
+            
+            // Повторная инициализация чекбоксов
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    console.log('Изменение чекбокса:', this.id, 'состояние:', this.checked);
+                });
+            });
+        }
+        
+        // Исправление работы селекта сортировки
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect) {
+            console.log('Текущее значение селекта сортировки:', sortSelect.value);
+            
+            // Получаем значение из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortParam = urlParams.get('sort');
+            
+            if (sortParam && sortSelect.value !== sortParam) {
+                console.log('Несоответствие сортировки! URL:', sortParam, 'Селект:', sortSelect.value);
+                console.log('Принудительно устанавливаем значение селекта');
+                sortSelect.value = sortParam;
+            }
+        }
+        
+        // Проверка работы формы фильтров
+        const filterForm = document.getElementById('ajax-filter-form');
+        if (filterForm) {
+            console.log('Форма фильтров найдена');
+            
+            // Дополнительный обработчик для кнопки применить
+            const applyButton = document.getElementById('apply-filters');
+            if (applyButton) {
+                applyButton.addEventListener('click', function() {
+                    console.log('Нажата кнопка применить фильтры');
+                    
+                    // Собираем все значения фильтров для отладки
+                    const formData = new FormData(filterForm);
+                    for (const [key, value] of formData.entries()) {
+                        console.log(`Фильтр: ${key} = ${value}`);
+                    }
+                });
+            }
+        }
+    }, 500);
+});
+</script> 
+
+<!-- JavaScript для анимации заголовка -->
+<script>
+$(document).ready(function() {
+    // Анимация появления элементов при прокрутке
+    function animateElements() {
+        $('.animate-fade-up').each(function() {
+            var elementPos = $(this).offset().top;
+            var topOfWindow = $(window).scrollTop();
+            var windowHeight = $(window).height();
+            
+            if (elementPos < topOfWindow + windowHeight - 50) {
+                $(this).css({
+                    'opacity': '1',
+                    'transform': 'translateY(0)'
+                });
+            }
+        });
+    }
+    
+    // Запускаем анимацию при загрузке страницы
+    setTimeout(function() {
+        animateElements();
+    }, 100);
+    
+    // Запускаем анимацию при прокрутке
+    $(window).on('scroll', function() {
+        animateElements();
+    });
+});
+</script>
+
+<!-- Дополнительные стили для анимации -->
+<style>
+    /* Анимация появления элементов */
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+</style> 

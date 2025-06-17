@@ -18,6 +18,216 @@ include_once 'includes/header/header.php';
 <!-- Подключение общих стилей для карточек товаров -->
 <link rel="stylesheet" href="/css/components/product-card.css">
 
+<!-- Подключение библиотек для анимаций -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="/js/libs/particles.min.js"></script>
+<script src="/js/animations/home-animations.js"></script>
+
+<style>
+/* Стили для фона с частицами - удалены */
+/* #particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+} */
+
+/* Улучшенные стили для секций */
+.section {
+    position: relative;
+    padding: 60px 0;
+    overflow: hidden;
+}
+
+.section-header {
+    position: relative;
+    margin-bottom: 40px;
+    z-index: 1;
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #4e73df, #6f42c1);
+    transition: width 0.5s ease;
+}
+
+.section-title:hover::after {
+    width: 100%;
+}
+
+/* Улучшенные стили для карточек товаров */
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+}
+
+.product-image img {
+    transition: transform 0.5s ease;
+}
+
+.product-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+}
+
+.badge {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.badge-new {
+    background-color: #4e73df;
+    color: white;
+}
+
+.badge-bestseller {
+    background-color: #f6c23e;
+    color: white;
+}
+
+.badge-sale {
+    background-color: #e74a3b;
+    color: white;
+}
+
+/* Улучшенные стили для вкладок */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.tab {
+    margin: 0 5px 10px;
+    padding: 8px 20px;
+    border-radius: 30px;
+    background-color: #f8f9fc;
+    color: #5a5c69;
+    border: 1px solid #e3e6f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.tab:hover {
+    background-color: #eaecf4;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tab.active {
+    background-color: #4e73df;
+    color: white;
+    border-color: #4e73df;
+    box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+}
+
+/* Улучшенные стили для слайдера */
+.hero-slider {
+    position: relative;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 20px;
+    margin-top: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slide {
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.slide-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1);
+    transition: transform 8s ease;
+}
+
+.slide.active .slide-bg {
+    transform: scale(1.1);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 767.98px) {
+    .hero-slider {
+        height: 300px;
+    }
+    
+    .section {
+        padding: 40px 0;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .tabs {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .tab {
+        flex: 0 0 auto;
+    }
+}
+</style>
+
 <!-- Главный баннер с слайдером -->
 <section class="hero-slider">
         <div class="slider-container">
@@ -44,44 +254,60 @@ include_once 'includes/header/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Автоматическое переключение слайдов
+    // Автоматическое переключение слайдов с использованием GSAP
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
     
+    // Инициализация первого слайда
+    gsap.set(slides[0], { opacity: 1 });
+    gsap.set(slides[0].querySelector('.slide-bg'), { scale: 1 });
+    
     // Функция для изменения слайда
     function changeSlide() {
-        // Скрываем все слайды
-        slides.forEach(slide => slide.classList.remove('active'));
+        // Скрываем текущий слайд
+        gsap.to(slides[currentSlide], {
+            opacity: 0,
+            duration: 1.5,
+            ease: 'power2.inOut'
+        });
+        
+        // Сбрасываем масштаб фона текущего слайда
+        gsap.to(slides[currentSlide].querySelector('.slide-bg'), {
+            scale: 1,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
         
         // Переходим к следующему слайду
         currentSlide = (currentSlide + 1) % slides.length;
         
-        // Показываем текущий слайд
-        slides[currentSlide].classList.add('active');
+        // Показываем следующий слайд
+        gsap.to(slides[currentSlide], {
+            opacity: 1,
+            duration: 1.5,
+            ease: 'power2.inOut'
+        });
+        
+        // Анимируем увеличение фона для следующего слайда
+        gsap.fromTo(slides[currentSlide].querySelector('.slide-bg'),
+            { scale: 1 },
+            { 
+                scale: 1.1,
+                duration: 8,
+                ease: 'power1.inOut'
+            }
+        );
     }
     
     // Запускаем автоматическое переключение каждые 5 секунд
     setInterval(changeSlide, 5000);
     
-    // Добавляем плавную анимацию перехода слайдов
-    const style = document.createElement('style');
-    style.textContent = `
-        .slide {
-            opacity: 0;
-            transition: opacity 1.5s ease-in-out;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .slide.active {
-            opacity: 1;
-            z-index: 1;
-        }
-    `;
-    document.head.appendChild(style);
+    // Начинаем анимацию увеличения для первого слайда
+    gsap.to(slides[0].querySelector('.slide-bg'), {
+        scale: 1.1,
+        duration: 8,
+        ease: 'power1.inOut'
+    });
 });
 </script>
 
@@ -141,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Выводим карточку товара
                     echo '
                     <div class="col-lg-3 col-md-6 col-sm-6 mb-5 product-item">
-                        <div class="product-card">
+                        <div class="product-card" data-category="' . $dataCategoryAttr . '">
                             <div class="product-image">
                                 <img src="' . $imageUrl . '" alt="' . htmlspecialchars(isset($product['name']) ? $product['name'] : '') . '">
                                 <div class="product-badges">
@@ -276,401 +502,73 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<style>
-    /* Кнопки с анимациями */
-    .pulse-button, .slide-button, .glow-button {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        border-radius: 50px; /* Полностью закругляем кнопки */
-        padding: 12px 25px; /* Увеличиваем отступы */
-        border: none;
-        font-weight: 500;
-    }
-
-    .pulse-button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(255,255,255,0.5);
-    }
-
-    .pulse-button:before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        background: rgba(255,255,255,0.2);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0;
-    }
-
-    .pulse-button:hover:before {
-        animation: pulse 0.8s ease-out;
-    }
-
-    @keyframes pulse {
-        0% {
-            width: 0;
-            height: 0;
-            opacity: 0.5;
-        }
-        100% {
-            width: 200px;
-            height: 200px;
-            opacity: 0;
-        }
-    }
-
-    .slide-button {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .slide-button:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-        transition: all 0.3s ease;
-        border-radius: 50px; /* Закругляем также и эффект свечения */
-    }
-
-    .slide-button:hover:before {
-        left: 100%;
-    }
-
-    .glow-button {
-        transition: all 0.3s ease;
-    }
-
-    .glow-button:hover {
-        box-shadow: 0 0 20px rgba(255,255,255,0.7);
-    }
-
-    /* Стили для кнопок фильтров */
-    .tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .tab {
-        padding: 8px 20px;
-        background-color: #f5f5f5;
-        border: none;
-        border-radius: 30px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #555;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .tab:hover {
-        background-color: #e0e0e0;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .tab.active {
-        background-color: var(--primary-color);
-        color: white;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transform: translateY(-3px);
+<script>
+// Анимация фильтрации товаров по вкладкам
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab');
+    const productItems = document.querySelectorAll('.product-item');
+    
+    // Сначала отображаем все товары
+    productItems.forEach(item => {
+        item.style.display = 'block';
+        gsap.to(item, { opacity: 1, duration: 0.5, ease: 'power2.out' });
+    });
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Удаляем активный класс со всех вкладок
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Добавляем активный класс на текущую вкладку
+            this.classList.add('active');
+            
+            // Получаем категорию
+            const category = this.getAttribute('data-category');
+            
+            // Анимируем фильтрацию товаров
+            filterProducts(category);
+        });
+    });
+    
+    function filterProducts(category) {
+        productItems.forEach(item => {
+            const productCard = item.querySelector('.product-card');
+            const categories = productCard ? productCard.getAttribute('data-category') : '';
+            
+            // Проверяем, соответствует ли товар выбранной категории
+            const shouldShow = category === 'all' || (categories && categories.split(' ').includes(category));
+            
+            if (shouldShow) {
+                // Показываем товар с анимацией
+                gsap.fromTo(item, 
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', clearProps: 'all' }
+                );
+                item.style.display = 'block';
+            } else {
+                // Скрываем товар с анимацией
+                gsap.to(item, {
+                    opacity: 0,
+                    y: -20,
+                    duration: 0.3,
+                    ease: 'power2.in',
+                    onComplete: () => {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
     }
     
-    .tab.active::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background-color: rgba(255, 255, 255, 0.5);
-        animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-    }
-
-    /* Глобальные стили для закругления всех контейнеров */
-    .section {
-        padding: 60px 0; /* Увеличиваем вертикальные отступы */
-    }
-
-    .container {
-        padding: 0 30px; /* Увеличиваем горизонтальные отступы */
-    }
-
-    /* Стили для карточек товаров */
-    /* Удалены дублирующиеся стили, теперь они перенесены в общий файл css/components/product-card.css */
-
-    .feature-card {
-        border-radius: 16px;
-        padding: 30px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-    }
-
-    .feature-icon {
-        background-color: rgba(var(--primary-color-rgb), 0.1);
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-        font-size: 24px;
-        color: var(--primary-color);
-    }
-
-    /* Стили для секции О нас */
-    .about-us {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .about-us .section-title {
-        margin-bottom: 30px;
-    }
-
-    .about-list {
-        list-style: none;
-        padding-left: 0;
-    }
-
-    .about-list li {
-        margin-bottom: 15px;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-    }
-
-    .about-list li i {
-        width: 25px;
-        font-size: 18px;
-    }
-
-    .about-image-container {
-        position: relative;
-        padding: 15px;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .about-experience {
-        position: absolute;
-        bottom: 30px;
-        left: 30px;
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 16px;
-        padding: 15px 25px;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    }
-
-    .experience-years {
-        font-size: 32px;
-        font-weight: 700;
-        margin-right: 10px;
-        line-height: 1;
-    }
-
-    .experience-text {
-        font-size: 16px;
-        line-height: 1.2;
-    }
-
-    @media (max-width: 991px) {
-        .about-image-container {
-            margin-top: 30px;
-        }
-    }
-
-    /* Стили для модальных окон и диалогов */
-    .product-quickview-content {
-        border-radius: 20px;
-    }
-
-    .angle-view {
-        border-radius: 50px !important;
-    }
-
-    .phone-model-select {
-        border-radius: 50px !important;
-    }
-
-    .color-option {
-        border-radius: 50% !important;
-    }
-
-    /* Стили для улучшения ощущения глубины и объема */
-    .section-title {
-        position: relative;
-        display: inline-block;
-        margin-bottom: 40px;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background-color: var(--primary-color);
-        border-radius: 50px;
-    }
-
-    /* Мягкие переходы цветов и теней */
-    :root {
-        --transition-standard: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    * {
-        transition: var(--transition-standard);
-    }
-
-    /* Стили для слайдера */
-    .hero-slider {
-        padding: 30px 0;
-        background-color: transparent;
-    }
-
-    .slider-container {
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: none;
-        height: 500px;
-        max-height: 60vh;
-    }
-
-    .slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 0.8s ease;
-        display: flex;
-        align-items: center;
-    }
-
-    .slide.active {
-        opacity: 1;
-        z-index: 1;
-    }
-
-    .slide-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-color: transparent;
-        filter: none;
-        transition: none;
-    }
-
-    .slide:hover .slide-bg {
-        transform: none;
-        filter: none;
-    }
-
-    .slide-content {
-        position: relative;
-        z-index: 2;
-        padding: 30px;
-        max-width: 1200px;
-        margin: 0 auto;
-        color: #212529;
-    }
-
-    /* Убираем градиент, который может мешать видеть изображение полностью */
-    .slide::after {
-        display: none;
-    }
-
-    /* Адаптив для мобильных устройств */
-    @media (max-width: 768px) {
-        .slider-container {
-            height: 400px;
-        }
-        
-        .slide-content {
-            padding: 20px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .slider-container {
-            height: 300px;
-        }
-    }
-
-    .product-item {
-        opacity: 0;
-        transform: translateY(10px); /* Уменьшаем высоту смещения */
-        animation: fadeInUp 0.4s forwards;
-    }
-    
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Задержка анимации для каждого элемента */
-    .product-item:nth-child(1) { animation-delay: 0.05s; }
-    .product-item:nth-child(2) { animation-delay: 0.1s; }
-    .product-item:nth-child(3) { animation-delay: 0.15s; }
-    .product-item:nth-child(4) { animation-delay: 0.2s; }
-    .product-item:nth-child(5) { animation-delay: 0.25s; }
-    .product-item:nth-child(6) { animation-delay: 0.3s; }
-    .product-item:nth-child(7) { animation-delay: 0.35s; }
-    .product-item:nth-child(8) { animation-delay: 0.4s; }
-
-    /* Стили для бейджей (меток) */
-    /* Удалены дублирующиеся стили бейджей, теперь они в общем файле css/components/product-card.css */
-
-    /* Адаптивность для карточек товаров */
-    /* Удалены дублирующиеся адаптивные стили, теперь они в общем файле css/components/product-card.css */
-
-    /* Удален дублирующийся стиль product-actions, теперь он в общем файле css/components/product-card.css */
-
-    /* Общие CSS-переменные вынесены в общий файл css/components/product-card.css */
-    
-    /* Дополнительные стили для точного соответствия изображениям */
-    .product-card {
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
-        border: none !important;
-    }
-</style>
+    // Проверка наличия атрибутов data-category и логирование для отладки
+    console.log('Проверка товаров и их категорий:');
+    productItems.forEach((item, index) => {
+        const productCard = item.querySelector('.product-card');
+        const categories = productCard ? productCard.getAttribute('data-category') : 'нет категорий';
+        console.log(`Товар #${index}:`, categories);
+    });
+});
+</script>
 
 <!-- Преимущества -->
 <section class="features section">
@@ -770,3 +668,111 @@ include_once 'includes/footer/footer.php';
 
 <!-- Функция для инициализации карточек товаров -->
 <script src="/js/product-cards.js"></script>
+
+<!-- Дополнительный скрипт для инициализации фильтров на главной странице -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Убедимся, что фильтры на главной странице работают корректно
+    console.log('Дополнительная инициализация фильтров на главной странице...');
+    
+    // Находим все кнопки фильтров
+    const filterButtons = document.querySelectorAll('.tab');
+    if (filterButtons.length > 0) {
+        console.log('Найдены кнопки фильтров:', filterButtons.length);
+        
+        // Проверяем, есть ли у них атрибут data-category
+        filterButtons.forEach(button => {
+            if (!button.hasAttribute('data-category')) {
+                console.warn('У кнопки фильтра нет атрибута data-category:', button.textContent);
+                
+                // Определяем категорию по тексту кнопки
+                const buttonText = button.textContent.trim().toLowerCase();
+                let category = 'all';
+                
+                if (buttonText.includes('нов')) {
+                    category = 'new';
+                } else if (buttonText.includes('скид')) {
+                    category = 'sale';
+                } else if (buttonText.includes('бестселлер') || buttonText.includes('хит')) {
+                    category = 'bestsellers';
+                } else if (buttonText.includes('все')) {
+                    category = 'all';
+                }
+                
+                // Добавляем атрибут data-category
+                button.setAttribute('data-category', category);
+                console.log('Добавлен атрибут data-category:', category);
+            }
+        });
+        
+        // Проверяем наличие обработчиков событий для кнопок фильтров
+        filterButtons.forEach(button => {
+            // Проверяем, есть ли у кнопки уже обработчики
+            const hasClickListeners = button._click_listeners && button._click_listeners.length > 0;
+            
+            if (!hasClickListeners) {
+                console.log('Добавляем обработчик клика для кнопки:', button.textContent);
+                
+                button.addEventListener('click', function() {
+                    // Удаляем активный класс со всех кнопок
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Добавляем активный класс на текущую кнопку
+                    this.classList.add('active');
+                    
+                    // Получаем категорию
+                    const category = this.getAttribute('data-category');
+                    console.log('Выбрана категория:', category);
+                    
+                    // Фильтруем товары
+                    const productItems = document.querySelectorAll('.product-item');
+                    productItems.forEach(item => {
+                        const productCard = item.querySelector('.product-card');
+                        const categories = productCard ? productCard.getAttribute('data-category') : '';
+                        
+                        // Преобразуем категории в массив
+                        const categoriesArray = categories ? categories.split(' ') : [];
+                        
+                        // Проверяем, соответствует ли товар выбранной категории
+                        const shouldShow = category === 'all' || categoriesArray.includes(category);
+                        
+                        if (shouldShow) {
+                            // Показываем товар с анимацией
+                            item.style.display = 'block';
+                            gsap.fromTo(item, 
+                                { opacity: 0, y: 20 },
+                                { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', clearProps: 'all' }
+                            );
+                        } else {
+                            // Скрываем товар с анимацией
+                            gsap.to(item, {
+                                opacity: 0,
+                                y: -20,
+                                duration: 0.3,
+                                ease: 'power2.in',
+                                onComplete: () => {
+                                    item.style.display = 'none';
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                // Отмечаем, что кнопка имеет обработчик
+                button._click_listeners = [true];
+            }
+        });
+        
+        // Активируем фильтр "Все" по умолчанию, если нет активного фильтра
+        const activeButton = document.querySelector('.tab.active');
+        if (!activeButton) {
+            console.log('Активируем фильтр "Все" по умолчанию');
+            const allButton = document.querySelector('.tab[data-category="all"]');
+            if (allButton) {
+                allButton.classList.add('active');
+                allButton.click();
+            }
+        }
+    }
+});
+</script>

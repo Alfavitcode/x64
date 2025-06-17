@@ -87,6 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Получаем заказы пользователя для отображения счетчика
+$orders = getUserOrders($user_id);
+$orderCount = count($orders);
+
 // Подключаем шапку сайта
 include_once '../includes/header/header.php';
 ?>
@@ -96,51 +100,15 @@ include_once '../includes/header/header.php';
         <div class="row">
             <!-- Боковое меню -->
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="profile-card profile-sidebar">
-                    <div class="profile-menu-header">
-                        <h5 class="mb-0">Личный кабинет</h5>
-                    </div>
-                    <ul class="profile-menu">
-                        <li class="profile-menu-item">
-                            <a href="profile.php">
-                                <i class="fas fa-user"></i>
-                                Мой профиль
-                            </a>
-                        </li>
-                        <li class="profile-menu-item">
-                            <a href="orders.php">
-                                <i class="fas fa-shopping-bag"></i>
-                                Мои заказы
-                            </a>
-                        </li>
-                        <li class="profile-menu-item active">
-                            <a href="telegram.php">
-                                <i class="fab fa-telegram"></i>
-                                Привязка Telegram
-                            </a>
-                        </li>
-                        <li class="profile-menu-item">
-                            <a href="settings.php">
-                                <i class="fas fa-cog"></i>
-                                Настройки
-                            </a>
-                        </li>
-                        <li class="profile-menu-item logout">
-                            <a href="logout.php">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Выйти
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <?php include_once 'includes/sidebar.php'; ?>
             </div>
             
             <!-- Основное содержимое -->
             <div class="col-lg-9 col-md-8">
                 <div class="profile-main-card">
                     <div class="profile-header">
-                        <h2 class="profile-title">Привязка Telegram</h2>
-                        <p class="profile-description">Привяжите свой аккаунт Telegram для получения уведомлений и управления аккаунтом через мессенджер.</p>
+                        <h2 class="profile-title text-white">Привязка Telegram</h2>
+                        <p class="profile-description text-white">Привяжите свой аккаунт Telegram для получения уведомлений и управления аккаунтом через мессенджер.</p>
                     </div>
                     
                     <?php if (!empty($message)): ?>
@@ -238,28 +206,10 @@ include_once '../includes/header/header.php';
     </div>
 </section>
 
-<style>
-.step-number {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    font-weight: bold;
-}
-
-.verification-code {
-    letter-spacing: 3px;
-    font-family: monospace;
-}
-
-code {
-    background-color: #f8f9fa;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-family: monospace;
-}
-</style>
-
 <?php
+// Подключаем файл со стилями для профиля
+include_once 'includes/profile_styles.php';
+
 // Подключаем подвал сайта
 include_once '../includes/footer/footer.php';
 ?> 

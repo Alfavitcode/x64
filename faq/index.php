@@ -3,7 +3,7 @@
 $page_title = 'Вопросы и ответы';
 
 // Подключаем дополнительные стили
-$additional_styles = '<link rel="stylesheet" href="/css/faq.css">';
+$additional_styles = '<link rel="stylesheet" href="/css/faq-enhanced.css">';
 
 // Подключаем шапку сайта
 include_once '../includes/header/header.php';
@@ -170,7 +170,8 @@ include_once '../includes/header/header.php';
     </div>
 </main>
 
-<script src="/js/faq.js"></script>
+<!-- Напрямую подключаем скрипт для страницы FAQ -->
+<script src="/js/faq-enhanced.js"></script>
 
 <?php
 // Подключаем футер

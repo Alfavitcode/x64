@@ -101,50 +101,33 @@ function getOrderStatusInfo($status) {
 $statusInfo = getOrderStatusInfo($order['status']);
 ?>
 
+<!-- Подключаем GSAP для анимаций -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<!-- Стили для предотвращения мерцания контента -->
+<style id="preload-styles">
+    .order-detail-container,
+    .order-progress-wrapper,
+    .info-card,
+    .order-item,
+    .order-summary {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Сбрасываем стили после полной загрузки страницы */
+    .js-content-loaded #preload-styles {
+        display: none;
+    }
+</style>
+
 <section class="profile-section">
     <div class="profile-container">
         <div class="row">
             <!-- Боковое меню -->
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="profile-card profile-sidebar">
-                    <div class="profile-menu-header">
-                        <h5 class="mb-0">Личный кабинет</h5>
-                    </div>
-                    <ul class="profile-menu">
-                        <li class="profile-menu-item">
-                            <a href="profile.php">
-                                <i class="fas fa-user"></i>
-                                Мой профиль
-                            </a>
-                        </li>
-                        <li class="profile-menu-item active">
-                            <a href="orders.php">
-                                <i class="fas fa-shopping-bag"></i>
-                                Мои заказы
-                            </a>
-                        </li>
-                        
-                        <li class="profile-menu-item">
-                            <a href="telegram.php">
-                                <i class="fab fa-telegram"></i>
-                                Привязка Telegram
-                            </a>
-                        </li>
-                        
-                        <li class="profile-menu-item">
-                            <a href="settings.php">
-                                <i class="fas fa-cog"></i>
-                                Настройки
-                            </a>
-                        </li>
-                        <li class="profile-menu-item logout">
-                            <a href="logout.php">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Выйти
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <?php include_once 'includes/sidebar.php'; ?>
             </div>
             
             <!-- Основное содержимое -->
@@ -165,10 +148,54 @@ $statusInfo = getOrderStatusInfo($order['status']);
                         </div>
                     </div>
                     
+                    <!-- Индикатор прогресса заказа (новый элемент) -->
+                    <div class="order-progress-wrapper">
+                        <div class="order-progress">
+                            <div class="progress-step <?php echo in_array($order['status'], ['pending', 'processing', 'shipped', 'delivered', 'completed']) ? 'active' : ''; ?>">
+                                <div class="step-icon"><i class="fas fa-check"></i></div>
+                                <div class="step-label">Заказ создан</div>
+                            </div>
+                            <div class="progress-step <?php echo in_array($order['status'], ['processing', 'shipped', 'delivered', 'completed']) ? 'active' : ''; ?>">
+                                <div class="step-icon"><i class="fas fa-box"></i></div>
+                                <div class="step-label">В обработке</div>
+                            </div>
+                            <div class="progress-step <?php echo in_array($order['status'], ['shipped', 'delivered', 'completed']) ? 'active' : ''; ?>">
+                                <div class="step-icon"><i class="fas fa-truck"></i></div>
+                                <div class="step-label">Отправлен</div>
+                            </div>
+                            <div class="progress-step <?php echo in_array($order['status'], ['delivered', 'completed']) ? 'active' : ''; ?>">
+                                <div class="step-icon"><i class="fas fa-home"></i></div>
+                                <div class="step-label">Доставлен</div>
+                            </div>
+                            <div class="progress-step <?php echo $order['status'] === 'completed' ? 'active' : ''; ?>">
+                                <div class="step-icon"><i class="fas fa-star"></i></div>
+                                <div class="step-label">Выполнен</div>
+                            </div>
+                            
+                            <div class="progress-line">
+                                <div class="progress-line-inner" style="
+                                    width: <?php 
+                                        switch($order['status']) {
+                                            case 'pending': echo '10%'; break;
+                                            case 'processing': echo '30%'; break;
+                                            case 'shipped': echo '50%'; break;
+                                            case 'delivered': echo '80%'; break;
+                                            case 'completed': echo '100%'; break;
+                                            case 'cancelled': case 'closed': echo '0%'; break;
+                                            default: echo '0%';
+                                        }
+                                    ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="order-info-section">
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <div class="info-card">
+                                    <div class="info-card-icon">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
                                     <h3 class="info-card-title">Информация о заказе</h3>
                                     <div class="info-item">
                                         <span class="info-label">Статус заказа:</span>
@@ -219,6 +246,9 @@ $statusInfo = getOrderStatusInfo($order['status']);
                             
                             <div class="col-md-6 mb-4">
                                 <div class="info-card">
+                                    <div class="info-card-icon">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
                                     <h3 class="info-card-title">Информация о доставке</h3>
                                     <div class="info-item">
                                         <span class="info-label">Получатель:</span>
@@ -251,7 +281,10 @@ $statusInfo = getOrderStatusInfo($order['status']);
                     </div>
                     
                     <div class="order-items-section">
-                        <h3 class="section-title">Товары в заказе</h3>
+                        <div class="section-header">
+                            <h3 class="section-title">Товары в заказе</h3>
+                            <div class="section-icon"><i class="fas fa-shopping-basket"></i></div>
+                        </div>
                         
                         <div class="order-items-container">
                             <?php foreach ($order_items as $item): ?>
@@ -319,34 +352,74 @@ $statusInfo = getOrderStatusInfo($order['status']);
 .order-detail-container {
     background-color: #fff;
     border-radius: 20px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(81, 101, 246, 0.15);
     overflow: hidden;
-    margin-bottom: 25px;
-    padding: 30px;
+    margin-bottom: 30px;
+    padding: 35px;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.order-detail-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, rgba(81, 101, 246, 0.05) 0%, rgba(81, 101, 246, 0) 70%);
+    border-radius: 0 0 0 100%;
+    z-index: 0;
 }
 
 .order-detail-header {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     border-bottom: 1px solid #f0f0f7;
-    padding-bottom: 20px;
+    padding-bottom: 25px;
+    position: relative;
+    z-index: 1;
 }
 
 .order-title h2 {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     color: #333;
+    position: relative;
+    display: inline-block;
+}
+
+.order-title h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(to right, #5165F6, #4e73df);
+    border-radius: 3px;
 }
 
 .order-meta {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-top: 10px;
 }
 
 .order-date {
     color: #666;
-    font-size: 14px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.order-date::before {
+    content: '\f073';
+    font-family: 'Font Awesome 5 Free';
+    margin-right: 5px;
+    color: #5165F6;
+    font-weight: 900;
 }
 
 .back-btn {
@@ -355,61 +428,216 @@ $statusInfo = getOrderStatusInfo($order['status']);
     color: #5165F6;
     font-weight: 500;
     text-decoration: none;
-    padding: 8px 15px;
+    padding: 10px 20px;
     border-radius: 30px;
     background-color: rgba(81, 101, 246, 0.1);
     transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(81, 101, 246, 0.1);
 }
 
 .back-btn:hover {
     background-color: #5165F6;
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(81, 101, 246, 0.2);
 }
 
 .back-btn i {
-    margin-right: 6px;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Новый компонент - индикатор прогресса заказа */
+.order-progress-wrapper {
+    margin-bottom: 35px;
+    position: relative;
+    z-index: 1;
+}
+
+.order-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 0 10px;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    max-width: 20%;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f0f0f7;
+    color: #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: all 0.4s ease;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.progress-step.active .step-icon {
+    background: linear-gradient(135deg, #5165F6, #4e73df);
+    color: white;
+    box-shadow: 0 5px 15px rgba(81, 101, 246, 0.3);
+}
+
+.step-label {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.4s ease;
+}
+
+.progress-step.active .step-label {
+    color: #5165F6;
+    font-weight: 600;
+}
+
+.progress-line {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #f0f0f7;
+    z-index: 1;
+}
+
+.progress-line-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(to right, #5165F6, #4e73df);
+    transition: width 1s ease;
+    border-radius: 3px;
 }
 
 .order-info-section {
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    position: relative;
+    z-index: 1;
 }
 
 .info-card {
     background-color: #f8f9fa;
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 25px;
     height: 100%;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(240, 240, 247, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-card-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #5165F6;
+    opacity: 0.2;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover .info-card-icon {
+    transform: scale(1.2);
+    opacity: 0.4;
 }
 
 .info-card-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     color: #333;
+    position: relative;
+    display: inline-block;
+}
+
+.info-card-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(to right, #5165F6, #4e73df);
+    border-radius: 2px;
 }
 
 .info-item {
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-left: 0;
 }
 
 .info-label {
     color: #666;
-    margin-bottom: 4px;
-    font-size: 13px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .info-value {
     font-weight: 500;
     color: #333;
+    font-size: 15px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.section-icon {
+    font-size: 22px;
+    color: #5165F6;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(81, 101, 246, 0.1) 0%, rgba(81, 101, 246, 0.05) 100%);
+    box-shadow: 0 2px 10px rgba(81, 101, 246, 0.1);
 }
 
 .section-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     color: #333;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(to right, #5165F6, #4e73df);
+    border-radius: 3px;
 }
 
 .order-items-container {
@@ -418,36 +646,59 @@ $statusInfo = getOrderStatusInfo($order['status']);
 
 .order-item {
     display: flex;
-    padding: 15px;
+    padding: 20px;
     border: 1px solid #f0f0f7;
-    border-radius: 10px;
+    border-radius: 16px;
     margin-bottom: 15px;
     background-color: #fff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    --before-opacity: 0; /* CSS переменная для анимации левой полосы */
+}
+
+.order-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #5165F6, #4e73df);
+    opacity: var(--before-opacity, 0); /* Используем CSS переменную */
+    transition: opacity 0.3s ease;
+}
+
+.order-item:hover::before {
+    opacity: 1;
 }
 
 .item-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 8px;
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-right: 15px;
+    margin-right: 20px;
     background-color: #f8f9fa;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .item-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    transition: all 0.3s ease;
 }
 
 .item-image .placeholder-text {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     color: #5165F6;
-    background-color: rgba(81, 101, 246, 0.1);
+    background: linear-gradient(135deg, rgba(81, 101, 246, 0.2) 0%, rgba(81, 101, 246, 0.1) 100%);
     width: 100%;
     height: 100%;
     display: flex;
@@ -458,24 +709,51 @@ $statusInfo = getOrderStatusInfo($order['status']);
 
 .item-details {
     flex: 1;
+    padding-right: 15px;
 }
 
 .item-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: #333;
+    transition: all 0.3s ease;
 }
 
 .item-meta {
     display: flex;
-    gap: 15px;
-    font-size: 14px;
+    gap: 20px;
+    font-size: 15px;
     color: #666;
 }
 
 .item-price {
-    font-weight: 500;
+    font-weight: 600;
+    color: #5165F6;
+    display: flex;
+    align-items: center;
+}
+
+.item-price::before {
+    content: '\f3d1';
+    font-family: 'Font Awesome 5 Free';
+    margin-right: 5px;
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.item-quantity {
+    display: flex;
+    align-items: center;
+}
+
+.item-quantity::before {
+    content: '\f291';
+    font-family: 'Font Awesome 5 Free';
+    margin-right: 5px;
+    color: #5165F6;
+    font-weight: 900;
+    font-size: 14px;
 }
 
 .item-total {
@@ -483,33 +761,53 @@ $statusInfo = getOrderStatusInfo($order['status']);
     flex-direction: column;
     align-items: flex-end;
     justify-content: center;
-    min-width: 120px;
+    min-width: 140px;
+    padding-left: 20px;
+    border-left: 1px solid #f0f0f7;
 }
 
 .total-label {
-    font-size: 13px;
+    font-size: 14px;
     color: #666;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
 .total-value {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #5165F6;
+    transition: all 0.3s ease;
 }
 
 .order-summary {
-    background-color: #f8f9fa;
-    border-radius: 15px;
-    padding: 20px;
+    background: linear-gradient(to right, #f8f9fa, #f5f7ff);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(240, 240, 247, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.order-summary::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(81, 101, 246, 0.1) 0%, rgba(81, 101, 246, 0) 70%);
+    border-radius: 50%;
 }
 
 .summary-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
     border-bottom: 1px solid #e9ecef;
+    transition: all 0.3s ease;
 }
 
 .summary-item:last-child {
@@ -520,61 +818,76 @@ $statusInfo = getOrderStatusInfo($order['status']);
 
 .summary-item.total {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 20px;
     color: #333;
+    padding-top: 5px;
 }
 
 .summary-item.total .summary-value {
     color: #5165F6;
+    font-size: 22px;
 }
 
 .status-badge {
     display: inline-block;
-    padding: 6px 12px;
+    padding: 7px 15px;
     border-radius: 30px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     text-align: center;
+    min-width: 120px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .status-pending {
-    background-color: #FFD166;
+    background: linear-gradient(135deg, #FFD166 0%, #FFC233 100%);
     color: #333;
 }
 
 .status-processing {
-    background-color: #06AED5;
+    background: linear-gradient(135deg, #06AED5 0%, #0095B6 100%);
     color: white;
 }
 
 .status-shipped {
-    background-color: #3498db;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
 }
 
 .status-delivered {
-    background-color: #9b59b6;
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
     color: white;
 }
 
 .status-completed {
-    background-color: #42BA96;
+    background: linear-gradient(135deg, #42BA96 0%, #2D9D7A 100%);
     color: white;
 }
 
 .status-cancelled {
-    background-color: #DF4759;
+    background: linear-gradient(135deg, #DF4759 0%, #C9364A 100%);
     color: white;
 }
 
 .status-closed {
-    background-color: #6c757d;
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     color: white;
 }
 
 .status-default {
-    background-color: #6c757d;
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     color: white;
+}
+
+/* Декоративные элементы */
+.decor-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(81, 101, 246, 0.15) 0%, rgba(81, 101, 246, 0) 70%);
+    opacity: 0.6;
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* Адаптивность */
@@ -598,12 +911,27 @@ $statusInfo = getOrderStatusInfo($order['status']);
         gap: 10px;
     }
     
+    .order-progress {
+        overflow-x: auto;
+        padding-bottom: 15px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .progress-step {
+        min-width: 80px;
+    }
+    
+    .step-label {
+        font-size: 12px;
+    }
+    
     .order-item {
         flex-direction: column;
     }
     
     .item-image {
         margin-bottom: 15px;
+        margin-right: 0;
     }
     
     .item-meta {
@@ -614,6 +942,10 @@ $statusInfo = getOrderStatusInfo($order['status']);
     .item-total {
         align-items: flex-start;
         margin-top: 15px;
+        border-left: none;
+        border-top: 1px solid #f0f0f7;
+        padding-left: 0;
+        padding-top: 15px;
     }
 }
 </style>
@@ -621,4 +953,14 @@ $statusInfo = getOrderStatusInfo($order['status']);
 <?php
 // Подключаем подвал сайта
 include_once '../includes/footer/footer.php';
-?> 
+?>
+
+<!-- Подключаем скрипт анимаций для страницы просмотра заказа -->
+<script src="../js/animations/order-view-animations.js"></script>
+
+<!-- Скрипт для отметки полной загрузки контента -->
+<script>
+    window.addEventListener('load', function() {
+        document.documentElement.classList.add('js-content-loaded');
+    });
+</script> 

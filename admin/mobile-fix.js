@@ -1,243 +1,100 @@
 /**
- * Скрипт для исправления отображения таблиц на мобильных устройствах в админ-панели
+ * JavaScript для улучшения работы мобильной версии админ-панели
+ * Версия 1.3
  */
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on a mobile device
-    const isMobile = window.innerWidth <= 767;
+    console.log('Mobile fix script loaded');
     
-    if (isMobile) {
-        // Apply mobile styles to all tables
-        applyMobileStyles();
+    // Функция для обеспечения горизонтального скролла таблиц
+    function enhanceTableScrolling() {
+        // Находим все таблицы
+        const tables = document.querySelectorAll('table.table');
         
-        // Special handling for reports table
-        const reportsWrapper = document.querySelector('#reports .report-table-wrapper');
-        const reportsTable = document.querySelector('#reports .report-table');
-        
-        if (reportsWrapper && reportsTable) {
-            reportsWrapper.style.overflowX = 'auto';
-            reportsWrapper.style.webkitOverflowScrolling = 'touch';
-            reportsWrapper.style.maxWidth = '100%';
-            
-            reportsTable.style.minWidth = '660px';
-            reportsTable.style.width = 'auto';
-        }
-        
-        // Special handling for products table
-        const productsWrapper = document.querySelector('#products .product-table-wrapper');
-        const productsTable = document.querySelector('#products .product-table');
-        
-        if (productsWrapper && productsTable) {
-            productsWrapper.style.overflowX = 'auto';
-            productsWrapper.style.webkitOverflowScrolling = 'touch';
-            productsWrapper.style.maxWidth = '100%';
-            
-            productsTable.style.minWidth = '630px';
-            productsTable.style.width = 'auto';
-            productsTable.style.tableLayout = 'fixed';
-            
-            // Apply specific column widths
-            applyProductTableColumnWidths(productsTable);
-            
-            // Set content alignment
-            alignProductTableContent(productsTable);
-        }
-    } else {
-        // Apply desktop styles
-        applyDesktopStyles();
-    }
-    
-    // Apply desktop styles to tables
-    function applyDesktopStyles() {
-        // Hide horizontal scrolling on desktop
-        const wrappers = document.querySelectorAll('.product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper');
-        wrappers.forEach(wrapper => {
-            wrapper.style.overflowX = 'hidden';
-            wrapper.style.maxWidth = '100%';
+        tables.forEach(function(table) {
+            // Проверяем, не обернута ли уже таблица
+            if (!table.parentElement.classList.contains('table-responsive') && 
+                !table.parentElement.classList.contains('product-table-wrapper') && 
+                !table.parentElement.classList.contains('category-table-wrapper') && 
+                !table.parentElement.classList.contains('order-table-wrapper') && 
+                !table.parentElement.classList.contains('user-table-wrapper') && 
+                !table.parentElement.classList.contains('report-table-wrapper')) {
+                
+                // Создаем обертку для таблицы
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive';
+                wrapper.style.cssText = 'overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; width: 100% !important; display: block !important;';
+                
+                // Оборачиваем таблицу
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+                
+                console.log('Table wrapped for scrolling', table);
+            }
         });
         
-        // Make tables full width
-        const tables = document.querySelectorAll('.product-table, .category-table, .order-table, .report-table, .user-table');
-        tables.forEach(table => {
-            table.style.width = '100%';
-            table.style.minWidth = 'auto';
-            table.style.maxWidth = '100%';
-            table.style.tableLayout = 'fixed';
-        });
+        // Принудительно включаем скролл для таблиц категорий, заказов и пользователей
+        const categoryTables = document.querySelectorAll('#categories .category-table-wrapper');
+        const orderTables = document.querySelectorAll('#orders .order-table-wrapper');
+        const userTables = document.querySelectorAll('#users .user-table-wrapper');
         
-        // Special handling for product table on desktop
-        const productsTable = document.querySelector('#products .product-table');
-        if (productsTable) {
-            // Set percentage-based column widths for desktop
-            const columnWidths = [
-                { index: 0, width: '5%' },   // ID
-                { index: 1, width: '8%' },   // Изображение
-                { index: 2, width: '30%' },  // Название
-                { index: 3, width: '15%' },  // Категория
-                { index: 4, width: '15%' },  // Цена
-                { index: 5, width: '12%' },  // Наличие
-                { index: 6, width: '15%' }   // Действия
-            ];
-            
-            // Apply column widths
-            const headers = productsTable.querySelectorAll('th');
-            columnWidths.forEach(column => {
-                if (headers[column.index]) {
-                    headers[column.index].style.width = column.width;
+        // Функция для применения стилей скролла
+        function applyScrollStyles(wrappers) {
+            wrappers.forEach(function(wrapper) {
+                wrapper.style.overflowX = 'auto';
+                wrapper.style.webkitOverflowScrolling = 'touch';
+                wrapper.style.maxWidth = '100%';
+                wrapper.style.width = '100%';
+                wrapper.style.display = 'block';
+                
+                // Устанавливаем минимальную ширину для таблицы внутри обертки
+                const table = wrapper.querySelector('table');
+                if (table) {
+                    table.style.minWidth = '600px';
+                    table.style.width = 'auto';
                 }
             });
-            
-            // Ensure cells don't overflow
-            const cells = productsTable.querySelectorAll('td');
-            cells.forEach(cell => {
-                cell.style.overflow = 'hidden';
-                cell.style.textOverflow = 'ellipsis';
-                cell.style.whiteSpace = 'nowrap';
-            });
-        }
-    }
-    
-    // Apply styles to all table wrappers for mobile
-    function applyMobileStyles() {
-        // Find all table wrappers
-        const wrappers = document.querySelectorAll('.product-table-wrapper, .category-table-wrapper, .order-table-wrapper, .report-table-wrapper, .user-table-wrapper');
-        
-        // Apply horizontal scroll styles
-        for (let i = 0; i < wrappers.length; i++) {
-            wrappers[i].style.overflowX = 'auto';
-            wrappers[i].style.webkitOverflowScrolling = 'touch';
-            wrappers[i].style.maxWidth = '100%';
         }
         
-        // Find all tables
-        const tables = document.querySelectorAll('.product-table, .order-table');
-        
-        // Set minimum width
-        for (let j = 0; j < tables.length; j++) {
-            tables[j].style.minWidth = '800px';
-        }
+        // Применяем стили скролла к таблицам
+        applyScrollStyles(categoryTables);
+        applyScrollStyles(orderTables);
+        applyScrollStyles(userTables);
     }
     
-    // Apply specific column widths to product table for mobile
-    function applyProductTableColumnWidths(table) {
-        if (!table) return;
-        
-        // Define column widths
-        const columnWidths = [
-            { index: 0, width: '40px' },   // ID
-            { index: 1, width: '80px' },   // Изображение
-            { index: 2, width: '180px' },  // Название
-            { index: 3, width: '100px' },  // Категория
-            { index: 4, width: '80px' },   // Цена
-            { index: 5, width: '80px' },   // Наличие
-            { index: 6, width: '70px' }    // Действия
-        ];
-        
-        // Get all headers
-        const headers = table.querySelectorAll('th');
-        
-        // Apply widths to headers
-        columnWidths.forEach(column => {
-            if (headers[column.index]) {
-                headers[column.index].style.width = column.width;
-                headers[column.index].style.minWidth = column.width;
-                headers[column.index].style.maxWidth = column.width;
-            }
-        });
-    }
+    // Применяем улучшения для таблиц
+    enhanceTableScrolling();
     
-    // Align content with headers in product table
-    function alignProductTableContent(table) {
-        if (!table) return;
-        
-        // Get all cells
-        const cells = table.querySelectorAll('td');
-        
-        // Apply text alignment
-        cells.forEach((cell, index) => {
-            const columnIndex = index % 7; // 7 columns total
-            
-            if (columnIndex === 0) { // ID
-                cell.style.textAlign = 'center';
-                cell.style.paddingRight = '0';
-            } else if (columnIndex === 1) { // Image
-                cell.style.textAlign = 'center';
-                cell.style.paddingLeft = '0';
-                cell.style.paddingRight = '0';
-            } else if (columnIndex === 5 || columnIndex === 6) { // Наличие, Действия
-                cell.style.textAlign = 'center';
-            }
-            
-            // Make sure all cells handle overflow properly
-            cell.style.overflow = 'hidden';
-            cell.style.textOverflow = 'ellipsis';
-            cell.style.whiteSpace = 'nowrap';
-            cell.style.padding = '0.4rem 0.3rem';
-        });
-    }
-    
-    // Handle resize events
-    window.addEventListener('resize', function() {
-        const isMobileNow = window.innerWidth <= 767;
-        
-        if (isMobileNow) {
-            applyMobileStyles();
-            
-            // Special handling for reports table on resize
-            const reportsWrapper = document.querySelector('#reports .report-table-wrapper');
-            const reportsTable = document.querySelector('#reports .report-table');
-            
-            if (reportsWrapper && reportsTable) {
-                reportsWrapper.style.overflowX = 'auto';
-                reportsWrapper.style.webkitOverflowScrolling = 'touch';
-                reportsWrapper.style.maxWidth = '100%';
-                
-                reportsTable.style.minWidth = '660px';
-                reportsTable.style.width = 'auto';
-            }
-            
-            // Special handling for products table on resize
-            const productsWrapper = document.querySelector('#products .product-table-wrapper');
-            const productsTable = document.querySelector('#products .product-table');
-            
-            if (productsWrapper && productsTable) {
-                productsWrapper.style.overflowX = 'auto';
-                productsWrapper.style.webkitOverflowScrolling = 'touch';
-                productsWrapper.style.maxWidth = '100%';
-                
-                productsTable.style.minWidth = '630px';
-                productsTable.style.width = 'auto';
-                productsTable.style.tableLayout = 'fixed';
-                
-                applyProductTableColumnWidths(productsTable);
-                alignProductTableContent(productsTable);
-            }
-        } else {
-            // Apply desktop styles on resize
-            applyDesktopStyles();
-        }
-    });
-    
-    // Apply styles when switching tabs
-    const tabLinks = document.querySelectorAll('.tab-link');
-    tabLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            // Apply styles after tab content loads
-            setTimeout(function() {
-                if (isMobile) {
-                    applyMobileStyles();
-                    
-                    // Check if we're on the products tab
-                    const productsTab = document.querySelector('#products.active');
-                    if (productsTab) {
-                        const productsTable = productsTab.querySelector('.product-table');
-                        applyProductTableColumnWidths(productsTable);
-                        alignProductTableContent(productsTable);
+    // Также применяем улучшения после загрузки AJAX-контента
+    // (если в админке есть динамически загружаемые таблицы)
+    if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    // Проверяем, добавлены ли новые таблицы
+                    for (let i = 0; i < mutation.addedNodes.length; i++) {
+                        const node = mutation.addedNodes[i];
+                        if (node.nodeType === 1) { // Только элементы
+                            const tables = node.querySelectorAll('table.table');
+                            if (tables.length > 0) {
+                                enhanceTableScrolling();
+                                break;
+                            }
+                        }
                     }
-                } else {
-                    // Apply desktop styles when switching tabs
-                    applyDesktopStyles();
                 }
-            }, 300);
+            });
         });
+        
+        // Наблюдаем за изменениями в DOM
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Обрабатываем изменение размера окна
+    window.addEventListener('resize', function() {
+        // Повторно применяем улучшения при изменении размера окна
+        enhanceTableScrolling();
     });
 }); 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр карты</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+        .map-container {
+            max-width: 800px;
+            margin: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .instructions {
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2345c2;
+        }
+        p {
+            line-height: 1.6;
+            color: #333;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(145deg, #2345c2, #4e73df);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h1>Просмотр SVG-карты</h1>
+        <p>Это SVG-изображение карты, которое можно использовать в качестве фона для страницы контактов.</p>
+        <p>Чтобы сохранить изображение в формате JPG или PNG:</p>
+        <ol>
+            <li>Щелкните правой кнопкой мыши на изображении карты</li>
+            <li>Выберите "Сохранить изображение как..."</li>
+            <li>Выберите формат JPG или PNG</li>
+            <li>Сохраните файл как "map-background.jpg" или "map-background.png"</li>
+        </ol>
+        <p>Либо используйте инструменты для создания скриншота.</p>
+        <a href="map-background.svg" download class="button">Скачать SVG</a>
+    </div>
+    
+    <div class="map-container">
+        <img src="map-background.svg" alt="Карта города" width="800" height="600">
+    </div>
+</body>
+</html> 

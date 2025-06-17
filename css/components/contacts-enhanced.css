@@ -1,0 +1,592 @@
+/**
+ * Улучшенные стили для страницы контактов
+ */
+
+/* Основные стили для секции контактов */
+.contacts-section {
+    background-color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 0;
+}
+
+.contacts-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/img/patterns/pattern-light.svg');
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+/* Стили для заголовка страницы */
+.page-header {
+    position: relative;
+    background: linear-gradient(135deg, #f8f9fc 0%, #eaecf4 100%);
+    border-radius: 15px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/img/patterns/pattern-dots.svg');
+    background-size: 20px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.page-title {
+    position: relative;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #2e3a59;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: #4e73df;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #2e59d9;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+
+/* Стилизация карточки с контактной информацией */
+.contact-info-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    padding: 30px !important;
+}
+
+.contact-info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    color: #2345c2;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #2345c2, #4e73df);
+    border-radius: 3px;
+}
+
+.contact-form-container .section-title {
+    text-align: center;
+}
+
+.contact-form-container .section-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.contact-item {
+    margin-bottom: 20px;
+    padding-left: 10px;
+    border-left: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    border-left: 2px solid #4e73df;
+    padding-left: 15px;
+}
+
+.contact-icon {
+    font-weight: 600;
+    color: #2345c2;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.contact-icon i {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(78, 115, 223, 0.1);
+    color: #2345c2;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover .contact-icon i {
+    transform: scale(1.2);
+    background-color: rgba(78, 115, 223, 0.2);
+}
+
+.contact-item p {
+    color: #555;
+    line-height: 1.6;
+}
+
+.contact-item a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.contact-item a:hover {
+    color: #2345c2;
+    text-decoration: underline;
+}
+
+/* Социальные сети */
+.social-media h4 {
+    color: #2345c2;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.social-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #f8f9fa, #ffffff);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2345c2;
+    font-size: 1.4rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #2345c2, #4e73df);
+    opacity: 0;
+    border-radius: 50%;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.social-icon i {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(78, 115, 223, 0.2);
+    color: white;
+}
+
+.social-icon:hover::before {
+    opacity: 1;
+}
+
+.social-icon.animated-icon {
+    animation: pulse-icon 0.5s ease;
+}
+
+@keyframes pulse-icon {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Стилизация формы обратной связи */
+.contact-form-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+    padding: 40px !important;
+    height: 100%;
+}
+
+.contact-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, rgba(35, 69, 194, 0.1), rgba(35, 69, 194, 0.05));
+    border-radius: 0 0 0 100%;
+    z-index: 0;
+}
+
+.contact-form-container .lead {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+/* Стилизация плавающих меток формы */
+.form-floating {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-floating label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.form-floating .form-control, 
+.form-floating .form-select {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+    font-size: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.form-floating .form-control:focus,
+.form-floating .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+    border-color: #4e73df;
+}
+
+.form-floating .form-control:focus ~ label,
+.form-floating .form-select:focus ~ label,
+.form-floating.focused label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    color: #2345c2;
+    background-color: white;
+    padding: 0 5px;
+    left: 10px;
+    top: 0;
+    height: auto;
+}
+
+.form-floating .form-control:not(:placeholder-shown) ~ label,
+.form-floating .form-select:not(:placeholder-shown) ~ label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    background-color: white;
+    padding: 0 5px;
+    left: 10px;
+    top: 0;
+    height: auto;
+}
+
+.form-floating textarea.form-control {
+    min-height: 150px;
+    height: auto;
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0;
+    border: 2px solid #e9ecef;
+}
+
+.form-check-input:checked {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.form-check-label {
+    padding-left: 5px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Стилизация кнопки отправки */
+.btn-primary {
+    background: linear-gradient(145deg, #2345c2, #4e73df);
+    border: none;
+    border-radius: 50px;
+    padding: 15px 30px;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-animated {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-animated .btn-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.btn-animated .btn-text {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.btn-animated.btn-loading .btn-text {
+    transform: translateY(-100%);
+}
+
+.btn-animated.btn-loading .btn-icon {
+    transform: translateY(0);
+}
+
+.btn-animated.btn-loading .btn-icon i {
+    animation: spin 1s infinite linear;
+}
+
+.btn-animated.btn-success .btn-icon {
+    transform: translateY(0);
+}
+
+.btn-animated.btn-success .btn-text {
+    transform: translateY(-100%);
+}
+
+.btn-animated.btn-success {
+    background: linear-gradient(145deg, #28a745, #20c997);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Эффект Ripple для кнопки */
+.btn-ripple {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+.hover-effect {
+    box-shadow: 0 8px 25px rgba(78, 115, 223, 0.4);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(78, 115, 223, 0.4);
+    background: linear-gradient(145deg, #1c35a3, #2345c2);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(78, 115, 223, 0.4);
+}
+
+/* Анимации для элементов страницы */
+.contact-info-card, .contact-form-container, .contact-item, .form-floating, .social-icons {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.contact-info-card.animated, 
+.contact-form-container.animated, 
+.social-icons.animated {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.contact-item.animated {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.1s * var(--animation-order, 0));
+}
+
+.contact-item:nth-child(1) {
+    --animation-order: 1;
+}
+
+.contact-item:nth-child(2) {
+    --animation-order: 2;
+}
+
+.contact-item:nth-child(3) {
+    --animation-order: 3;
+}
+
+.contact-item:nth-child(4) {
+    --animation-order: 4;
+}
+
+.form-floating.animated {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.1s * var(--animation-order, 0));
+}
+
+.form-floating:nth-child(1) {
+    --animation-order: 1;
+}
+
+.form-floating:nth-child(2) {
+    --animation-order: 2;
+}
+
+.form-floating:nth-child(3) {
+    --animation-order: 3;
+}
+
+.form-floating:nth-child(4) {
+    --animation-order: 4;
+}
+
+/* Стилизация для уведомлений */
+.alert {
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-top: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.5s ease;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 991px) {
+    .contact-form-container {
+        padding: 25px !important;
+        margin-top: 30px;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .contact-form-container .lead {
+        font-size: 1rem;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+    
+    .social-icons {
+        justify-content: center;
+    }
+} 

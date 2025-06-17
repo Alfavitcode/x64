@@ -30,53 +30,15 @@ $orders = getUserOrders($user_id);
 $orderCount = count($orders);
 ?>
 
+<!-- Подключаем GSAP для анимаций -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
 <section class="profile-section">
     <div class="profile-container">
         <div class="row">
             <!-- Боковое меню -->
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="profile-card profile-sidebar">
-                    <div class="profile-menu-header">
-                        <h5 class="mb-0">Личный кабинет</h5>
-                    </div>
-                    <ul class="profile-menu">
-                        <li class="profile-menu-item active">
-                            <a href="profile.php">
-                                <i class="fas fa-user"></i>
-                                Мой профиль
-                            </a>
-                        </li>
-                        <li class="profile-menu-item">
-                            <a href="orders.php">
-                                <i class="fas fa-shopping-bag"></i>
-                                Мои заказы
-                                <?php if ($orderCount > 0): ?>
-                                <span class="badge rounded-pill bg-primary ms-2"><?php echo $orderCount; ?></span>
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                     
-                        <li class="profile-menu-item">
-                            <a href="telegram.php">
-                                <i class="fab fa-telegram"></i>
-                                Привязка Telegram
-                            </a>
-                        </li>
-                        
-                        <li class="profile-menu-item">
-                            <a href="settings.php">
-                                <i class="fas fa-cog"></i>
-                                Настройки
-                            </a>
-                        </li>
-                        <li class="profile-menu-item logout">
-                            <a href="logout.php">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Выйти
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <?php include_once 'includes/sidebar.php'; ?>
             </div>
             
             <!-- Основное содержимое -->
@@ -264,321 +226,25 @@ $orderCount = count($orders);
     </div>
 </section>
 
-<script>
-// JavaScript для анимаций при наведении
-document.addEventListener('DOMContentLoaded', function() {
-    // Анимация для карточек быстрого доступа
-    const actionCards = document.querySelectorAll('.card');
-    actionCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px)';
-            this.style.boxShadow = '0 10px 25px rgba(77, 97, 252, 0.2)';
-            this.style.transition = 'all 0.3s ease';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 4px 15px rgba(77, 97, 252, 0.1)';
-        });
-    });
-});
-</script>
+<?php
+// Подключаем файл со стилями для профиля
+include_once 'includes/profile_styles.php';
+?>
 
+<!-- Дополнительный стиль для устранения белой полоски -->
 <style>
-/* Стили для мобильной адаптивности */
-@media (max-width: 767px) {
-    .profile-content .card {
-        margin-bottom: 15px;
-    }
-    
-    .profile-stats {
-        flex-direction: row;
-        justify-content: space-around;
-    }
-    
-    .stat-item {
-        text-align: center;
-        padding: 0 10px;
-    }
-    
-    .profile-info-row {
-        flex-direction: column;
-        padding: 8px 0;
-    }
-    
-    .profile-info-label {
-        margin-bottom: 5px;
-    }
-    
-    .profile-info-value {
-        padding-left: 0;
-    }
-    
-    .profile-main-card {
-        padding: 15px;
-    }
-    
-    .profile-header {
-        padding: 15px;
-    }
-    
-    .profile-body {
-        padding: 15px;
-    }
-    
-    .orders-table {
-        font-size: 14px;
-    }
-    
-    .orders-table th, 
-    .orders-table td {
-        padding: 10px 5px;
-    }
-    
-    .status-badge {
-        padding: 5px 8px;
-        font-size: 12px;
-    }
-    
-    .view-order-btn {
-        padding: 5px;
-    }
+.footer {
+    margin-top: -1px !important;
 }
-
-/* Улучшения для всех устройств */
-.card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Улучшенные стили для статистики */
-.profile-stats-wrapper {
-    margin: 25px 0;
-}
-
-.profile-stats {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.stat-item {
-    background-color: #5165F6;
-    border-radius: 15px;
-    padding: 20px 35px;
-    text-align: center;
-    min-width: 150px;
-    box-shadow: 0 4px 10px rgba(81, 101, 246, 0.3);
-    transition: all 0.3s ease;
-    border: none;
-}
-
-.stat-value {
-    font-size: 36px;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 5px;
-    display: block;
-    line-height: 1.2;
-}
-
-.stat-label {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 1px;
-}
-
-/* Стили для таблицы заказов */
-.profile-info-card {
-    background-color: #fff;
-    border-radius: 20px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+main {
     overflow: hidden;
-    margin-bottom: 25px;
-}
-
-.profile-info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 25px;
-    border-bottom: 1px solid #f0f0f7;
-}
-
-.profile-info-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-    color: #333;
-}
-
-.profile-view-all-btn {
-    display: inline-flex;
-    align-items: center;
-    color: #5165F6;
-    font-weight: 500;
-    text-decoration: none;
-    padding: 8px 15px;
-    border-radius: 30px;
-    background-color: rgba(81, 101, 246, 0.1);
-    transition: all 0.3s ease;
-}
-
-.profile-view-all-btn:hover {
-    background-color: #5165F6;
-    color: white;
-}
-
-.profile-view-all-btn i {
-    margin-right: 6px;
-}
-
-.profile-info-body {
-    padding: 0;
-}
-
-.orders-table-container {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.orders-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.orders-table th {
-    color: #666;
-    font-weight: 500;
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f0f7;
-    font-size: 14px;
-}
-
-.orders-table td {
-    padding: 15px 20px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f0f0f7;
-}
-
-.orders-table tr:last-child td {
-    border-bottom: none;
-}
-
-.order-id {
-    font-weight: 600;
-    color: #333;
-}
-
-.order-date {
-    color: #666;
-}
-
-.order-amount {
-    font-weight: 600;
-    color: #333;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-    min-width: 100px;
-}
-
-.status-pending {
-    background-color: #FFD166;
-    color: #333;
-}
-
-.status-processing {
-    background-color: #06AED5;
-    color: white;
-}
-
-.status-completed {
-    background-color: #42BA96;
-    color: white;
-}
-
-.status-cancelled {
-    background-color: #DF4759;
-    color: white;
-}
-
-.status-closed {
-    background-color: #6c757d;
-    color: white;
-}
-
-.status-default {
-    background-color: #6c757d;
-    color: white;
-}
-
-.order-actions {
-    text-align: center;
-}
-
-.view-order-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: rgba(81, 101, 246, 0.1);
-    color: #5165F6;
-    transition: all 0.3s ease;
-}
-
-.view-order-btn:hover {
-    background-color: #5165F6;
-    color: white;
-    transform: scale(1.1);
-}
-
-/* Адаптация для разных устройств */
-@media (max-width: 991px) {
-    .profile-stats {
-        justify-content: center;
-    }
-}
-
-@media (max-width: 576px) {
-    .stat-item {
-        padding: 15px 25px;
-        min-width: 120px;
-    }
-    
-    .stat-value {
-        font-size: 30px;
-    }
-    
-    .stat-label {
-        font-size: 12px;
-    }
-    
-    .profile-info-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .profile-view-all-btn {
-        margin-top: 10px;
-    }
-    
-    .orders-table th:nth-child(2), 
-    .orders-table td:nth-child(2) {
-        display: none;
-    }
 }
 </style>
 
 <?php
 // Подключаем подвал сайта
 include_once '../includes/footer/footer.php';
-?> 
+?>
+
+<!-- Подключаем скрипт анимаций для профиля -->
+<script src="../js/animations/profile-animations.js"></script> 
